@@ -1,0 +1,23 @@
+[project]
+name = "airline-refiner"
+version = "0.1.0"
+description = "Interfaces and CLI scaffold for the autonomous refinement process."
+requires-python = ">=3.12"
+dependencies = [
+    "airline-contracts",
+    "httpx>=0.28,<1",
+    "pydantic-settings>=2.8,<3",
+]
+
+[project.scripts]
+airline-refiner = "airline_refiner.cli:main"
+
+[tool.uv.sources]
+airline-contracts = { workspace = true }
+
+[build-system]
+requires = ["hatchling>=1.27,<2"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/airline_refiner"]

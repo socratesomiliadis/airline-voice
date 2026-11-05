@@ -1,0 +1,13 @@
+[project]
+name = "airline-contracts"
+version = "0.1.0"
+description = "Provider-independent contracts shared by the API and refinement worker."
+requires-python = ">=3.12"
+dependencies = ["pydantic>=2.10,<3"]
+
+[build-system]
+requires = ["hatchling>=1.27,<2"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/airline_contracts"]

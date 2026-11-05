@@ -1,0 +1,41 @@
+[project]
+name = "airline-voice-workspace"
+version = "0.1.0"
+description = "Workspace tooling for an AI airline customer service platform."
+requires-python = ">=3.12"
+dependencies = []
+
+[tool.uv]
+package = false
+
+[tool.uv.workspace]
+members = ["apps/api", "apps/refiner", "packages/contracts"]
+
+[dependency-groups]
+dev = [
+    "httpx2>=2.16.0",
+    "mypy>=1.15,<2",
+    "pytest>=8,<10",
+    "ruff>=0.11,<1",
+]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+extend-exclude = [".tools"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "ASYNC"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+files = ["apps/api/src", "apps/refiner/src", "packages/contracts/src"]
+
+[[tool.mypy.overrides]]
+module = ["alembic.*"]
+ignore_missing_imports = true

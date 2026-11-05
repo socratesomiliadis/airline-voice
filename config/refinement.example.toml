@@ -1,0 +1,10 @@
+# Shape and policy decisions are intentionally deferred.
+# These empty sections are documentation placeholders, not an executable configuration.
+[simulation]
+[evaluation]
+[quality_thresholds]
+[diagnosis]
+[fix_generation]
+[patch_application]
+[verification]
+[iteration]
