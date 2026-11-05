@@ -42,7 +42,7 @@ packages/contracts/        Shared Python payload and event contracts
 config/                    Refinement configuration placeholders
 prompts/                   Future versioned prompt assets
 scenarios/                 Future simulated customer scenarios
-knowledge/                 Knowledge source staging location
+knowledge/                 One JSON file per fictional policy and source staging
 artifacts/                 Ignored local refinement output
 tests/                     Infrastructure and scaffold boundary checks
 docs/                      Architecture and extension guidance
@@ -160,6 +160,7 @@ CI also builds all three application images.
 ## Architecture and next implementation steps
 
 See [architecture](docs/architecture.md), [development guidance](docs/development.md),
-and the [reserved API surface](docs/api.md). Domain schemas, persistence models,
+the [reserved API surface](docs/api.md), and the [fictional JSON knowledge base](knowledge/README.md).
+Domain schemas, persistence models,
 provider integration, real-time transport, evaluation criteria, and the refinement
 loop are intentionally left for subsequent implementation.

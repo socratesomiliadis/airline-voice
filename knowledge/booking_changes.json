@@ -1,0 +1,112 @@
+{
+  "schema_version": "1.0.0",
+  "knowledge_base_id": "airline-voice-demo-policies",
+  "policy_version": "1.0.0",
+  "language": "en-US",
+  "airline": {
+    "name": "Airline Voice Demo",
+    "fictional": true
+  },
+  "status": "fictional_development_data",
+  "description": "Editable fictional policies for developing and simulating an airline customer service agent. All amounts, allowances, and deadlines are invented sample values, not any real airline's policies or a statement of passenger rights.",
+  "scope": {
+    "operating_carrier": "Airline Voice Demo",
+    "partner_operated_flights": "Not covered. Confirm the operating carrier's policies.",
+    "route_types": [
+      "domestic",
+      "international"
+    ],
+    "route_classification": {
+      "domestic": "Every segment in the ticketed direction stays within one country.",
+      "international": "At least one segment in the ticketed direction crosses a country border. Apply the international table to that whole direction, including its domestic connections."
+    },
+    "fare_types": [
+      "basic",
+      "standard",
+      "flexible",
+      "business"
+    ],
+    "currency": "USD",
+    "weight_unit": "kg",
+    "dimension_unit": "cm",
+    "fee_amounts": "Final fictional amounts in USD, including any applicable sample taxes. Each fee states its own charging unit.",
+    "time_reference": "Deadlines are relative to the scheduled departure of the relevant flight segment, using the departure airport's local time.",
+    "exceptions": "Confirmed itinerary-specific or airport-specific requirements take precedence. If a required exception is not documented, obtain confirmation rather than inventing a rule."
+  },
+  "policy": {
+    "id": "changes",
+    "title": "Rescheduling and flight changes",
+    "summary": "Voluntary changes depend on fare type and may require a change fee and fare difference. Airline disruption rebooking follows a separate rule.",
+    "keywords": [
+      "reschedule",
+      "change flight",
+      "change date",
+      "fare difference",
+      "change fee",
+      "rebook"
+    ],
+    "questions_to_ask": [
+      "What is the fare type and route type?",
+      "What are the original departure time and requested replacement flights?",
+      "Is the change voluntary or caused by an airline disruption?",
+      "Was the ticket purchased directly, and has any segment been used?"
+    ],
+    "rules": [
+      {
+        "id": "changes.voluntary",
+        "title": "Voluntary changes before departure",
+        "answer": "For a wholly unused directly booked ticket, basic does not allow voluntary flight changes; cancellation and a new purchase are separate options under the cancellation policy. Standard permits changes before the original first scheduled departure for USD 30 domestically or USD 60 internationally, plus any positive fare difference. Flexible and business charge no change fee, but any positive fare difference still applies. Availability and the replacement fare must be confirmed before quoting the total.",
+        "details": {
+          "scope": "wholly_unused_direct_booking_changed_before_original_first_scheduled_departure",
+          "fare_rules": {
+            "basic": {
+              "changes_allowed": false
+            },
+            "standard": {
+              "changes_allowed": true,
+              "change_fee_usd": {
+                "domestic": 30,
+                "international": 60
+              }
+            },
+            "flexible": {
+              "changes_allowed": true,
+              "change_fee_usd": {
+                "domestic": 0,
+                "international": 0
+              }
+            },
+            "business": {
+              "changes_allowed": true,
+              "change_fee_usd": {
+                "domestic": 0,
+                "international": 0
+              }
+            }
+          },
+          "change_fee_unit": "per_passenger_per_ticket_change_transaction",
+          "positive_fare_difference_payable": true,
+          "negative_fare_difference": {
+            "standard": "travel_credit",
+            "flexible": "original_payment_method_refund",
+            "business": "original_payment_method_refund"
+          },
+          "change_fee_separate_from_negative_fare_difference": "The applicable change fee is still due. A lower replacement fare does not waive it.",
+          "credits_related_rule_id": "cancellation.travel_credits",
+          "partially_used_or_third_party_tickets": "Require an individual fare assessment or the issuing seller."
+        }
+      },
+      {
+        "id": "changes.disruption_and_late_requests",
+        "title": "Disruption rebooking and late changes",
+        "answer": "Rebooking after a qualifying airline disruption follows the disruption policy, which waives change fees and fare differences for available replacement travel. Requests at or after the original scheduled departure require assessment under the no-show rules. Do not apply the voluntary change-fee table automatically to either situation.",
+        "details": {
+          "related_rule_ids": [
+            "cancellation.airline_disruption",
+            "cancellation.no_show"
+          ]
+        }
+      }
+    ]
+  }
+}

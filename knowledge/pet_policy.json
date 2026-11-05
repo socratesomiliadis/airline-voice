@@ -1,0 +1,125 @@
+{
+  "schema_version": "1.0.0",
+  "knowledge_base_id": "airline-voice-demo-policies",
+  "policy_version": "1.0.0",
+  "language": "en-US",
+  "airline": {
+    "name": "Airline Voice Demo",
+    "fictional": true
+  },
+  "status": "fictional_development_data",
+  "description": "Editable fictional policies for developing and simulating an airline customer service agent. All amounts, allowances, and deadlines are invented sample values, not any real airline's policies or a statement of passenger rights.",
+  "scope": {
+    "operating_carrier": "Airline Voice Demo",
+    "partner_operated_flights": "Not covered. Confirm the operating carrier's policies.",
+    "route_types": [
+      "domestic",
+      "international"
+    ],
+    "route_classification": {
+      "domestic": "Every segment in the ticketed direction stays within one country.",
+      "international": "At least one segment in the ticketed direction crosses a country border. Apply the international table to that whole direction, including its domestic connections."
+    },
+    "fare_types": [
+      "basic",
+      "standard",
+      "flexible",
+      "business"
+    ],
+    "currency": "USD",
+    "weight_unit": "kg",
+    "dimension_unit": "cm",
+    "fee_amounts": "Final fictional amounts in USD, including any applicable sample taxes. Each fee states its own charging unit.",
+    "time_reference": "Deadlines are relative to the scheduled departure of the relevant flight segment, using the departure airport's local time.",
+    "exceptions": "Confirmed itinerary-specific or airport-specific requirements take precedence. If a required exception is not documented, obtain confirmation rather than inventing a rule."
+  },
+  "policy": {
+    "id": "pets",
+    "title": "Traveling with pets",
+    "summary": "Small cats and dogs may travel in the cabin on eligible flights with an approved reservation and carrier. Pet transport in the hold or as cargo is not offered.",
+    "keywords": [
+      "pet",
+      "dog",
+      "cat",
+      "animal",
+      "pet carrier",
+      "pet fee",
+      "service dog"
+    ],
+    "questions_to_ask": [
+      "What is the route and travel date?",
+      "Is the animal a pet or a trained service dog?",
+      "What are the animal's age and species?",
+      "What are the carrier dimensions and the combined weight of the pet and carrier?"
+    ],
+    "rules": [
+      {
+        "id": "pets.eligibility",
+        "title": "Eligible pets and routes",
+        "answer": "Cabin pets must be cats or dogs at least 12 weeks old. Domestic travel is eligible; international pet travel requires route-specific confirmation before acceptance. Hold and cargo transport are unavailable.",
+        "details": {
+          "allowed_species": [
+            "cat",
+            "dog"
+          ],
+          "minimum_age_weeks": 12,
+          "domestic_travel": "eligible_subject_to_capacity",
+          "international_travel": "requires_manual_confirmation",
+          "hold_transport_available": false,
+          "cargo_transport_available": false,
+          "health_and_entry_documents": "Requirements depend on the route. Confirm the required documents; this knowledge base does not specify them."
+        }
+      },
+      {
+        "id": "pets.carrier",
+        "title": "Cabin carrier limits",
+        "answer": "One pet in one carrier is allowed per passenger. The pet and carrier together may weigh up to 8 kg. The carrier must be no larger than 45 x 30 x 23 cm, fit under the seat, and allow the pet to stand, turn, and lie down naturally. It replaces the passenger's standard carry-on bag; one personal item is still allowed.",
+        "details": {
+          "maximum_carriers_per_passenger": 1,
+          "maximum_pets_per_carrier": 1,
+          "maximum_combined_weight_kg": 8,
+          "maximum_carrier_dimensions_cm": {
+            "length": 45,
+            "width": 30,
+            "height": 23
+          },
+          "carrier_requirements": [
+            "ventilated",
+            "leak_resistant",
+            "securely_closed",
+            "fits_under_seat"
+          ],
+          "counts_as_standard_carry_on": true,
+          "personal_item_still_allowed": true,
+          "during_flight": "The pet must remain inside the closed carrier under the seat."
+        }
+      },
+      {
+        "id": "pets.reservations_and_fees",
+        "title": "Reservations, capacity, and pet fees",
+        "answer": "Request pet travel at least 48 hours before departure when possible. Each flight accepts at most four pet carriers, so a pet space must be confirmed separately from the passenger ticket. The cabin pet fee is USD 125 per carrier per direction, including connections on that direction of the same ticket. Requests within 48 hours require an availability check.",
+        "details": {
+          "recommended_notice_hours": 48,
+          "maximum_pet_carriers_per_flight": 4,
+          "reservation_requires_confirmation": true,
+          "fee": {
+            "amount": 125,
+            "currency": "USD",
+            "unit": "per_carrier_per_direction"
+          },
+          "connections": "One pet fee covers connecting segments in the same direction on the same ticket. A return journey incurs a separate pet fee.",
+          "refund": "Refund the unused pet fee to the original payment method if pet travel is canceled before the first scheduled departure in that direction or the airline cannot accommodate the confirmed pet."
+        }
+      },
+      {
+        "id": "pets.service_animals",
+        "title": "Service dogs and emotional support animals",
+        "answer": "Trained service dogs use the special assistance policy, travel without a pet fee, and do not use the pet-carrier quota or cabin baggage allowance. Emotional support animals are treated as pets under this fictional policy.",
+        "details": {
+          "related_rule_id": "assistance.service_dogs",
+          "emotional_support_animals": "standard_pet_policy_applies"
+        }
+      }
+    ]
+  }
+}

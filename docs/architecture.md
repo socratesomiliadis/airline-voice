@@ -53,6 +53,12 @@ evolve independently. No embedding model, vector index, chunking algorithm,
 document parser, or external knowledge provider has been selected. The ignored
 `knowledge/sources/` directory is only a local staging area.
 
+`knowledge/` contains one JSON file per fictional development policy: pets,
+baggage, accessibility, check-in, cancellations and refunds, and flight changes.
+Each file includes metadata, stable rule IDs, plain-language answers, and
+structured details. No runtime loader, retrieval implementation, or ElevenLabs
+upload is connected to these files yet.
+
 ## Refinement extension points
 
 The proposed pipeline has separate protocols for:

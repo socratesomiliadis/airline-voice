@@ -1,0 +1,125 @@
+{
+  "schema_version": "1.0.0",
+  "knowledge_base_id": "airline-voice-demo-policies",
+  "policy_version": "1.0.0",
+  "language": "en-US",
+  "airline": {
+    "name": "Airline Voice Demo",
+    "fictional": true
+  },
+  "status": "fictional_development_data",
+  "description": "Editable fictional policies for developing and simulating an airline customer service agent. All amounts, allowances, and deadlines are invented sample values, not any real airline's policies or a statement of passenger rights.",
+  "scope": {
+    "operating_carrier": "Airline Voice Demo",
+    "partner_operated_flights": "Not covered. Confirm the operating carrier's policies.",
+    "route_types": [
+      "domestic",
+      "international"
+    ],
+    "route_classification": {
+      "domestic": "Every segment in the ticketed direction stays within one country.",
+      "international": "At least one segment in the ticketed direction crosses a country border. Apply the international table to that whole direction, including its domestic connections."
+    },
+    "fare_types": [
+      "basic",
+      "standard",
+      "flexible",
+      "business"
+    ],
+    "currency": "USD",
+    "weight_unit": "kg",
+    "dimension_unit": "cm",
+    "fee_amounts": "Final fictional amounts in USD, including any applicable sample taxes. Each fee states its own charging unit.",
+    "time_reference": "Deadlines are relative to the scheduled departure of the relevant flight segment, using the departure airport's local time.",
+    "exceptions": "Confirmed itinerary-specific or airport-specific requirements take precedence. If a required exception is not documented, obtain confirmation rather than inventing a rule."
+  },
+  "policy": {
+    "id": "check_in",
+    "title": "Check-in and airport deadlines",
+    "summary": "Online check-in opens 24 hours before departure. Airport check-in, bag drop, and boarding have separate deadlines for domestic and international flights.",
+    "keywords": [
+      "check-in",
+      "online check-in",
+      "airport arrival",
+      "bag drop",
+      "boarding",
+      "gate closes",
+      "boarding pass",
+      "deadline"
+    ],
+    "questions_to_ask": [
+      "Is the flight domestic or international, and which airport does it depart from?",
+      "What is the scheduled departure date and local time?",
+      "Do you have checked bags, a pet, or a document-verification requirement?",
+      "Does the booking show a specific airport deadline?"
+    ],
+    "rules": [
+      {
+        "id": "check_in.online",
+        "title": "Online check-in window",
+        "answer": "Online check-in opens 24 hours before scheduled departure. It closes 60 minutes before domestic flights and 120 minutes before international flights. If online check-in is closed, airport check-in may still be available until its separate cutoff. Online check-in does not remove bag-drop or document-check requirements.",
+        "details": {
+          "opens_hours_before_departure": 24,
+          "closes_minutes_before_departure": {
+            "domestic": 60,
+            "international": 120
+          },
+          "pet_travel": "Passengers traveling with cabin pets must complete check-in at the airport.",
+          "document_review": "Some journeys require airport document verification before a boarding pass can be issued.",
+          "special_assistance": "An assistance request alone does not prevent online check-in."
+        }
+      },
+      {
+        "id": "check_in.airport_and_bag_drop",
+        "title": "Airport check-in and bag drop",
+        "answer": "Airport check-in and bag drop open three hours before domestic flights and four hours before international flights. Both must be completed before 45 minutes prior to domestic departure or 60 minutes prior to international departure. Joining a queue before the cutoff does not count as completed check-in or bag drop.",
+        "details": {
+          "opens_hours_before_departure": {
+            "domestic": 3,
+            "international": 4
+          },
+          "check_in_closes_minutes_before_departure": {
+            "domestic": 45,
+            "international": 60
+          },
+          "bag_drop_closes_minutes_before_departure": {
+            "domestic": 45,
+            "international": 60
+          },
+          "must_complete_before_cutoff": true,
+          "at_the_cutoff": "closed",
+          "recommended_arrival_minutes_before_departure": {
+            "domestic": 120,
+            "international": 180
+          }
+        }
+      },
+      {
+        "id": "check_in.boarding",
+        "title": "Boarding and gate closure",
+        "answer": "Boarding normally starts 45 minutes before domestic flights and 60 minutes before international flights. The gate closes 15 minutes before domestic departure and 20 minutes before international departure. Passengers must be present and ready to board before gate closure, even if they already have a boarding pass.",
+        "details": {
+          "boarding_normally_starts_minutes_before_departure": {
+            "domestic": 45,
+            "international": 60
+          },
+          "gate_closes_minutes_before_departure": {
+            "domestic": 15,
+            "international": 20
+          },
+          "must_be_ready_before_gate_closure": true
+        }
+      },
+      {
+        "id": "check_in.exceptions",
+        "title": "Airport exceptions and flight delays",
+        "answer": "A confirmed airport-specific deadline shown on the itinerary takes precedence over these general windows. A delay does not automatically extend check-in, bag-drop, or gate deadlines; use the original scheduled departure unless the airline explicitly confirms revised deadlines. Each connection has its own boarding deadline.",
+        "details": {
+          "delays_automatically_extend_deadlines": false,
+          "missed_deadline": "Request an assessment of rebooking options under the fare and no-show rules; do not guarantee boarding or reinstatement.",
+          "related_rule_id": "cancellation.no_show"
+        }
+      }
+    ]
+  }
+}

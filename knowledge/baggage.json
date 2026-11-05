@@ -1,0 +1,222 @@
+{
+  "schema_version": "1.0.0",
+  "knowledge_base_id": "airline-voice-demo-policies",
+  "policy_version": "1.0.0",
+  "language": "en-US",
+  "airline": {
+    "name": "Airline Voice Demo",
+    "fictional": true
+  },
+  "status": "fictional_development_data",
+  "description": "Editable fictional policies for developing and simulating an airline customer service agent. All amounts, allowances, and deadlines are invented sample values, not any real airline's policies or a statement of passenger rights.",
+  "scope": {
+    "operating_carrier": "Airline Voice Demo",
+    "partner_operated_flights": "Not covered. Confirm the operating carrier's policies.",
+    "route_types": [
+      "domestic",
+      "international"
+    ],
+    "route_classification": {
+      "domestic": "Every segment in the ticketed direction stays within one country.",
+      "international": "At least one segment in the ticketed direction crosses a country border. Apply the international table to that whole direction, including its domestic connections."
+    },
+    "fare_types": [
+      "basic",
+      "standard",
+      "flexible",
+      "business"
+    ],
+    "currency": "USD",
+    "weight_unit": "kg",
+    "dimension_unit": "cm",
+    "fee_amounts": "Final fictional amounts in USD, including any applicable sample taxes. Each fee states its own charging unit.",
+    "time_reference": "Deadlines are relative to the scheduled departure of the relevant flight segment, using the departure airport's local time.",
+    "exceptions": "Confirmed itinerary-specific or airport-specific requirements take precedence. If a required exception is not documented, obtain confirmation rather than inventing a rule."
+  },
+  "policy": {
+    "id": "baggage",
+    "title": "Baggage allowances and fees",
+    "summary": "All fares include one personal item and one standard carry-on. Checked allowances vary by fare and route. Additional-piece, overweight, and oversized fees can apply together.",
+    "keywords": [
+      "baggage",
+      "luggage",
+      "carry-on",
+      "checked bag",
+      "allowance",
+      "overweight",
+      "oversized",
+      "baggage fee",
+      "stroller"
+    ],
+    "questions_to_ask": [
+      "Is the journey domestic or international?",
+      "What is the fare type?",
+      "How many bags are being checked, and what are their individual weights and dimensions?",
+      "Is the item a standard bag, mobility aid, infant item, or special equipment?"
+    ],
+    "rules": [
+      {
+        "id": "baggage.cabin_allowance",
+        "title": "Personal item and carry-on",
+        "answer": "Every fare includes one personal item up to 40 x 30 x 15 cm and one carry-on up to 55 x 40 x 23 cm weighing no more than 8 kg. Dimensions include handles, pockets, and wheels. A cabin pet carrier replaces the carry-on. If a compliant carry-on is checked solely because overhead space is unavailable, there is no checked-bag fee.",
+        "details": {
+          "personal_item": {
+            "included_pieces": 1,
+            "maximum_dimensions_cm": {
+              "length": 40,
+              "width": 30,
+              "height": 15
+            },
+            "weight_policy": "No separate weight limit; the item must fit fully under the seat."
+          },
+          "carry_on": {
+            "included_pieces": 1,
+            "maximum_dimensions_cm": {
+              "length": 55,
+              "width": 40,
+              "height": 23
+            },
+            "maximum_weight_kg": 8
+          },
+          "compliant_bag_checked_for_capacity_fee": {
+            "amount": 0,
+            "currency": "USD",
+            "unit": "per_bag"
+          },
+          "noncompliant_cabin_bag": "Must meet checked-baggage acceptance limits and is charged under the checked-baggage rules."
+        }
+      },
+      {
+        "id": "baggage.checked_allowance",
+        "title": "Included checked bags by fare",
+        "answer": "Basic includes no checked bags. Standard includes one checked bag on either route type. Flexible includes one on domestic routes and two on international routes. Business includes two on either route type. Each included bag may weigh up to 23 kg for basic, standard, or flexible fares and up to 32 kg for business. The standard size limit is a combined length, width, and height of 158 cm.",
+        "details": {
+          "included_pieces_by_fare": {
+            "basic": {
+              "domestic": 0,
+              "international": 0
+            },
+            "standard": {
+              "domestic": 1,
+              "international": 1
+            },
+            "flexible": {
+              "domestic": 1,
+              "international": 2
+            },
+            "business": {
+              "domestic": 2,
+              "international": 2
+            }
+          },
+          "standard_weight_limit_kg_by_fare": {
+            "basic": 23,
+            "standard": 23,
+            "flexible": 23,
+            "business": 32
+          },
+          "standard_maximum_dimension_sum_cm": 158,
+          "measurement": "Dimension sum is length + width + height, including handles and wheels.",
+          "mixed_fares_or_carriers": "Confirm the ticketed allowance; do not infer a combined allowance from this table."
+        }
+      },
+      {
+        "id": "baggage.additional_piece_fees",
+        "title": "Additional checked-bag fees",
+        "answer": "Fees apply to bags beyond the fare's included allowance. For domestic travel, the first additional bag costs USD 35, the second USD 50, and each later bag USD 100. For international travel, those fees are USD 60, USD 90, and USD 150. Fees are per bag per passenger per direction, not per connecting segment. Up to five standard checked bags per passenger are accepted, subject to capacity; mobility aids and free infant equipment do not count toward that limit.",
+        "details": {
+          "fee_currency": "USD",
+          "fee_unit": "per_additional_bag_per_passenger_per_direction",
+          "additional_piece_fees": {
+            "domestic": {
+              "first_additional": 35,
+              "second_additional": 50,
+              "third_and_each_subsequent": 100
+            },
+            "international": {
+              "first_additional": 60,
+              "second_additional": 90,
+              "third_and_each_subsequent": 150
+            }
+          },
+          "ordinal_definition": "Count additional bags after subtracting the fare's included checked pieces, not from the first physical bag.",
+          "maximum_standard_checked_pieces_per_passenger": 5,
+          "payment_channel": "The same sample fees apply online and at the airport.",
+          "connections": "One fee covers same-ticket connections in one direction when bags are through-checked. Separate tickets require allowance confirmation."
+        }
+      },
+      {
+        "id": "baggage.weight_and_size_fees",
+        "title": "Overweight and oversized bags",
+        "answer": "For basic, standard, and flexible fares, a checked bag over 23 kg and up to 32 kg incurs an overweight fee of USD 75 domestically or USD 100 internationally. Business bags up to 32 kg incur no overweight fee. A bag with a dimension sum over 158 cm and up to 203 cm incurs an oversized fee of USD 100 domestically or USD 150 internationally. Bags over 32 kg or over 203 cm are not accepted as standard checked baggage. Additional-piece, overweight, and oversized fees are cumulative.",
+        "details": {
+          "overweight": {
+            "applicable_fares": [
+              "basic",
+              "standard",
+              "flexible"
+            ],
+            "weight_kg": {
+              "greater_than": 23,
+              "less_than_or_equal_to": 32
+            },
+            "fees": {
+              "domestic": 75,
+              "international": 100
+            },
+            "currency": "USD",
+            "unit": "per_bag_per_direction"
+          },
+          "oversized": {
+            "dimension_sum_cm": {
+              "greater_than": 158,
+              "less_than_or_equal_to": 203
+            },
+            "fees": {
+              "domestic": 100,
+              "international": 150
+            },
+            "currency": "USD",
+            "unit": "per_bag_per_direction"
+          },
+          "absolute_maximum_weight_kg": 32,
+          "absolute_maximum_dimension_sum_cm": 203,
+          "fees_are_cumulative": true,
+          "nonstandard_equipment": "Sports equipment, musical instruments, and items exceeding standard acceptance limits require separate confirmation. Do not promise acceptance or quote an unspecified equipment fee."
+        }
+      },
+      {
+        "id": "baggage.infant_and_assistance_items",
+        "title": "Infant equipment and mobility aids",
+        "answer": "A lap infant receives one checked bag up to 10 kg and 158 cm in combined dimensions, plus one diaper bag. One stroller and one car seat per infant or child travel free in addition to the passenger's allowance. Approved mobility aids also travel free and do not consume the normal baggage allowance. A child or infant with a purchased seat receives the checked allowance of that seat's fare.",
+        "details": {
+          "lap_infant_checked_bag": {
+            "included_pieces": 1,
+            "maximum_weight_kg": 10,
+            "maximum_dimension_sum_cm": 158
+          },
+          "lap_infant_diaper_bag": {
+            "included_pieces": 1,
+            "maximum_dimensions_cm": {
+              "length": 40,
+              "width": 30,
+              "height": 15
+            }
+          },
+          "free_strollers_per_infant_or_child": 1,
+          "free_car_seats_per_infant_or_child": 1,
+          "infant_bag_exceeding_limits": "Confirm acceptance and fees; do not apply the adult overweight table to the infant bag automatically.",
+          "mobility_aids_related_rule_id": "assistance.mobility"
+        }
+      },
+      {
+        "id": "baggage.unused_fees",
+        "title": "Unused baggage fees",
+        "answer": "A prepaid baggage fee is refundable to the original payment method if the bag service is canceled before the first scheduled departure in that direction, or if the airline cannot provide the purchased service. Used baggage services are not refundable. These ancillary-fee rules apply even when the ticket itself is nonrefundable.",
+        "details": {
+          "related_rule_id": "cancellation.ancillary_fees"
+        }
+      }
+    ]
+  }
+}

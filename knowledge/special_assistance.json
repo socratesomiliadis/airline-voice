@@ -1,0 +1,178 @@
+{
+  "schema_version": "1.0.0",
+  "knowledge_base_id": "airline-voice-demo-policies",
+  "policy_version": "1.0.0",
+  "language": "en-US",
+  "airline": {
+    "name": "Airline Voice Demo",
+    "fictional": true
+  },
+  "status": "fictional_development_data",
+  "description": "Editable fictional policies for developing and simulating an airline customer service agent. All amounts, allowances, and deadlines are invented sample values, not any real airline's policies or a statement of passenger rights.",
+  "scope": {
+    "operating_carrier": "Airline Voice Demo",
+    "partner_operated_flights": "Not covered. Confirm the operating carrier's policies.",
+    "route_types": [
+      "domestic",
+      "international"
+    ],
+    "route_classification": {
+      "domestic": "Every segment in the ticketed direction stays within one country.",
+      "international": "At least one segment in the ticketed direction crosses a country border. Apply the international table to that whole direction, including its domestic connections."
+    },
+    "fare_types": [
+      "basic",
+      "standard",
+      "flexible",
+      "business"
+    ],
+    "currency": "USD",
+    "weight_unit": "kg",
+    "dimension_unit": "cm",
+    "fee_amounts": "Final fictional amounts in USD, including any applicable sample taxes. Each fee states its own charging unit.",
+    "time_reference": "Deadlines are relative to the scheduled departure of the relevant flight segment, using the departure airport's local time.",
+    "exceptions": "Confirmed itinerary-specific or airport-specific requirements take precedence. If a required exception is not documented, obtain confirmation rather than inventing a rule."
+  },
+  "policy": {
+    "id": "assistance",
+    "title": "Special assistance",
+    "summary": "Airport accessibility assistance and approved mobility-aid transport are free. Request assistance early so that arrangements can be confirmed for every segment.",
+    "keywords": [
+      "accessibility",
+      "special assistance",
+      "wheelchair",
+      "mobility aid",
+      "hearing",
+      "visual impairment",
+      "service dog",
+      "medical device"
+    ],
+    "questions_to_ask": [
+      "What assistance would make your journey accessible?",
+      "Which flight segments need assistance?",
+      "Are you traveling with a mobility aid, service dog, medical device, or companion?",
+      "For a powered device, what are its dimensions, weight, battery type, and battery rating?"
+    ],
+    "rules": [
+      {
+        "id": "assistance.options",
+        "title": "Available assistance options",
+        "answer": "Free options include wheelchair assistance through the airport, boarding and deplaning assistance, guidance for passengers with visual impairments, accessible or written communication for passengers with hearing impairments, and additional boarding time or reduced-stimulation arrangements where available. Staff do not provide personal care, medication administration, or continuous supervision.",
+        "details": {
+          "options": [
+            {
+              "type": "wheelchair",
+              "includes": [
+                "check_in_to_gate",
+                "connections",
+                "arrival_assistance"
+              ]
+            },
+            {
+              "type": "boarding",
+              "includes": [
+                "priority_boarding",
+                "extra_time",
+                "boarding_equipment_subject_to_airport_confirmation"
+              ]
+            },
+            {
+              "type": "visual",
+              "includes": [
+                "airport_guidance",
+                "verbal_orientation"
+              ]
+            },
+            {
+              "type": "hearing",
+              "includes": [
+                "written_communication",
+                "assistance_with_flight_announcements"
+              ]
+            },
+            {
+              "type": "cognitive_or_sensory",
+              "includes": [
+                "extra_boarding_time",
+                "reduced_stimulation_arrangements_subject_to_availability"
+              ]
+            }
+          ],
+          "assistance_fee": {
+            "amount": 0,
+            "currency": "USD",
+            "unit": "per_passenger"
+          },
+          "personal_care_available": false,
+          "continuous_supervision_available": false,
+          "companion": "If the passenger needs personal care or continuous supervision, discuss companion arrangements. A companion's seat is not automatically free."
+        }
+      },
+      {
+        "id": "assistance.notice",
+        "title": "How and when to request assistance",
+        "answer": "Request assistance at booking or at least 48 hours before departure when possible. Requests made later are still accepted for assessment, but specific equipment and arrangements must be confirmed. No fee applies for requesting late. Describe the assistance needed; a medical diagnosis is not required for a routine airport assistance request.",
+        "details": {
+          "recommended_notice_hours": 48,
+          "late_requests": "assess_and_confirm_available_arrangements",
+          "late_request_fee": {
+            "amount": 0,
+            "currency": "USD",
+            "unit": "per_request"
+          },
+          "routine_request_requires_medical_diagnosis": false,
+          "connections": "Confirm assistance at the departure airport, connecting airports, and arrival airport."
+        }
+      },
+      {
+        "id": "assistance.mobility",
+        "title": "Wheelchairs and other mobility aids",
+        "answer": "Approved wheelchairs and mobility aids are carried free in addition to the baggage allowance. Provide dimensions, weight, handling instructions, and battery details for powered devices. Aircraft fit and battery acceptance must be confirmed. Where operationally possible, the passenger may use the aid up to the gate and receive it at the arrival gate; the return location must be confirmed rather than guaranteed.",
+        "details": {
+          "transport_fee": {
+            "amount": 0,
+            "currency": "USD",
+            "unit": "per_approved_mobility_aid"
+          },
+          "counts_toward_baggage_allowance": false,
+          "powered_aid_requires_battery_review": true,
+          "aircraft_fit_requires_confirmation": true,
+          "gate_return": "subject_to_airport_and_aircraft_confirmation"
+        }
+      },
+      {
+        "id": "assistance.service_dogs",
+        "title": "Trained service dogs",
+        "answer": "A trained service dog may accompany its passenger without a pet fee and without using the cabin-pet quota or baggage allowance. Pet age, pet weight, and pet carrier limits do not apply. Route-specific documents, space arrangements, and any entry requirements must be confirmed. The dog must remain under the passenger's control and must not obstruct an aisle or exit.",
+        "details": {
+          "animal_type": "trained_service_dog",
+          "fee": {
+            "amount": 0,
+            "currency": "USD",
+            "unit": "per_service_dog"
+          },
+          "counts_toward_pet_quota": false,
+          "counts_toward_baggage_allowance": false,
+          "standard_pet_limits_apply": false,
+          "documents": "Not enumerated in this sample; confirm requirements for the specific route."
+        }
+      },
+      {
+        "id": "assistance.medical_devices",
+        "title": "Medical devices and oxygen arrangements",
+        "answer": "CPAP devices, portable oxygen concentrators, and other medical equipment require device-specific confirmation before onboard use. Provide the device model and battery specifications. The airline does not provide onboard medical oxygen in this sample policy. Do not promise equipment compatibility, oxygen provision, or medical clearance without confirmation.",
+        "details": {
+          "onboard_use_requires_confirmation": true,
+          "airline_provided_medical_oxygen_available": false,
+          "approved_medical_equipment_counts_toward_baggage_allowance": false,
+          "refer_for_review_when": [
+            "device_acceptance_is_unknown",
+            "battery_acceptance_is_unknown",
+            "medical_clearance_may_be_required",
+            "passenger_needs_personal_care"
+          ]
+        }
+      }
+    ]
+  }
+}
