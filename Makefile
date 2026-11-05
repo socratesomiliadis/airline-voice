@@ -1,4 +1,4 @@
-.PHONY: setup dev-api dev-dashboard check check-python check-dashboard up down migrate
+.PHONY: setup dev-api dev-dashboard check check-python check-dashboard up down migrate seed-flights
 
 setup:
 	uv sync --all-packages --frozen
@@ -35,3 +35,6 @@ down:
 
 migrate:
 	uv run --package airline-api alembic -c apps/api/alembic.ini upgrade head
+
+seed-flights:
+	uv run --package airline-api airline-seed-flights

@@ -1,1 +1,1 @@
-"""Async PostgreSQL plumbing; no domain tables are defined yet."""
+"""Async PostgreSQL persistence, migrations, and fictional flight seed tooling."""

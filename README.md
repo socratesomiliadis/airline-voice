@@ -4,10 +4,11 @@ Scaffold for an autonomous airline customer service agent powered by ElevenLabs,
 with a FastAPI backend, PostgreSQL persistence, a Python refinement worker, and
 a Next.js monitoring dashboard.
 
-**This repository intentionally contains no business logic.** Feature routes return
+**Customer operations and the refinement loop are not implemented.** Feature routes return
 `501 Not Implemented`; the worker cannot execute a run; dashboard views show empty
-states. Only application startup, configuration, database session plumbing, route
-registration, navigation, and development infrastructure are implemented.
+states. Infrastructure includes application startup, configuration, database
+models and session plumbing, a fictional flight seed dataset, route registration,
+navigation, and development tooling.
 
 ## Repository layout
 
@@ -27,7 +28,7 @@ apps/
         monitoring/        Monitoring events
         refinement/        Run control and result persistence
       infrastructure/      Database and reserved provider adapters
-    migrations/            Alembic environment; no domain revisions
+    migrations/            Flight inventory schema migration
   refiner/
     src/airline_refiner/
       pipeline/            Context, runner, and stage protocols
@@ -40,6 +41,7 @@ apps/
       lib/api/             Future API and event-stream contracts
 packages/contracts/        Shared Python payload and event contracts
 config/                    Refinement configuration placeholders
+data/flights/              Fictional flight week and database setup instructions
 prompts/                   Future versioned prompt assets
 scenarios/                 Future simulated customer scenarios
 knowledge/                 One JSON file per fictional policy and source staging
@@ -130,11 +132,21 @@ retry limits, model selection, or mutation policy. The worker does not load it y
 
 ## Database migrations
 
-The async SQLAlchemy base and session factory are ready for future models. No
-domain tables, schema migrations, seed data, or auto-create behavior are supplied.
-Alembic reads `DATABASE_URL` through the API settings.
+The database contains airports, flight schedules, shared cabin inventory, and fare
+offers. Alembic reads `DATABASE_URL` through the API settings. Create the schema and
+populate the fictional November 9–15, 2026 flight week:
 
-After adding and registering models in `infrastructure/database/models/`:
+```sh
+make migrate
+make seed-flights
+```
+
+The seed contains 112 flights across seven airports, three seat classes, and six
+fare offers per flight. Repeated imports preserve existing inventory and prices.
+See [flight database setup](data/flights/README.md) for the schema, container
+commands, and example queries. Migrations and seeds never run during API startup.
+
+After adding further models in `infrastructure/database/models/`:
 
 ```sh
 uv run --package airline-api alembic -c apps/api/alembic.ini revision --autogenerate -m "describe schema"
@@ -153,14 +165,14 @@ docker compose config --quiet
 
 Checks cover Python linting, formatting, strict typing, infrastructure smoke tests,
 dashboard linting and formatting with Biome, TypeScript, and the Next.js production
-build. Tests require no external services and verify that feature routes and worker
-execution stay inactive.
-CI also builds all three application images.
+build. Dataset and scaffold tests require no external services. The PostgreSQL
+integration test runs when `TEST_DATABASE_URL` is set and uses its own disposable
+database. CI supplies PostgreSQL and also builds all three application images.
 
 ## Architecture and next implementation steps
 
 See [architecture](docs/architecture.md), [development guidance](docs/development.md),
 the [reserved API surface](docs/api.md), and the [fictional JSON knowledge base](knowledge/README.md).
-Domain schemas, persistence models,
-provider integration, real-time transport, evaluation criteria, and the refinement
-loop are intentionally left for subsequent implementation.
+Booking and passenger models, customer operations, provider integration, real-time
+transport, evaluation criteria, and the refinement loop remain for subsequent
+implementation.

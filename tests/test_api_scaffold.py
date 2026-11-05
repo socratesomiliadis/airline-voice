@@ -4,7 +4,6 @@ from collections.abc import Iterator
 
 import pytest
 from airline_api.core.config import Settings
-from airline_api.infrastructure.database.base import Base
 from airline_api.main import create_app
 from fastapi.testclient import TestClient
 from pydantic import SecretStr
@@ -62,7 +61,3 @@ def test_feature_routes_are_explicitly_unimplemented(
     response = client.request(method, f"/api/v1{path}")
     assert response.status_code == 501
     assert response.json()["detail"]["code"] == "not_implemented"
-
-
-def test_no_domain_tables_are_defined() -> None:
-    assert not Base.metadata.tables

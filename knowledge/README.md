@@ -25,6 +25,37 @@ retrieval keywords, clarification questions, and rules with stable IDs. Each rul
 contains a customer-facing `answer` and structured `details`. Related rules
 reference those IDs, including references across policy files.
 
+## Alignment with flight inventory
+
+Every policy file includes an `inventory_reference` for the November 9–15, 2026
+flight dataset and the database fields used for current schedules, seats, and
+prices. The sample dates describe the flight fixtures, not an expiry date for the
+policies. Flight prices and seat counts remain in PostgreSQL and are not copied
+into policy answers.
+
+The shared scope distinguishes `seat_classes` from `fare_tiers` and lists the
+offered combinations in `fare_tiers_by_seat_class`. Economy has basic, standard,
+and flexible tiers; premium economy has standard and flexible; business has the
+business tier. Baggage, change, and refund entitlements follow the purchased fare
+tier. Premium economy does not automatically receive business entitlements.
+
+Policy fees are in USD dollars; `flight_fares.price_cents` is in USD cents. Flight
+quotes include sample taxes and exclude optional services. Check-in deadlines use
+the relevant departure timestamp and origin airport's IANA time zone. US-to-US
+sample flights use domestic rules; Toronto and London flights use international
+rules in either direction.
+
+Passenger seat inventory does not confirm pet space, assistance arrangements,
+device acceptance, or original payment amounts needed for refunds. The policy
+answers identify where separate confirmation is still required.
+
+Alignment checks compare all six policy files with every seeded cabin/fare/route
+combination and validate shared metadata and cross-references:
+
+```sh
+uv run --all-packages pytest tests/test_knowledge_alignment.py
+```
+
 Keep an answer and its structured details consistent when editing. Fees state
 their charging unit; domestic and international amounts are separate where they
 differ. Additional-bag fees count from the first bag beyond the included allowance.

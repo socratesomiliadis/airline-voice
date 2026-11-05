@@ -1,4 +1,4 @@
-"""Async Alembic environment. No revisions or domain schema are supplied."""
+"""Async Alembic environment for the registered persistence models."""
 
 import asyncio
 

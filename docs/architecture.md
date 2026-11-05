@@ -44,9 +44,19 @@ final domain schema.
 ## Persistence and knowledge
 
 PostgreSQL is the persistent database. SQLAlchemy provides async engine/session
-plumbing, and Alembic provides migration configuration. No domain tables exist.
+plumbing, and Alembic provides schema migrations. The flight database has `airports`,
+`flights`, `flight_cabins`, and `flight_fares` tables. Cabin inventory is shared
+across its fare tiers, and prices are stored in integer USD cents. Booking and
+passenger persistence is not implemented yet.
 Session dependencies close sessions without implicitly committing transactions;
 transaction ownership is a future application-layer decision.
+
+`data/flights/week_2026_11_09.json` seeds 112 fictional flights departing November
+9–15, 2026, with three cabin classes and six fare offers per flight. The explicit
+seed command validates the data and inserts missing rows without replacing existing
+inventory, flight status, or fares. This JSON is reproducible seed input; the mutable
+PostgreSQL tables are the future booking API's flight inventory source. See the
+[flight database guide](../data/flights/README.md) for setup and query examples.
 
 Knowledge ingestion and search are separate ports so storage and retrieval can
 evolve independently. No embedding model, vector index, chunking algorithm,

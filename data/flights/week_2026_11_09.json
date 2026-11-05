@@ -1,0 +1,6450 @@
+{
+  "schema_version": "1.0.0",
+  "dataset_id": "airline-voice-demo-week-2026-11-09",
+  "status": "fictional_development_data",
+  "airline": "Airline Voice Demo",
+  "description": "Invented flight schedules, prices, and availability for development. Airport locations are real; these are not real scheduled airline services.",
+  "week_start": "2026-11-09",
+  "week_end": "2026-11-15",
+  "date_reference": "departure_airport_local_time",
+  "currency": "USD",
+  "price_basis": "Stored integer cents per adult passenger for one flight segment, including sample taxes and excluding optional services. These are fixed sample prices, not a dynamic pricing algorithm.",
+  "inventory_note": "Each cabin shares one available-seat count across all its fare tiers. Initial occupied seats are fictional starting occupancy, not generated customer bookings. Some business cabins are sold out; every flight has available economy seats.",
+  "airports": [
+    {
+      "code": "SFO",
+      "name": "San Francisco International Airport",
+      "city": "San Francisco",
+      "country_code": "US",
+      "timezone": "America/Los_Angeles"
+    },
+    {
+      "code": "LAX",
+      "name": "Los Angeles International Airport",
+      "city": "Los Angeles",
+      "country_code": "US",
+      "timezone": "America/Los_Angeles"
+    },
+    {
+      "code": "SEA",
+      "name": "Seattle-Tacoma International Airport",
+      "city": "Seattle",
+      "country_code": "US",
+      "timezone": "America/Los_Angeles"
+    },
+    {
+      "code": "JFK",
+      "name": "John F. Kennedy International Airport",
+      "city": "New York",
+      "country_code": "US",
+      "timezone": "America/New_York"
+    },
+    {
+      "code": "ORD",
+      "name": "Chicago O'Hare International Airport",
+      "city": "Chicago",
+      "country_code": "US",
+      "timezone": "America/Chicago"
+    },
+    {
+      "code": "YYZ",
+      "name": "Toronto Pearson International Airport",
+      "city": "Toronto",
+      "country_code": "CA",
+      "timezone": "America/Toronto"
+    },
+    {
+      "code": "LHR",
+      "name": "London Heathrow Airport",
+      "city": "London",
+      "country_code": "GB",
+      "timezone": "Europe/London"
+    }
+  ],
+  "flights": [
+    {
+      "id": "25c205f5-1d7b-50a7-a279-e0f75d1955fe",
+      "flight_number": "DEMO101",
+      "origin_code": "SFO",
+      "destination_code": "LAX",
+      "departure_at": "2026-11-09T07:00:00-08:00",
+      "arrival_at": "2026-11-09T08:30:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 25,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 8900
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 13400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 18900
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 3,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 20900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 28900
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 0,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 41700
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "8b63d8df-fb1c-5f05-8e55-f24a9c880127",
+      "flight_number": "DEMO102",
+      "origin_code": "LAX",
+      "destination_code": "SFO",
+      "departure_at": "2026-11-09T09:30:00-08:00",
+      "arrival_at": "2026-11-09T11:05:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 32,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 9400
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 13900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 19400
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 6,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 21400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 29400
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 2,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 43200
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "672263c1-2b06-58aa-a866-dd43afa261f0",
+      "flight_number": "DEMO103",
+      "origin_code": "SFO",
+      "destination_code": "LAX",
+      "departure_at": "2026-11-09T17:30:00-08:00",
+      "arrival_at": "2026-11-09T19:05:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 39,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 10900
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 15400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 20900
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 9,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 22900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 30900
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 3,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 47700
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "6adb839c-1632-5574-beaf-d20ad4ea8ef1",
+      "flight_number": "DEMO104",
+      "origin_code": "LAX",
+      "destination_code": "SFO",
+      "departure_at": "2026-11-09T20:00:00-08:00",
+      "arrival_at": "2026-11-09T21:30:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 46,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 9900
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 14400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 19900
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 12,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 21900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 29900
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 4,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 44700
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "e075e4cf-8792-5c68-a499-6a9d4223091c",
+      "flight_number": "DEMO201",
+      "origin_code": "SFO",
+      "destination_code": "SEA",
+      "departure_at": "2026-11-09T08:10:00-08:00",
+      "arrival_at": "2026-11-09T10:25:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 53,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 11900
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 16400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 21900
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 15,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 23900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 31900
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 5,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 50700
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "1b531cad-cd85-594b-a99c-a6b7b64491f8",
+      "flight_number": "DEMO202",
+      "origin_code": "SEA",
+      "destination_code": "SFO",
+      "departure_at": "2026-11-09T11:15:00-08:00",
+      "arrival_at": "2026-11-09T13:35:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 60,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 12900
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 17400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 22900
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 18,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 24900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 32900
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 6,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 53700
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "6739d614-8fb1-52d3-a044-1c9d1ffd1849",
+      "flight_number": "DEMO203",
+      "origin_code": "SFO",
+      "destination_code": "SEA",
+      "departure_at": "2026-11-09T18:20:00-08:00",
+      "arrival_at": "2026-11-09T20:35:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 67,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 13900
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 18400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 23900
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 21,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 25900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 33900
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 7,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 56700
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "d3c5959e-8f69-58ca-b31e-5c4aa3eeecbe",
+      "flight_number": "DEMO204",
+      "origin_code": "SEA",
+      "destination_code": "SFO",
+      "departure_at": "2026-11-09T21:15:00-08:00",
+      "arrival_at": "2026-11-09T23:35:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 74,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 12400
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 16900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 22400
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 4,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 24400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 32400
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 8,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 52200
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "658c4c79-9074-5e74-ba78-0b36d29888c8",
+      "flight_number": "DEMO301",
+      "origin_code": "SFO",
+      "destination_code": "JFK",
+      "departure_at": "2026-11-09T06:30:00-08:00",
+      "arrival_at": "2026-11-09T15:00:00-05:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 81,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 24900
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 29400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 34900
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 7,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 36900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 44900
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 9,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 89700
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "0cdc3744-0b8f-5c38-93c6-13aa02e179c9",
+      "flight_number": "DEMO302",
+      "origin_code": "JFK",
+      "destination_code": "SFO",
+      "departure_at": "2026-11-09T18:00:00-05:00",
+      "arrival_at": "2026-11-09T21:30:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 88,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 26900
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 31400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 36900
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 10,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 38900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 46900
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 0,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 95700
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "29ffc849-db5b-53ca-9344-29365ea0fc80",
+      "flight_number": "DEMO401",
+      "origin_code": "SFO",
+      "destination_code": "ORD",
+      "departure_at": "2026-11-09T10:00:00-08:00",
+      "arrival_at": "2026-11-09T16:15:00-06:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 95,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 19900
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 24400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 29900
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 13,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 31900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 39900
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 11,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 74700
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "76b63065-290f-5986-b366-b3a4a2385089",
+      "flight_number": "DEMO402",
+      "origin_code": "ORD",
+      "destination_code": "SFO",
+      "departure_at": "2026-11-09T18:00:00-06:00",
+      "arrival_at": "2026-11-09T20:45:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 102,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 20900
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 25400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 30900
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 16,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 32900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 40900
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 1,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 77700
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "e79e595a-469e-5ccd-a3e1-21f8db27d78a",
+      "flight_number": "DEMO501",
+      "origin_code": "SFO",
+      "destination_code": "YYZ",
+      "departure_at": "2026-11-09T09:00:00-08:00",
+      "arrival_at": "2026-11-09T16:45:00-05:00",
+      "route_type": "international",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 109,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 22900
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 27400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 32900
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 19,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 34900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 42900
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 2,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 83700
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "48e3e1c6-6608-5cc7-825a-a62712f83252",
+      "flight_number": "DEMO502",
+      "origin_code": "YYZ",
+      "destination_code": "SFO",
+      "departure_at": "2026-11-09T18:30:00-05:00",
+      "arrival_at": "2026-11-09T21:00:00-08:00",
+      "route_type": "international",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 31,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 23900
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 28400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 33900
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 22,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 35900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 43900
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 3,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 86700
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "a06c2b7d-bc5b-59ad-9110-c4214a0ea452",
+      "flight_number": "DEMO601",
+      "origin_code": "SFO",
+      "destination_code": "LHR",
+      "departure_at": "2026-11-09T19:30:00-08:00",
+      "arrival_at": "2026-11-10T14:00:00+00:00",
+      "route_type": "international",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 210,
+          "available_seats": 38,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 59900
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 64400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 69900
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 36,
+          "available_seats": 5,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 81900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 91900
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 30,
+          "available_seats": 4,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 209700
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "e727783e-9a79-5ad8-93ac-52549008a841",
+      "flight_number": "DEMO602",
+      "origin_code": "LHR",
+      "destination_code": "SFO",
+      "departure_at": "2026-11-09T11:00:00+00:00",
+      "arrival_at": "2026-11-09T14:00:00-08:00",
+      "route_type": "international",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 210,
+          "available_seats": 45,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 62900
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 67400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 72900
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 36,
+          "available_seats": 8,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 84900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 94900
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 30,
+          "available_seats": 5,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 218700
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "20248ce1-0409-5186-89f7-258f13324a19",
+      "flight_number": "DEMO101",
+      "origin_code": "SFO",
+      "destination_code": "LAX",
+      "departure_at": "2026-11-10T07:00:00-08:00",
+      "arrival_at": "2026-11-10T08:30:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 36,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 9400
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 13900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 19400
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 8,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 21400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 29400
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 4,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 43200
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "e990059a-aef7-5451-b989-468c04da8b44",
+      "flight_number": "DEMO102",
+      "origin_code": "LAX",
+      "destination_code": "SFO",
+      "departure_at": "2026-11-10T09:30:00-08:00",
+      "arrival_at": "2026-11-10T11:05:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 43,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 9900
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 14400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 19900
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 11,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 21900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 29900
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 5,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 44700
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "17892c3f-61e0-5d1e-8945-322262ecf451",
+      "flight_number": "DEMO103",
+      "origin_code": "SFO",
+      "destination_code": "LAX",
+      "departure_at": "2026-11-10T17:30:00-08:00",
+      "arrival_at": "2026-11-10T19:05:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 50,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 11400
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 15900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 21400
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 14,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 23400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 31400
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 6,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 49200
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "a5b87869-90af-5ac0-9dbd-58da159d787c",
+      "flight_number": "DEMO104",
+      "origin_code": "LAX",
+      "destination_code": "SFO",
+      "departure_at": "2026-11-10T20:00:00-08:00",
+      "arrival_at": "2026-11-10T21:30:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 57,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 10400
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 14900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 20400
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 17,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 22400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 30400
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 7,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 46200
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "55dd87aa-e9fc-5029-8459-6278b1cbef49",
+      "flight_number": "DEMO201",
+      "origin_code": "SFO",
+      "destination_code": "SEA",
+      "departure_at": "2026-11-10T08:10:00-08:00",
+      "arrival_at": "2026-11-10T10:25:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 64,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 12400
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 16900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 22400
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 20,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 24400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 32400
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 8,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 52200
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "2bdefa48-53af-5212-8a77-a353707e0c22",
+      "flight_number": "DEMO202",
+      "origin_code": "SEA",
+      "destination_code": "SFO",
+      "departure_at": "2026-11-10T11:15:00-08:00",
+      "arrival_at": "2026-11-10T13:35:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 71,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 13400
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 17900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 23400
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 3,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 25400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 33400
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 9,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 55200
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "3371ef55-ef0d-5591-90a5-ff0873cdef15",
+      "flight_number": "DEMO203",
+      "origin_code": "SFO",
+      "destination_code": "SEA",
+      "departure_at": "2026-11-10T18:20:00-08:00",
+      "arrival_at": "2026-11-10T20:35:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 78,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 14400
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 18900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 24400
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 6,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 26400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 34400
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 10,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 58200
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "67c44c79-df2c-541d-82be-374afdbb8f39",
+      "flight_number": "DEMO204",
+      "origin_code": "SEA",
+      "destination_code": "SFO",
+      "departure_at": "2026-11-10T21:15:00-08:00",
+      "arrival_at": "2026-11-10T23:35:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 85,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 12900
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 17400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 22900
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 9,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 24900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 32900
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 11,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 53700
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ba8d4a89-c524-5cd1-beb7-ddfd7e2f96c5",
+      "flight_number": "DEMO301",
+      "origin_code": "SFO",
+      "destination_code": "JFK",
+      "departure_at": "2026-11-10T06:30:00-08:00",
+      "arrival_at": "2026-11-10T15:00:00-05:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 92,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 25400
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 29900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 35400
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 12,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 37400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 45400
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 0,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 91200
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "3c0298bc-af97-5b7d-807d-538ab58a4195",
+      "flight_number": "DEMO302",
+      "origin_code": "JFK",
+      "destination_code": "SFO",
+      "departure_at": "2026-11-10T18:00:00-05:00",
+      "arrival_at": "2026-11-10T21:30:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 99,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 27400
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 31900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 37400
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 15,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 39400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 47400
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 2,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 97200
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "424d1c60-7ef2-5812-941f-07c249921cbf",
+      "flight_number": "DEMO401",
+      "origin_code": "SFO",
+      "destination_code": "ORD",
+      "departure_at": "2026-11-10T10:00:00-08:00",
+      "arrival_at": "2026-11-10T16:15:00-06:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 106,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 20400
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 24900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 30400
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 18,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 32400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 40400
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 3,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 76200
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "77175106-3759-5541-8c97-b1f1350c107c",
+      "flight_number": "DEMO402",
+      "origin_code": "ORD",
+      "destination_code": "SFO",
+      "departure_at": "2026-11-10T18:00:00-06:00",
+      "arrival_at": "2026-11-10T20:45:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 28,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 21400
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 25900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 31400
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 21,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 33400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 41400
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 4,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 79200
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "c674b3bd-7961-5606-b0c9-ab2fb25713df",
+      "flight_number": "DEMO501",
+      "origin_code": "SFO",
+      "destination_code": "YYZ",
+      "departure_at": "2026-11-10T09:00:00-08:00",
+      "arrival_at": "2026-11-10T16:45:00-05:00",
+      "route_type": "international",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 35,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 23400
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 27900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 33400
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 4,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 35400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 43400
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 5,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 85200
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "21636533-dba1-5013-9375-4b9f19580b22",
+      "flight_number": "DEMO502",
+      "origin_code": "YYZ",
+      "destination_code": "SFO",
+      "departure_at": "2026-11-10T18:30:00-05:00",
+      "arrival_at": "2026-11-10T21:00:00-08:00",
+      "route_type": "international",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 42,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 24400
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 28900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 34400
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 7,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 36400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 44400
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 6,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 88200
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "a7f7b93e-e741-5469-959b-e7a25f016286",
+      "flight_number": "DEMO601",
+      "origin_code": "SFO",
+      "destination_code": "LHR",
+      "departure_at": "2026-11-10T19:30:00-08:00",
+      "arrival_at": "2026-11-11T14:00:00+00:00",
+      "route_type": "international",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 210,
+          "available_seats": 49,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 60400
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 64900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 70400
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 36,
+          "available_seats": 10,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 82400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 92400
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 30,
+          "available_seats": 7,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 211200
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "161c7941-61a3-5644-adcc-6c81cbca067e",
+      "flight_number": "DEMO602",
+      "origin_code": "LHR",
+      "destination_code": "SFO",
+      "departure_at": "2026-11-10T11:00:00+00:00",
+      "arrival_at": "2026-11-10T14:00:00-08:00",
+      "route_type": "international",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 210,
+          "available_seats": 56,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 63400
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 67900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 73400
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 36,
+          "available_seats": 13,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 85400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 95400
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 30,
+          "available_seats": 8,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 220200
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "8e3ae7ef-5636-51a3-9cef-c129b9b9dacf",
+      "flight_number": "DEMO101",
+      "origin_code": "SFO",
+      "destination_code": "LAX",
+      "departure_at": "2026-11-11T07:00:00-08:00",
+      "arrival_at": "2026-11-11T08:30:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 47,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 9900
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 14400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 19900
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 13,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 21900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 29900
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 7,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 44700
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "570d375b-009d-5046-a1b1-36f068492901",
+      "flight_number": "DEMO102",
+      "origin_code": "LAX",
+      "destination_code": "SFO",
+      "departure_at": "2026-11-11T09:30:00-08:00",
+      "arrival_at": "2026-11-11T11:05:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 54,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 10400
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 14900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 20400
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 16,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 22400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 30400
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 8,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 46200
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "a3c1ae97-ac29-5f71-a1cc-3bd45983983c",
+      "flight_number": "DEMO103",
+      "origin_code": "SFO",
+      "destination_code": "LAX",
+      "departure_at": "2026-11-11T17:30:00-08:00",
+      "arrival_at": "2026-11-11T19:05:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 61,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 11900
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 16400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 21900
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 19,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 23900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 31900
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 9,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 50700
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "dbb3eb95-a7d2-5517-9490-10637af534aa",
+      "flight_number": "DEMO104",
+      "origin_code": "LAX",
+      "destination_code": "SFO",
+      "departure_at": "2026-11-11T20:00:00-08:00",
+      "arrival_at": "2026-11-11T21:30:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 68,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 10900
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 15400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 20900
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 22,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 22900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 30900
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 10,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 47700
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "b7d7f2c8-0709-5d98-8640-7915eaecd6c3",
+      "flight_number": "DEMO201",
+      "origin_code": "SFO",
+      "destination_code": "SEA",
+      "departure_at": "2026-11-11T08:10:00-08:00",
+      "arrival_at": "2026-11-11T10:25:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 75,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 12900
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 17400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 22900
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 5,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 24900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 32900
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 11,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 53700
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "b92dc897-d4b8-5ac0-93a9-289726a26729",
+      "flight_number": "DEMO202",
+      "origin_code": "SEA",
+      "destination_code": "SFO",
+      "departure_at": "2026-11-11T11:15:00-08:00",
+      "arrival_at": "2026-11-11T13:35:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 82,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 13900
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 18400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 23900
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 8,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 25900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 33900
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 1,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 56700
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "48b00618-d1bf-51ee-b0bc-0e1e2c340923",
+      "flight_number": "DEMO203",
+      "origin_code": "SFO",
+      "destination_code": "SEA",
+      "departure_at": "2026-11-11T18:20:00-08:00",
+      "arrival_at": "2026-11-11T20:35:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 89,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 14900
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 19400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 24900
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 11,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 26900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 34900
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 2,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 59700
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ca8e0424-64ce-582c-83ef-aee05026bd63",
+      "flight_number": "DEMO204",
+      "origin_code": "SEA",
+      "destination_code": "SFO",
+      "departure_at": "2026-11-11T21:15:00-08:00",
+      "arrival_at": "2026-11-11T23:35:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 96,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 13400
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 17900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 23400
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 14,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 25400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 33400
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 0,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 55200
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "66e68bd8-29d6-5b34-b28a-f00df0148980",
+      "flight_number": "DEMO301",
+      "origin_code": "SFO",
+      "destination_code": "JFK",
+      "departure_at": "2026-11-11T06:30:00-08:00",
+      "arrival_at": "2026-11-11T15:00:00-05:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 103,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 25900
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 30400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 35900
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 17,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 37900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 45900
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 4,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 92700
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "f46ab73c-5b3f-59aa-b637-3c2eecaf18c7",
+      "flight_number": "DEMO302",
+      "origin_code": "JFK",
+      "destination_code": "SFO",
+      "departure_at": "2026-11-11T18:00:00-05:00",
+      "arrival_at": "2026-11-11T21:30:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 25,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 27900
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 32400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 37900
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 20,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 39900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 47900
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 5,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 98700
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "4af84779-9bfe-54a9-9dfc-6d0176218e9f",
+      "flight_number": "DEMO401",
+      "origin_code": "SFO",
+      "destination_code": "ORD",
+      "departure_at": "2026-11-11T10:00:00-08:00",
+      "arrival_at": "2026-11-11T16:15:00-06:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 32,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 20900
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 25400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 30900
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 3,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 32900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 40900
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 6,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 77700
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "92853269-ca8c-5baf-99e5-eb8ce47f89d9",
+      "flight_number": "DEMO402",
+      "origin_code": "ORD",
+      "destination_code": "SFO",
+      "departure_at": "2026-11-11T18:00:00-06:00",
+      "arrival_at": "2026-11-11T20:45:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 39,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 21900
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 26400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 31900
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 6,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 33900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 41900
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 7,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 80700
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "f6b8a6d0-332e-5f43-afc8-0aee74fb95be",
+      "flight_number": "DEMO501",
+      "origin_code": "SFO",
+      "destination_code": "YYZ",
+      "departure_at": "2026-11-11T09:00:00-08:00",
+      "arrival_at": "2026-11-11T16:45:00-05:00",
+      "route_type": "international",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 46,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 23900
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 28400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 33900
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 9,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 35900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 43900
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 8,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 86700
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "87fd7cab-69c1-5027-9462-0412baa6e2c2",
+      "flight_number": "DEMO502",
+      "origin_code": "YYZ",
+      "destination_code": "SFO",
+      "departure_at": "2026-11-11T18:30:00-05:00",
+      "arrival_at": "2026-11-11T21:00:00-08:00",
+      "route_type": "international",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 53,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 24900
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 29400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 34900
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 12,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 36900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 44900
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 9,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 89700
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "c4771267-fde4-5063-8ebc-eba0dee9dc1d",
+      "flight_number": "DEMO601",
+      "origin_code": "SFO",
+      "destination_code": "LHR",
+      "departure_at": "2026-11-11T19:30:00-08:00",
+      "arrival_at": "2026-11-12T14:00:00+00:00",
+      "route_type": "international",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 210,
+          "available_seats": 60,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 60900
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 65400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 70900
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 36,
+          "available_seats": 15,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 82900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 92900
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 30,
+          "available_seats": 10,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 212700
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "de13561f-c868-5d97-9caf-4f4b5d137f6c",
+      "flight_number": "DEMO602",
+      "origin_code": "LHR",
+      "destination_code": "SFO",
+      "departure_at": "2026-11-11T11:00:00+00:00",
+      "arrival_at": "2026-11-11T14:00:00-08:00",
+      "route_type": "international",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 210,
+          "available_seats": 67,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 63900
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 68400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 73900
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 36,
+          "available_seats": 18,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 85900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 95900
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 30,
+          "available_seats": 11,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 221700
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "e2c7d8a0-2dee-5145-b9f0-d6b94783fdad",
+      "flight_number": "DEMO101",
+      "origin_code": "SFO",
+      "destination_code": "LAX",
+      "departure_at": "2026-11-12T07:00:00-08:00",
+      "arrival_at": "2026-11-12T08:30:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 58,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 10400
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 14900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 20400
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 18,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 22400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 30400
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 10,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 46200
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "5f9c5763-14c1-5e8d-8516-415d76ce0319",
+      "flight_number": "DEMO102",
+      "origin_code": "LAX",
+      "destination_code": "SFO",
+      "departure_at": "2026-11-12T09:30:00-08:00",
+      "arrival_at": "2026-11-12T11:05:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 65,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 10900
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 15400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 20900
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 21,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 22900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 30900
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 11,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 47700
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "f4dcb63d-3c09-5910-bb7e-dbcdf9767f8e",
+      "flight_number": "DEMO103",
+      "origin_code": "SFO",
+      "destination_code": "LAX",
+      "departure_at": "2026-11-12T17:30:00-08:00",
+      "arrival_at": "2026-11-12T19:05:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 72,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 12400
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 16900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 22400
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 4,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 24400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 32400
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 1,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 52200
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "62f897d7-4b92-5f11-8f27-360a723c9e35",
+      "flight_number": "DEMO104",
+      "origin_code": "LAX",
+      "destination_code": "SFO",
+      "departure_at": "2026-11-12T20:00:00-08:00",
+      "arrival_at": "2026-11-12T21:30:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 79,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 11400
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 15900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 21400
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 7,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 23400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 31400
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 2,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 49200
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "5e8ed6fb-847e-5d2f-b049-adb179306db0",
+      "flight_number": "DEMO201",
+      "origin_code": "SFO",
+      "destination_code": "SEA",
+      "departure_at": "2026-11-12T08:10:00-08:00",
+      "arrival_at": "2026-11-12T10:25:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 86,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 13400
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 17900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 23400
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 10,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 25400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 33400
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 3,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 55200
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "71ca4dca-db03-52e8-88e5-6a667db0c7af",
+      "flight_number": "DEMO202",
+      "origin_code": "SEA",
+      "destination_code": "SFO",
+      "departure_at": "2026-11-12T11:15:00-08:00",
+      "arrival_at": "2026-11-12T13:35:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 93,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 14400
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 18900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 24400
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 13,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 26400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 34400
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 4,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 58200
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "d6074a22-8350-535b-83b6-073d47d789f2",
+      "flight_number": "DEMO203",
+      "origin_code": "SFO",
+      "destination_code": "SEA",
+      "departure_at": "2026-11-12T18:20:00-08:00",
+      "arrival_at": "2026-11-12T20:35:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 100,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 15400
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 19900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 25400
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 16,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 27400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 35400
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 0,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 61200
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "129fafb6-9a14-5648-99a7-fb9ca968200d",
+      "flight_number": "DEMO204",
+      "origin_code": "SEA",
+      "destination_code": "SFO",
+      "departure_at": "2026-11-12T21:15:00-08:00",
+      "arrival_at": "2026-11-12T23:35:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 107,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 13900
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 18400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 23900
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 19,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 25900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 33900
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 6,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 56700
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "18698dd9-7b5f-5a85-b07c-ec25afe340a8",
+      "flight_number": "DEMO301",
+      "origin_code": "SFO",
+      "destination_code": "JFK",
+      "departure_at": "2026-11-12T06:30:00-08:00",
+      "arrival_at": "2026-11-12T15:00:00-05:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 29,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 26400
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 30900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 36400
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 22,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 38400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 46400
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 7,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 94200
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "36559a9c-2939-5358-9329-f5402cba5672",
+      "flight_number": "DEMO302",
+      "origin_code": "JFK",
+      "destination_code": "SFO",
+      "departure_at": "2026-11-12T18:00:00-05:00",
+      "arrival_at": "2026-11-12T21:30:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 36,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 28400
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 32900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 38400
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 5,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 40400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 48400
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 8,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 100200
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "353ddcfa-2af3-5487-854c-8bb3124e1850",
+      "flight_number": "DEMO401",
+      "origin_code": "SFO",
+      "destination_code": "ORD",
+      "departure_at": "2026-11-12T10:00:00-08:00",
+      "arrival_at": "2026-11-12T16:15:00-06:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 43,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 21400
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 25900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 31400
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 8,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 33400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 41400
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 9,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 79200
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "7e79effd-9c49-56fe-911a-78af0ebd62aa",
+      "flight_number": "DEMO402",
+      "origin_code": "ORD",
+      "destination_code": "SFO",
+      "departure_at": "2026-11-12T18:00:00-06:00",
+      "arrival_at": "2026-11-12T20:45:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 50,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 22400
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 26900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 32400
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 11,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 34400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 42400
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 10,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 82200
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "64b8d89f-afac-5f4c-a17a-fedb2f3c934f",
+      "flight_number": "DEMO501",
+      "origin_code": "SFO",
+      "destination_code": "YYZ",
+      "departure_at": "2026-11-12T09:00:00-08:00",
+      "arrival_at": "2026-11-12T16:45:00-05:00",
+      "route_type": "international",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 57,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 24400
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 28900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 34400
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 14,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 36400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 44400
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 11,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 88200
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "d238b396-8491-54b1-9d01-0750c7b0d345",
+      "flight_number": "DEMO502",
+      "origin_code": "YYZ",
+      "destination_code": "SFO",
+      "departure_at": "2026-11-12T18:30:00-05:00",
+      "arrival_at": "2026-11-12T21:00:00-08:00",
+      "route_type": "international",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 64,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 25400
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 29900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 35400
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 17,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 37400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 45400
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 1,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 91200
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "f27bf136-ea3e-59f1-846a-9f41c3dda9e1",
+      "flight_number": "DEMO601",
+      "origin_code": "SFO",
+      "destination_code": "LHR",
+      "departure_at": "2026-11-12T19:30:00-08:00",
+      "arrival_at": "2026-11-13T14:00:00+00:00",
+      "route_type": "international",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 210,
+          "available_seats": 71,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 61400
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 65900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 71400
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 36,
+          "available_seats": 20,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 83400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 93400
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 30,
+          "available_seats": 2,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 214200
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "d860be10-0f2f-5ef8-9808-d5788fbe916b",
+      "flight_number": "DEMO602",
+      "origin_code": "LHR",
+      "destination_code": "SFO",
+      "departure_at": "2026-11-12T11:00:00+00:00",
+      "arrival_at": "2026-11-12T14:00:00-08:00",
+      "route_type": "international",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 210,
+          "available_seats": 78,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 64400
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 68900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 74400
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 36,
+          "available_seats": 3,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 86400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 96400
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 30,
+          "available_seats": 0,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 223200
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "e86201b4-ab1f-5e8b-916d-addf240d6693",
+      "flight_number": "DEMO101",
+      "origin_code": "SFO",
+      "destination_code": "LAX",
+      "departure_at": "2026-11-13T07:00:00-08:00",
+      "arrival_at": "2026-11-13T08:30:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 69,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 12400
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 16900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 22400
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 3,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 24400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 32400
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 2,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 52200
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ea06b565-fa50-53be-9675-0e648f7e15a7",
+      "flight_number": "DEMO102",
+      "origin_code": "LAX",
+      "destination_code": "SFO",
+      "departure_at": "2026-11-13T09:30:00-08:00",
+      "arrival_at": "2026-11-13T11:05:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 76,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 12900
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 17400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 22900
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 6,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 24900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 32900
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 3,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 53700
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "4f520211-9bbc-500d-9737-13d582460abb",
+      "flight_number": "DEMO103",
+      "origin_code": "SFO",
+      "destination_code": "LAX",
+      "departure_at": "2026-11-13T17:30:00-08:00",
+      "arrival_at": "2026-11-13T19:05:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 83,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 14400
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 18900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 24400
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 9,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 26400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 34400
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 4,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 58200
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "d8b35812-0e62-5c08-a277-acc49d7dd095",
+      "flight_number": "DEMO104",
+      "origin_code": "LAX",
+      "destination_code": "SFO",
+      "departure_at": "2026-11-13T20:00:00-08:00",
+      "arrival_at": "2026-11-13T21:30:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 90,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 13400
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 17900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 23400
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 12,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 25400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 33400
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 5,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 55200
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "4ed5c97c-919a-5b26-b634-7170d1a0c429",
+      "flight_number": "DEMO201",
+      "origin_code": "SFO",
+      "destination_code": "SEA",
+      "departure_at": "2026-11-13T08:10:00-08:00",
+      "arrival_at": "2026-11-13T10:25:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 97,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 15400
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 19900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 25400
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 15,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 27400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 35400
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 6,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 61200
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "2aa195a2-707f-5ce4-b2e7-c3ede6994092",
+      "flight_number": "DEMO202",
+      "origin_code": "SEA",
+      "destination_code": "SFO",
+      "departure_at": "2026-11-13T11:15:00-08:00",
+      "arrival_at": "2026-11-13T13:35:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 104,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 16400
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 20900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 26400
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 18,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 28400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 36400
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 0,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 64200
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "55c02588-d2f8-5adc-a55a-34c97deb122c",
+      "flight_number": "DEMO203",
+      "origin_code": "SFO",
+      "destination_code": "SEA",
+      "departure_at": "2026-11-13T18:20:00-08:00",
+      "arrival_at": "2026-11-13T20:35:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 26,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 17400
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 21900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 27400
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 21,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 29400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 37400
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 8,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 67200
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bff5bbac-6c03-5d82-b3df-e46a6523e9d6",
+      "flight_number": "DEMO204",
+      "origin_code": "SEA",
+      "destination_code": "SFO",
+      "departure_at": "2026-11-13T21:15:00-08:00",
+      "arrival_at": "2026-11-13T23:35:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 33,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 15900
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 20400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 25900
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 4,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 27900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 35900
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 9,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 62700
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "7a0351e4-c433-522f-b393-ea0faf1669e8",
+      "flight_number": "DEMO301",
+      "origin_code": "SFO",
+      "destination_code": "JFK",
+      "departure_at": "2026-11-13T06:30:00-08:00",
+      "arrival_at": "2026-11-13T15:00:00-05:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 2,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 28400
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 32900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 38400
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 7,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 40400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 48400
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 10,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 100200
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ddf75dd6-0a76-5b21-9fe9-cc6f6ec2b3f8",
+      "flight_number": "DEMO302",
+      "origin_code": "JFK",
+      "destination_code": "SFO",
+      "departure_at": "2026-11-13T18:00:00-05:00",
+      "arrival_at": "2026-11-13T21:30:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 47,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 30400
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 34900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 40400
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 10,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 42400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 50400
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 11,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 106200
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "e061b0b5-0ef1-5055-8836-34c1c37299d9",
+      "flight_number": "DEMO401",
+      "origin_code": "SFO",
+      "destination_code": "ORD",
+      "departure_at": "2026-11-13T10:00:00-08:00",
+      "arrival_at": "2026-11-13T16:15:00-06:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 54,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 23400
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 27900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 33400
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 13,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 35400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 43400
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 1,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 85200
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ab255937-3654-5766-bea2-dc56dfef1697",
+      "flight_number": "DEMO402",
+      "origin_code": "ORD",
+      "destination_code": "SFO",
+      "departure_at": "2026-11-13T18:00:00-06:00",
+      "arrival_at": "2026-11-13T20:45:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 61,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 24400
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 28900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 34400
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 16,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 36400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 44400
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 2,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 88200
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "4492bd0c-2753-539e-b533-381738ab0d88",
+      "flight_number": "DEMO501",
+      "origin_code": "SFO",
+      "destination_code": "YYZ",
+      "departure_at": "2026-11-13T09:00:00-08:00",
+      "arrival_at": "2026-11-13T16:45:00-05:00",
+      "route_type": "international",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 68,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 26400
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 30900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 36400
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 19,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 38400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 46400
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 3,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 94200
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "425bcede-5b3c-5359-96ff-5126eb625156",
+      "flight_number": "DEMO502",
+      "origin_code": "YYZ",
+      "destination_code": "SFO",
+      "departure_at": "2026-11-13T18:30:00-05:00",
+      "arrival_at": "2026-11-13T21:00:00-08:00",
+      "route_type": "international",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 75,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 27400
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 31900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 37400
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 22,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 39400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 47400
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 4,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 97200
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "0faeab2b-e6f5-5ab2-9514-8e3c20c791ad",
+      "flight_number": "DEMO601",
+      "origin_code": "SFO",
+      "destination_code": "LHR",
+      "departure_at": "2026-11-13T19:30:00-08:00",
+      "arrival_at": "2026-11-14T14:00:00+00:00",
+      "route_type": "international",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 210,
+          "available_seats": 82,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 63400
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 67900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 73400
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 36,
+          "available_seats": 5,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 85400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 95400
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 30,
+          "available_seats": 0,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 220200
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "e5d3bc2c-c143-55ca-8314-7031eac0b9e9",
+      "flight_number": "DEMO602",
+      "origin_code": "LHR",
+      "destination_code": "SFO",
+      "departure_at": "2026-11-13T11:00:00+00:00",
+      "arrival_at": "2026-11-13T14:00:00-08:00",
+      "route_type": "international",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 210,
+          "available_seats": 89,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 66400
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 70900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 76400
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 36,
+          "available_seats": 8,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 88400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 98400
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 30,
+          "available_seats": 6,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 229200
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "0dbe811a-7551-5362-8516-1a5545ded038",
+      "flight_number": "DEMO101",
+      "origin_code": "SFO",
+      "destination_code": "LAX",
+      "departure_at": "2026-11-14T07:00:00-08:00",
+      "arrival_at": "2026-11-14T08:30:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 80,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 11400
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 15900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 21400
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 8,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 23400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 31400
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 5,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 49200
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "93c58544-a9ec-5f82-b8a4-4d614acc590b",
+      "flight_number": "DEMO102",
+      "origin_code": "LAX",
+      "destination_code": "SFO",
+      "departure_at": "2026-11-14T09:30:00-08:00",
+      "arrival_at": "2026-11-14T11:05:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 87,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 11900
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 16400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 21900
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 11,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 23900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 31900
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 6,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 50700
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cba43457-c22b-58e9-b811-8eef885a918c",
+      "flight_number": "DEMO103",
+      "origin_code": "SFO",
+      "destination_code": "LAX",
+      "departure_at": "2026-11-14T17:30:00-08:00",
+      "arrival_at": "2026-11-14T19:05:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 94,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 13400
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 17900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 23400
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 14,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 25400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 33400
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 7,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 55200
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "e2e02426-1dae-5d9c-a98e-04bf079798f9",
+      "flight_number": "DEMO104",
+      "origin_code": "LAX",
+      "destination_code": "SFO",
+      "departure_at": "2026-11-14T20:00:00-08:00",
+      "arrival_at": "2026-11-14T21:30:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 101,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 12400
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 16900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 22400
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 17,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 24400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 32400
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 8,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 52200
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "6f236bf1-e76d-5806-b284-907bb07a2b90",
+      "flight_number": "DEMO201",
+      "origin_code": "SFO",
+      "destination_code": "SEA",
+      "departure_at": "2026-11-14T08:10:00-08:00",
+      "arrival_at": "2026-11-14T10:25:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 108,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 14400
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 18900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 24400
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 20,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 26400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 34400
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 0,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 58200
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "9eae7aca-7da1-52f6-8c77-a9994dec5205",
+      "flight_number": "DEMO202",
+      "origin_code": "SEA",
+      "destination_code": "SFO",
+      "departure_at": "2026-11-14T11:15:00-08:00",
+      "arrival_at": "2026-11-14T13:35:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 30,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 15400
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 19900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 25400
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 3,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 27400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 35400
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 10,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 61200
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ede734b9-31df-5424-a310-bfa657fe0bb6",
+      "flight_number": "DEMO203",
+      "origin_code": "SFO",
+      "destination_code": "SEA",
+      "departure_at": "2026-11-14T18:20:00-08:00",
+      "arrival_at": "2026-11-14T20:35:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 37,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 16400
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 20900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 26400
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 6,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 28400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 36400
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 11,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 64200
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bbfeaa4e-749d-558d-89b1-cba0413a1f01",
+      "flight_number": "DEMO204",
+      "origin_code": "SEA",
+      "destination_code": "SFO",
+      "departure_at": "2026-11-14T21:15:00-08:00",
+      "arrival_at": "2026-11-14T23:35:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 44,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 14900
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 19400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 24900
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 9,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 26900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 34900
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 1,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 59700
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "221dded8-32ef-51e1-b10b-747ccbd699e6",
+      "flight_number": "DEMO301",
+      "origin_code": "SFO",
+      "destination_code": "JFK",
+      "departure_at": "2026-11-14T06:30:00-08:00",
+      "arrival_at": "2026-11-14T15:00:00-05:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 51,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 27400
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 31900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 37400
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 12,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 39400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 47400
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 2,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 97200
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "534b89de-8715-5564-94a2-cdbfc2d8857d",
+      "flight_number": "DEMO302",
+      "origin_code": "JFK",
+      "destination_code": "SFO",
+      "departure_at": "2026-11-14T18:00:00-05:00",
+      "arrival_at": "2026-11-14T21:30:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 58,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 29400
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 33900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 39400
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 15,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 41400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 49400
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 3,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 103200
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ce26939a-0f9f-544f-a5d6-780c2bb1d44c",
+      "flight_number": "DEMO401",
+      "origin_code": "SFO",
+      "destination_code": "ORD",
+      "departure_at": "2026-11-14T10:00:00-08:00",
+      "arrival_at": "2026-11-14T16:15:00-06:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 65,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 22400
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 26900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 32400
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 18,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 34400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 42400
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 4,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 82200
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "6b622ec0-7ed2-54c0-ac8f-7c760c6ad224",
+      "flight_number": "DEMO402",
+      "origin_code": "ORD",
+      "destination_code": "SFO",
+      "departure_at": "2026-11-14T18:00:00-06:00",
+      "arrival_at": "2026-11-14T20:45:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 72,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 23400
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 27900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 33400
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 21,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 35400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 43400
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 5,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 85200
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "5eb85b49-0526-58d6-91ed-38061f3a466c",
+      "flight_number": "DEMO501",
+      "origin_code": "SFO",
+      "destination_code": "YYZ",
+      "departure_at": "2026-11-14T09:00:00-08:00",
+      "arrival_at": "2026-11-14T16:45:00-05:00",
+      "route_type": "international",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 79,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 25400
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 29900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 35400
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 4,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 37400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 45400
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 6,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 91200
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "d0f9ccf5-ec65-563d-8917-f9f736de8d55",
+      "flight_number": "DEMO502",
+      "origin_code": "YYZ",
+      "destination_code": "SFO",
+      "departure_at": "2026-11-14T18:30:00-05:00",
+      "arrival_at": "2026-11-14T21:00:00-08:00",
+      "route_type": "international",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 86,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 26400
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 30900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 36400
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 7,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 38400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 46400
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 0,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 94200
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "015c60b4-9bc3-596e-babd-3497f505a4fa",
+      "flight_number": "DEMO601",
+      "origin_code": "SFO",
+      "destination_code": "LHR",
+      "departure_at": "2026-11-14T19:30:00-08:00",
+      "arrival_at": "2026-11-15T14:00:00+00:00",
+      "route_type": "international",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 210,
+          "available_seats": 93,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 62400
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 66900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 72400
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 36,
+          "available_seats": 10,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 84400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 94400
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 30,
+          "available_seats": 8,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 217200
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "f4999f94-5874-5194-bc09-be7758b3891a",
+      "flight_number": "DEMO602",
+      "origin_code": "LHR",
+      "destination_code": "SFO",
+      "departure_at": "2026-11-14T11:00:00+00:00",
+      "arrival_at": "2026-11-14T14:00:00-08:00",
+      "route_type": "international",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 210,
+          "available_seats": 100,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 65400
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 69900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 75400
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 36,
+          "available_seats": 13,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 87400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 97400
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 30,
+          "available_seats": 9,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 226200
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "4f2fe58e-8e1f-5382-aef6-af54d52fe586",
+      "flight_number": "DEMO101",
+      "origin_code": "SFO",
+      "destination_code": "LAX",
+      "departure_at": "2026-11-15T07:00:00-08:00",
+      "arrival_at": "2026-11-15T08:30:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 91,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 10900
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 15400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 20900
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 13,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 22900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 30900
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 8,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 47700
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "99716293-9989-5ab4-8af6-119fc3c9098a",
+      "flight_number": "DEMO102",
+      "origin_code": "LAX",
+      "destination_code": "SFO",
+      "departure_at": "2026-11-15T09:30:00-08:00",
+      "arrival_at": "2026-11-15T11:05:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 98,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 11400
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 15900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 21400
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 16,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 23400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 31400
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 9,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 49200
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "3d9f792a-8c48-5b21-b3cc-c8083cd706b5",
+      "flight_number": "DEMO103",
+      "origin_code": "SFO",
+      "destination_code": "LAX",
+      "departure_at": "2026-11-15T17:30:00-08:00",
+      "arrival_at": "2026-11-15T19:05:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 1,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 12900
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 17400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 22900
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 19,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 24900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 32900
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 10,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 53700
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "5d4d80db-21b2-57c0-925a-3d0ea2c22587",
+      "flight_number": "DEMO104",
+      "origin_code": "LAX",
+      "destination_code": "SFO",
+      "departure_at": "2026-11-15T20:00:00-08:00",
+      "arrival_at": "2026-11-15T21:30:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 27,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 11900
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 16400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 21900
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 22,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 23900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 31900
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 0,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 50700
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "e3909b31-3ccd-5e12-b65a-8cb059c1552a",
+      "flight_number": "DEMO201",
+      "origin_code": "SFO",
+      "destination_code": "SEA",
+      "departure_at": "2026-11-15T08:10:00-08:00",
+      "arrival_at": "2026-11-15T10:25:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 34,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 13900
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 18400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 23900
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 5,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 25900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 33900
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 1,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 56700
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "9ae5eef2-8389-5d27-b7f8-0ec23deee934",
+      "flight_number": "DEMO202",
+      "origin_code": "SEA",
+      "destination_code": "SFO",
+      "departure_at": "2026-11-15T11:15:00-08:00",
+      "arrival_at": "2026-11-15T13:35:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 41,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 14900
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 19400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 24900
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 8,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 26900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 34900
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 2,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 59700
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "b8755a79-e7e8-5ebc-8335-1a6b93da3ac2",
+      "flight_number": "DEMO203",
+      "origin_code": "SFO",
+      "destination_code": "SEA",
+      "departure_at": "2026-11-15T18:20:00-08:00",
+      "arrival_at": "2026-11-15T20:35:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 48,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 15900
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 20400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 25900
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 11,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 27900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 35900
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 3,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 62700
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cad14bae-fa80-5ae7-9abb-e5a9c6613425",
+      "flight_number": "DEMO204",
+      "origin_code": "SEA",
+      "destination_code": "SFO",
+      "departure_at": "2026-11-15T21:15:00-08:00",
+      "arrival_at": "2026-11-15T23:35:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 55,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 14400
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 18900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 24400
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 14,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 26400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 34400
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 4,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 58200
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "5b807213-bc5d-5afb-9206-544ae5e37575",
+      "flight_number": "DEMO301",
+      "origin_code": "SFO",
+      "destination_code": "JFK",
+      "departure_at": "2026-11-15T06:30:00-08:00",
+      "arrival_at": "2026-11-15T15:00:00-05:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 62,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 26900
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 31400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 36900
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 17,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 38900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 46900
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 5,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 95700
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "c87d0ce5-a7bb-517d-9866-29337ba7d24f",
+      "flight_number": "DEMO302",
+      "origin_code": "JFK",
+      "destination_code": "SFO",
+      "departure_at": "2026-11-15T18:00:00-05:00",
+      "arrival_at": "2026-11-15T21:30:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 69,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 28900
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 33400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 38900
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 20,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 40900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 48900
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 6,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 101700
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "9c1b6f19-f31d-565d-8d41-33ad02aa1c5e",
+      "flight_number": "DEMO401",
+      "origin_code": "SFO",
+      "destination_code": "ORD",
+      "departure_at": "2026-11-15T10:00:00-08:00",
+      "arrival_at": "2026-11-15T16:15:00-06:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 76,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 21900
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 26400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 31900
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 3,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 33900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 41900
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 7,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 80700
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "997e912e-1e95-53db-b393-01f8f95cd11c",
+      "flight_number": "DEMO402",
+      "origin_code": "ORD",
+      "destination_code": "SFO",
+      "departure_at": "2026-11-15T18:00:00-06:00",
+      "arrival_at": "2026-11-15T20:45:00-08:00",
+      "route_type": "domestic",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 83,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 22900
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 27400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 32900
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 6,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 34900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 42900
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 8,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 83700
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "e678de03-36d2-51e2-bf74-1e291968acd0",
+      "flight_number": "DEMO501",
+      "origin_code": "SFO",
+      "destination_code": "YYZ",
+      "departure_at": "2026-11-15T09:00:00-08:00",
+      "arrival_at": "2026-11-15T16:45:00-05:00",
+      "route_type": "international",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 90,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 24900
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 29400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 34900
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 9,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 36900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 44900
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 0,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 89700
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "d72fbbf8-e5f4-548c-8a3f-f654c539e73d",
+      "flight_number": "DEMO502",
+      "origin_code": "YYZ",
+      "destination_code": "SFO",
+      "departure_at": "2026-11-15T18:30:00-05:00",
+      "arrival_at": "2026-11-15T21:00:00-08:00",
+      "route_type": "international",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 120,
+          "available_seats": 97,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 25900
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 30400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 35900
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 24,
+          "available_seats": 12,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 37900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 45900
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 12,
+          "available_seats": 10,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 92700
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "8e0fc393-82b9-52d5-8965-889176f298db",
+      "flight_number": "DEMO601",
+      "origin_code": "SFO",
+      "destination_code": "LHR",
+      "departure_at": "2026-11-15T19:30:00-08:00",
+      "arrival_at": "2026-11-16T14:00:00+00:00",
+      "route_type": "international",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 210,
+          "available_seats": 104,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 61900
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 66400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 71900
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 36,
+          "available_seats": 15,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 83900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 93900
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 30,
+          "available_seats": 11,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 215700
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "0e45dc11-9e35-52c4-ac6b-0f9bc78b8315",
+      "flight_number": "DEMO602",
+      "origin_code": "LHR",
+      "destination_code": "SFO",
+      "departure_at": "2026-11-15T11:00:00+00:00",
+      "arrival_at": "2026-11-15T14:00:00-08:00",
+      "route_type": "international",
+      "status": "scheduled",
+      "cabins": [
+        {
+          "seat_class": "economy",
+          "capacity": 210,
+          "available_seats": 26,
+          "fares": [
+            {
+              "fare_tier": "basic",
+              "price_cents": 64900
+            },
+            {
+              "fare_tier": "standard",
+              "price_cents": 69400
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 74900
+            }
+          ]
+        },
+        {
+          "seat_class": "premium_economy",
+          "capacity": 36,
+          "available_seats": 18,
+          "fares": [
+            {
+              "fare_tier": "standard",
+              "price_cents": 86900
+            },
+            {
+              "fare_tier": "flexible",
+              "price_cents": 96900
+            }
+          ]
+        },
+        {
+          "seat_class": "business",
+          "capacity": 30,
+          "available_seats": 1,
+          "fares": [
+            {
+              "fare_tier": "business",
+              "price_cents": 224700
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

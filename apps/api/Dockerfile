@@ -11,6 +11,7 @@ WORKDIR /app
 COPY pyproject.toml uv.lock ./
 COPY packages/contracts/ packages/contracts/
 COPY apps/api/ apps/api/
+COPY data/flights/ data/flights/
 COPY apps/refiner/pyproject.toml apps/refiner/pyproject.toml
 RUN uv sync --frozen --no-dev --package airline-api --no-editable \
     && useradd --create-home app

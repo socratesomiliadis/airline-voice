@@ -1,7 +1,7 @@
 {
-  "schema_version": "1.0.0",
+  "schema_version": "1.1.0",
   "knowledge_base_id": "airline-voice-demo-policies",
-  "policy_version": "1.0.0",
+  "policy_version": "1.1.0",
   "language": "en-US",
   "airline": {
     "name": "Airline Voice Demo",
@@ -20,18 +20,100 @@
       "domestic": "Every segment in the ticketed direction stays within one country.",
       "international": "At least one segment in the ticketed direction crosses a country border. Apply the international table to that whole direction, including its domestic connections."
     },
-    "fare_types": [
-      "basic",
-      "standard",
-      "flexible",
-      "business"
-    ],
     "currency": "USD",
     "weight_unit": "kg",
     "dimension_unit": "cm",
     "fee_amounts": "Final fictional amounts in USD, including any applicable sample taxes. Each fee states its own charging unit.",
     "time_reference": "Deadlines are relative to the scheduled departure of the relevant flight segment, using the departure airport's local time.",
-    "exceptions": "Confirmed itinerary-specific or airport-specific requirements take precedence. If a required exception is not documented, obtain confirmation rather than inventing a rule."
+    "exceptions": "Confirmed itinerary-specific or airport-specific requirements take precedence. If a required exception is not documented, obtain confirmation rather than inventing a rule.",
+    "seat_classes": [
+      "economy",
+      "premium_economy",
+      "business"
+    ],
+    "fare_tiers": [
+      "basic",
+      "standard",
+      "flexible",
+      "business"
+    ],
+    "fare_tiers_by_seat_class": {
+      "economy": [
+        "basic",
+        "standard",
+        "flexible"
+      ],
+      "premium_economy": [
+        "standard",
+        "flexible"
+      ],
+      "business": [
+        "business"
+      ]
+    },
+    "policy_selection": "Apply fare-dependent baggage, cancellation, and change rules using the purchased fare_tier, not seat_class alone. Premium economy standard follows standard rules; premium economy flexible follows flexible rules. The business cabin offers only the business tier.",
+    "fee_amount_unit": "major_currency_units",
+    "fee_and_fare_conversion": "Policy fees are stated in USD dollars. Database price_cents values are USD cents: 8900 cents is USD 89.00. Convert to a common unit before combining a ticket price with optional fees. Included baggage allowances are already part of the purchased fare."
+  },
+  "inventory_reference": {
+    "seed_dataset_path": "data/flights/week_2026_11_09.json",
+    "seed_dataset_id": "airline-voice-demo-week-2026-11-09",
+    "sample_departure_week": {
+      "start": "2026-11-09",
+      "end": "2026-11-15",
+      "date_reference": "departure_airport_local_time"
+    },
+    "sample_airport_codes": [
+      "JFK",
+      "LAX",
+      "LHR",
+      "ORD",
+      "SEA",
+      "SFO",
+      "YYZ"
+    ],
+    "sample_route_examples": {
+      "domestic": [
+        "JFK-SFO",
+        "LAX-SFO",
+        "ORD-SFO",
+        "SEA-SFO",
+        "SFO-JFK",
+        "SFO-LAX",
+        "SFO-ORD",
+        "SFO-SEA"
+      ],
+      "international": [
+        "LHR-SFO",
+        "SFO-LHR",
+        "SFO-YYZ",
+        "YYZ-SFO"
+      ]
+    },
+    "source_fields": {
+      "flight_id": "flights.id",
+      "flight_status": "flights.status",
+      "origin_code": "flights.origin_code",
+      "destination_code": "flights.destination_code",
+      "route_type": "flights.route_type",
+      "scheduled_departure": "flights.departure_at",
+      "scheduled_arrival": "flights.arrival_at",
+      "airport_timezone": "airports.timezone",
+      "seat_class": "flight_cabins.seat_class",
+      "available_seats": "flight_cabins.available_seats",
+      "fare_tier": "flight_fares.fare_tier",
+      "fare_price": "flight_fares.price_cents",
+      "fare_currency": "flight_fares.currency"
+    },
+    "fare_price_unit": "minor_currency_units",
+    "minor_units_per_currency_unit": 100,
+    "fare_price_basis": "per_adult_passenger_per_flight_segment",
+    "fare_includes_sample_taxes": true,
+    "fare_includes_optional_service_fees": false,
+    "live_data": "Use current database records for flight schedules, flight status, available seats, and fare quotes. The seed file is a starting dataset, not live inventory; do not hard-code its prices or availability into policy answers.",
+    "shared_inventory": "All fare tiers in one flight cabin use the same available_seats count. A sold-out cabin has no bookable tier; a more expensive tier does not create additional seats.",
+    "sample_week_scope": "The sample week describes the available seed flights; it is not an expiry date or travel-date restriction for these policies.",
+    "untracked_services": "Flight seat inventory does not track pet-carrier availability, approved medical devices, mobility-aid acceptance, or confirmed special assistance. Those arrangements require separate confirmation."
   },
   "policy": {
     "id": "cancellation",
@@ -51,7 +133,7 @@
     "questions_to_ask": [
       "Was the ticket purchased directly or through a third party?",
       "When was it purchased, and when was the first flight scheduled to depart at purchase?",
-      "What is the fare type, and is the journey domestic or international?",
+      "Which cabin and fare tier did you purchase, and is the journey domestic or international?",
       "Has any part of the ticket been used?",
       "Is this a voluntary cancellation or an airline cancellation or schedule change?",
       "Which optional services were paid for, and what was the original payment method?"
@@ -86,7 +168,7 @@
       {
         "id": "cancellation.voluntary_by_fare",
         "title": "Voluntary cancellation outside the grace period",
-        "answer": "For a wholly unused ticket canceled before its first scheduled departure outside the grace period, basic is nonrefundable and receives no travel credit, except any refundable unused taxes. Standard receives a travel credit for the unused eligible ticket value less USD 50 domestically or USD 100 internationally. Flexible and business receive the unused ticket value back to the original payment method with no cancellation fee. A cancellation fee cannot exceed the eligible value and does not create an additional amount owed.",
+        "answer": "For a wholly unused ticket canceled before its first scheduled departure outside the grace period, basic is nonrefundable and receives no travel credit, except any refundable unused taxes. Standard receives a travel credit for the unused eligible ticket value less USD 50 domestically or USD 100 internationally. Flexible and business receive the unused ticket value back to the original payment method with no cancellation fee. A cancellation fee cannot exceed the eligible value and does not create an additional amount owed. These refund rules follow the purchased fare tier; a premium economy standard fare receives standard travel-credit treatment, while premium economy flexible follows the flexible refund rule.",
         "details": {
           "scope": "wholly_unused_ticket_canceled_before_first_scheduled_departure_outside_grace_period",
           "fare_rules": {
@@ -119,7 +201,12 @@
           "fee_capped_at_eligible_ticket_value": true,
           "standard_credit_value": "Unused eligible ticket value minus the applicable cancellation fee, with a minimum of zero. Refundable unused taxes are returned separately and excluded from the credit calculation.",
           "unused_taxes": "Refundable unused taxes may be returned to the original payment method for every fare. Confirm the ticket's tax breakdown before quoting an amount.",
-          "partially_used_tickets": "Require manual assessment of the unused value and refund eligibility; do not apply a whole-ticket refund automatically."
+          "partially_used_tickets": "Require manual assessment of the unused value and refund eligibility; do not apply a whole-ticket refund automatically.",
+          "policy_basis": "fare_tier",
+          "refund_value_source": "original_ticket_payment_record",
+          "current_offer_price_is_refund_basis": false,
+          "tax_breakdown_available_in_flight_inventory": false,
+          "inventory_limitations": "Flight fares store current tax-inclusive offers, not original ticket payments, itemized taxes, paid optional services, or purchase timestamps. Confirm those booking details before quoting a refund or applying the grace-period conditions."
         }
       },
       {
