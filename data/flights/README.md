@@ -1,7 +1,7 @@
 # Fictional flight database
 
 `week_2026_11_09.json` is the reproducible seed dataset for the PostgreSQL flight
-database. The mutable database tables are the future booking APIs' source of
+database. The mutable database tables are the booking APIs' source of
 flight schedules, cabin availability, and fares. The JSON is seed input, not a
 second live inventory store.
 
@@ -116,10 +116,15 @@ WHERE f.origin_code = 'SFO'
 ORDER BY f.departure_at, c.seat_class, p.price_cents;
 ```
 
-Booking, cancellation, and rescheduling operations remain unimplemented. Their
-future seat updates must be transactional and conditional on sufficient cabin
-availability; read-then-write without a concurrency guard is insufficient. The
-database does not yet contain booking or passenger tables.
+Booking, cancellation, rescheduling, and booking-item operations are implemented
+and update these tables transactionally. Active passenger/flight allocations are
+unique, cabin rows are locked during seat changes, and successful retry receipts
+are persisted. Booking and passenger records survive application restarts. See
+the [API reference](../../docs/api.md) and [webhook setup](../../docs/elevenlabs.md).
+
+To use the fixed sample week after its real departure dates, set `SIMULATION_NOW`
+to a timezone-aware pre-departure timestamp such as `2026-11-05T12:00:00Z`. The
+default business clock is real UTC time; past departures are unavailable.
 
 ## Verification
 

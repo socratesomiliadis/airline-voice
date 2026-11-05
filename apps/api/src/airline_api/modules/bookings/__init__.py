@@ -1,1 +1,1 @@
-"""Flight booking, cancellation, and rescheduling. Implementation is intentionally deferred."""
+"""Persistent flight search, bookings, cancellation, rescheduling, and booking items."""

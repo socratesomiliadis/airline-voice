@@ -24,9 +24,9 @@ Biome handles dashboard linting, formatting, and import organization. Run
 6. Replace the corresponding `501` route only when its behavior is implemented.
 7. Replace the scaffold boundary test for that route with behavior-focused tests.
 
-The existing route names reserve an API surface, not a finished API contract.
-Authentication, authorization, idempotency, provider failures, request schemas,
-and transaction handling will be designed alongside the real use cases.
+Flight and booking routes have implemented schemas, agent-key authentication,
+durable idempotency, explicit transactions, and database integration tests. See
+`docs/api.md`. Other route names still reserve an unimplemented API surface.
 
 ## Adding a refinement stage
 

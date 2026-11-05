@@ -24,6 +24,9 @@ services:
     environment:
       APP_ENV: ${APP_ENV:-development}
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      AGENT_API_KEY: ${AGENT_API_KEY:-}
+      KNOWLEDGE_DIR: /app/knowledge
+      SIMULATION_NOW: ${SIMULATION_NOW:-}
       DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-airline}:${POSTGRES_PASSWORD:-airline_local}@database:5432/${POSTGRES_DB:-airline}
       CORS_ORIGINS: ${CORS_ORIGINS:-["http://localhost:3000"]}
       ELEVENLABS_API_KEY: ${ELEVENLABS_API_KEY:-}

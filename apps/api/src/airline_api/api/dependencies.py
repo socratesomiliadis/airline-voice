@@ -1,4 +1,4 @@
-"""Request-scoped database dependency; transaction policy is intentionally deferred."""
+"""Request-scoped sessions; application mutations own explicit transactions."""
 
 from collections.abc import AsyncIterator
 

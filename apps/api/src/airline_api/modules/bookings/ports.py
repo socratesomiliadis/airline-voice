@@ -1,20 +1,31 @@
-"""Application boundaries. JsonObject payloads will become domain schemas during implementation."""
+"""Typed application boundary shared by REST and agent tool adapters."""
 
 from typing import Protocol
-from uuid import UUID
 
-from airline_contracts.types import JsonObject
+from airline_api.modules.bookings.schemas import (
+    AddBookingItems,
+    BookFlight,
+    BookingView,
+    CancelBooking,
+    FlightSearch,
+    FlightSearchResult,
+    RescheduleBooking,
+)
 
 
-class BookingService(Protocol):
-    async def book(self, request: JsonObject) -> JsonObject: ...
+class BookingOperations(Protocol):
+    async def search(self, query: FlightSearch) -> FlightSearchResult: ...
 
-    async def cancel(self, booking_id: UUID, request: JsonObject) -> JsonObject: ...
+    async def get(self, reference: str) -> BookingView: ...
 
-    async def reschedule(self, booking_id: UUID, request: JsonObject) -> JsonObject: ...
+    async def list_bookings(
+        self, limit: int = 50, offset: int = 0, caller_id: str | None = None
+    ) -> list[BookingView]: ...
 
+    async def book(self, request: BookFlight) -> BookingView: ...
 
-class BookingRepository(Protocol):
-    async def get(self, booking_id: UUID) -> JsonObject | None: ...
+    async def cancel(self, reference: str, request: CancelBooking) -> BookingView: ...
 
-    async def save(self, booking: JsonObject) -> None: ...
+    async def reschedule(self, reference: str, request: RescheduleBooking) -> BookingView: ...
+
+    async def add_items(self, reference: str, request: AddBookingItems) -> BookingView: ...

@@ -10,7 +10,7 @@ router = APIRouter(tags=["health"])
 
 class HealthResponse(BaseModel):
     status: Literal["ok"] = "ok"
-    mode: Literal["scaffold"] = "scaffold"
+    mode: Literal["simulation"] = "simulation"
 
 
 @router.get("/health", response_model=HealthResponse)

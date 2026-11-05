@@ -4,11 +4,12 @@ Scaffold for an autonomous airline customer service agent powered by ElevenLabs,
 with a FastAPI backend, PostgreSQL persistence, a Python refinement worker, and
 a Next.js monitoring dashboard.
 
-**Customer operations and the refinement loop are not implemented.** Feature routes return
-`501 Not Implemented`; the worker cannot execute a run; dashboard views show empty
-states. Infrastructure includes application startup, configuration, database
-models and session plumbing, a fictional flight seed dataset, route registration,
-navigation, and development tooling.
+**Persistent booking APIs and ElevenLabs webhook tools are implemented.** The API
+searches flights, books travel, retrieves bookings, cancels or reschedules, and
+adds baggage or special-item requests. Operations use PostgreSQL transactions,
+shared cabin inventory, versioned JSON policies, and durable retry receipts.
+Payments are simulated ledger entries. The refinement loop, live dashboard data,
+and other reserved platform features remain unimplemented.
 
 ## Repository layout
 
@@ -28,7 +29,7 @@ apps/
         monitoring/        Monitoring events
         refinement/        Run control and result persistence
       infrastructure/      Database and reserved provider adapters
-    migrations/            Flight inventory schema migration
+    migrations/            Flight inventory and booking schema migrations
   refiner/
     src/airline_refiner/
       pipeline/            Context, runner, and stage protocols
@@ -40,13 +41,13 @@ apps/
       features/monitoring/ Monitoring view shells
       lib/api/             Future API and event-stream contracts
 packages/contracts/        Shared Python payload and event contracts
-config/                    Refinement configuration placeholders
+config/                    Webhook contracts and refinement configuration placeholders
 data/flights/              Fictional flight week and database setup instructions
 prompts/                   Future versioned prompt assets
 scenarios/                 Future simulated customer scenarios
 knowledge/                 One JSON file per fictional policy and source staging
 artifacts/                 Ignored local refinement output
-tests/                     Infrastructure and scaffold boundary checks
+tests/                     Policy, API, concurrency, persistence, and infrastructure checks
 docs/                      Architecture and extension guidance
 ```
 
@@ -74,6 +75,13 @@ docker compose up --build
 The default stack starts PostgreSQL, the API, and the dashboard. Named volumes
 preserve database data and future refinement artifacts. `docker compose down`
 stops the stack without deleting these volumes. Published ports bind to localhost.
+
+Initialize a new database before using booking operations:
+
+```sh
+docker compose run --rm --no-deps api alembic -c apps/api/alembic.ini upgrade head
+docker compose run --rm --no-deps api airline-seed-flights
+```
 
 The refinement container is optional and only displays CLI help:
 
@@ -123,17 +131,25 @@ from the repository root. Compose injects container-specific addresses, includin
 the `database` hostname instead of `localhost`. The dashboard has a separate
 `.env.local`; its reserved `API_BASE_URL` is server-side and currently unused.
 
-ElevenLabs credentials are reserved for the backend. There are no provider calls,
-webhook verification, authentication, or customer-data handling in this scaffold.
-The defaults are for local development; deployment configuration is deferred.
+Set `AGENT_API_KEY` and configure the matching `X-Agent-Api-Key` secret header for
+ElevenLabs webhook tools and trusted simulation clients. Development/test mode
+allows local requests when no key is configured; production fails closed with
+`503` until a key is set. Receiving tool calls does not require an ElevenLabs API
+key. These endpoints do not make outbound provider calls or process real payments.
+
+`KNOWLEDGE_DIR` locates the policy JSON files. The optional timezone-aware
+`SIMULATION_NOW` fixes the business clock for the sample week, for example
+`2026-11-05T12:00:00Z`. Without it, flight eligibility uses the current UTC time.
+Audit events keep real timestamps and include the effective business time.
 
 `config/refinement.example.toml` contains empty sections, with no active thresholds,
 retry limits, model selection, or mutation policy. The worker does not load it yet.
 
 ## Database migrations
 
-The database contains airports, flight schedules, shared cabin inventory, and fare
-offers. Alembic reads `DATABASE_URL` through the API settings. Create the schema and
+The database contains airports, flights, cabin inventory, fare offers, bookings,
+passengers, active passenger allocations, extras, audit events, and idempotency
+receipts. Alembic reads `DATABASE_URL` through API settings. Create the schema and
 populate the fictional November 9–15, 2026 flight week:
 
 ```sh
@@ -172,7 +188,7 @@ database. CI supplies PostgreSQL and also builds all three application images.
 ## Architecture and next implementation steps
 
 See [architecture](docs/architecture.md), [development guidance](docs/development.md),
-the [reserved API surface](docs/api.md), and the [fictional JSON knowledge base](knowledge/README.md).
-Booking and passenger models, customer operations, provider integration, real-time
-transport, evaluation criteria, and the refinement loop remain for subsequent
-implementation.
+the [booking API reference](docs/api.md), [ElevenLabs setup](docs/elevenlabs.md),
+and the [fictional JSON knowledge base](knowledge/README.md).
+Outbound provider integration, real-time monitoring, evaluation criteria, and the
+refinement loop remain for subsequent implementation.

@@ -1,1 +1,1 @@
-"""ElevenLabs sessions, tools, and webhooks. Implementation is intentionally deferred."""
+"""ElevenLabs booking webhook tools; voice session creation is deferred."""

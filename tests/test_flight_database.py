@@ -1,58 +1,15 @@
 """PostgreSQL integration checks using an isolated, disposable test database."""
 
 import asyncio
-import os
-import subprocess
-import sys
-from collections.abc import Iterator
-from uuid import uuid4
 
 import pytest
 from airline_api.infrastructure.database.models import Flight, FlightCabin, FlightFare
 from airline_api.infrastructure.database.seed import load_dataset, seed_dataset
-from sqlalchemy import func, select, text, update
-from sqlalchemy.engine import make_url
+from sqlalchemy import func, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import create_async_engine
 
-
-def migrate(database_url: str, *arguments: str) -> None:
-    subprocess.run(
-        [sys.executable, "-m", "alembic", "-c", "apps/api/alembic.ini", *arguments],
-        env={**os.environ, "DATABASE_URL": database_url},
-        check=True,
-        capture_output=True,
-        text=True,
-    )
-
-
-@pytest.fixture
-def postgres_url() -> Iterator[str]:
-    admin_url = os.environ.get("TEST_DATABASE_URL")
-    if not admin_url:
-        pytest.skip("Set TEST_DATABASE_URL to run the isolated PostgreSQL integration test")
-    database_name = f"airline_flights_test_{uuid4().hex}"
-
-    async def manage_database(create: bool) -> None:
-        engine = create_async_engine(admin_url, isolation_level="AUTOCOMMIT")
-        try:
-            async with engine.connect() as connection:
-                if create:
-                    await connection.execute(text(f'CREATE DATABASE "{database_name}"'))
-                else:
-                    await connection.execute(text(f'DROP DATABASE "{database_name}" WITH (FORCE)'))
-        finally:
-            await engine.dispose()
-
-    asyncio.run(manage_database(create=True))
-    database_url = (
-        make_url(admin_url).set(database=database_name).render_as_string(hide_password=False)
-    )
-    try:
-        migrate(database_url, "upgrade", "head")
-        yield database_url
-    finally:
-        asyncio.run(manage_database(create=False))
+from tests.database import migrate
 
 
 def test_postgres_migration_seed_inventory_and_constraints(postgres_url: str) -> None:

@@ -1,0 +1,551 @@
+{
+  "format": "airline-voice-webhook-contracts-v1",
+  "authentication": {
+    "header": "X-Agent-Api-Key",
+    "secret_environment_variable": "AGENT_API_KEY"
+  },
+  "tools": [
+    {
+      "name": "search_flights",
+      "description": "Find available flights and current prices before offering or booking travel.",
+      "method": "POST",
+      "path": "/api/v1/voice/webhooks/elevenlabs/search_flights",
+      "request_schema": {
+        "$defs": {
+          "FareTier": {
+            "enum": [
+              "basic",
+              "standard",
+              "flexible",
+              "business"
+            ],
+            "type": "string"
+          },
+          "SeatClass": {
+            "enum": [
+              "economy",
+              "premium_economy",
+              "business"
+            ],
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "properties": {
+          "destination": {
+            "anyOf": [
+              {
+                "maxLength": 80,
+                "minLength": 2,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "IATA code or city name, e.g. JFK or New York.",
+            "title": "Destination"
+          },
+          "origin": {
+            "anyOf": [
+              {
+                "maxLength": 80,
+                "minLength": 2,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Origin"
+          },
+          "departure_date": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Local departure date at the origin airport, YYYY-MM-DD.",
+            "title": "Departure Date"
+          },
+          "min_price_cents": {
+            "anyOf": [
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Minimum per-passenger fare in USD cents.",
+            "title": "Min Price Cents"
+          },
+          "max_price_cents": {
+            "anyOf": [
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Maximum per-passenger fare in USD cents.",
+            "title": "Max Price Cents"
+          },
+          "seat_class": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/SeatClass"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "fare_tier": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/FareTier"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "passengers": {
+            "default": 1,
+            "maximum": 9,
+            "minimum": 1,
+            "title": "Passengers",
+            "type": "integer"
+          },
+          "sort_by": {
+            "default": "departure",
+            "enum": [
+              "departure",
+              "price"
+            ],
+            "title": "Sort By",
+            "type": "string"
+          },
+          "limit": {
+            "default": 50,
+            "maximum": 200,
+            "minimum": 1,
+            "title": "Limit",
+            "type": "integer"
+          },
+          "offset": {
+            "default": 0,
+            "minimum": 0,
+            "title": "Offset",
+            "type": "integer"
+          }
+        },
+        "title": "FlightSearch",
+        "type": "object"
+      }
+    },
+    {
+      "name": "book_flight",
+      "description": "Reserve a confirmed flight quote. Reuse action keys and stable passenger IDs.",
+      "method": "POST",
+      "path": "/api/v1/voice/webhooks/elevenlabs/book_flight",
+      "request_schema": {
+        "$defs": {
+          "FareTier": {
+            "enum": [
+              "basic",
+              "standard",
+              "flexible",
+              "business"
+            ],
+            "type": "string"
+          },
+          "Identifier": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "Passenger": {
+            "additionalProperties": false,
+            "properties": {
+              "passenger_id": {
+                "$ref": "#/$defs/Identifier",
+                "description": "Stable passenger ID. Reuse across calls and retries."
+              },
+              "full_name": {
+                "maxLength": 160,
+                "minLength": 2,
+                "title": "Full Name",
+                "type": "string"
+              }
+            },
+            "required": [
+              "passenger_id",
+              "full_name"
+            ],
+            "title": "Passenger",
+            "type": "object"
+          },
+          "SeatClass": {
+            "enum": [
+              "economy",
+              "premium_economy",
+              "business"
+            ],
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "properties": {
+          "idempotency_key": {
+            "description": "Unique action key. Reuse the exact key and request on retry.",
+            "maxLength": 128,
+            "minLength": 8,
+            "title": "Idempotency Key",
+            "type": "string"
+          },
+          "caller_id": {
+            "$ref": "#/$defs/Identifier",
+            "description": "Stable simulated caller or conversation ID for the audit history."
+          },
+          "flight_id": {
+            "format": "uuid",
+            "title": "Flight Id",
+            "type": "string"
+          },
+          "seat_class": {
+            "$ref": "#/$defs/SeatClass"
+          },
+          "fare_tier": {
+            "$ref": "#/$defs/FareTier"
+          },
+          "expected_unit_price_cents": {
+            "description": "The per-passenger price returned by flight search; rejects a changed quote.",
+            "exclusiveMinimum": 0,
+            "title": "Expected Unit Price Cents",
+            "type": "integer"
+          },
+          "passengers": {
+            "items": {
+              "$ref": "#/$defs/Passenger"
+            },
+            "maxItems": 9,
+            "minItems": 1,
+            "title": "Passengers",
+            "type": "array"
+          }
+        },
+        "required": [
+          "idempotency_key",
+          "caller_id",
+          "flight_id",
+          "seat_class",
+          "fare_tier",
+          "expected_unit_price_cents",
+          "passengers"
+        ],
+        "title": "BookFlight",
+        "type": "object"
+      }
+    },
+    {
+      "name": "get_booking",
+      "description": "Retrieve saved booking details and changes by booking reference.",
+      "method": "POST",
+      "path": "/api/v1/voice/webhooks/elevenlabs/get_booking",
+      "request_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "reference": {
+            "maxLength": 36,
+            "minLength": 1,
+            "title": "Reference",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reference"
+        ],
+        "title": "BookingReference",
+        "type": "object"
+      }
+    },
+    {
+      "name": "cancel_booking",
+      "description": "Cancel confirmed travel and release seats; read the saved settlement result.",
+      "method": "POST",
+      "path": "/api/v1/voice/webhooks/elevenlabs/cancel_booking",
+      "request_schema": {
+        "$defs": {
+          "Identifier": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "properties": {
+          "reference": {
+            "maxLength": 36,
+            "minLength": 1,
+            "title": "Reference",
+            "type": "string"
+          },
+          "idempotency_key": {
+            "description": "Unique action key. Reuse the exact key and request on retry.",
+            "maxLength": 128,
+            "minLength": 8,
+            "title": "Idempotency Key",
+            "type": "string"
+          },
+          "caller_id": {
+            "$ref": "#/$defs/Identifier",
+            "description": "Stable simulated caller or conversation ID for the audit history."
+          }
+        },
+        "required": [
+          "reference",
+          "idempotency_key",
+          "caller_id"
+        ],
+        "title": "CancelBookingTool",
+        "type": "object"
+      }
+    },
+    {
+      "name": "reschedule_booking",
+      "description": "Search and confirm a replacement, then reschedule on the same route.",
+      "method": "POST",
+      "path": "/api/v1/voice/webhooks/elevenlabs/reschedule_booking",
+      "request_schema": {
+        "$defs": {
+          "FareTier": {
+            "enum": [
+              "basic",
+              "standard",
+              "flexible",
+              "business"
+            ],
+            "type": "string"
+          },
+          "Identifier": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "SeatClass": {
+            "enum": [
+              "economy",
+              "premium_economy",
+              "business"
+            ],
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "properties": {
+          "reference": {
+            "maxLength": 36,
+            "minLength": 1,
+            "title": "Reference",
+            "type": "string"
+          },
+          "idempotency_key": {
+            "description": "Unique action key. Reuse the exact key and request on retry.",
+            "maxLength": 128,
+            "minLength": 8,
+            "title": "Idempotency Key",
+            "type": "string"
+          },
+          "caller_id": {
+            "$ref": "#/$defs/Identifier",
+            "description": "Stable simulated caller or conversation ID for the audit history."
+          },
+          "flight_id": {
+            "format": "uuid",
+            "title": "Flight Id",
+            "type": "string"
+          },
+          "seat_class": {
+            "$ref": "#/$defs/SeatClass"
+          },
+          "fare_tier": {
+            "$ref": "#/$defs/FareTier"
+          },
+          "expected_unit_price_cents": {
+            "exclusiveMinimum": 0,
+            "title": "Expected Unit Price Cents",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "reference",
+          "idempotency_key",
+          "caller_id",
+          "flight_id",
+          "seat_class",
+          "fare_tier",
+          "expected_unit_price_cents"
+        ],
+        "title": "RescheduleBookingTool",
+        "type": "object"
+      }
+    },
+    {
+      "name": "add_booking_items",
+      "description": "Add checked bags or request special items; read each item's confirmation status.",
+      "method": "POST",
+      "path": "/api/v1/voice/webhooks/elevenlabs/add_booking_items",
+      "request_schema": {
+        "$defs": {
+          "ExtraItem": {
+            "additionalProperties": false,
+            "properties": {
+              "passenger_id": {
+                "$ref": "#/$defs/Identifier"
+              },
+              "item_type": {
+                "enum": [
+                  "checked_bag",
+                  "stroller",
+                  "car_seat",
+                  "mobility_aid",
+                  "medical_device",
+                  "sports_equipment",
+                  "musical_instrument",
+                  "cabin_pet"
+                ],
+                "title": "Item Type",
+                "type": "string"
+              },
+              "weight_kg": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/Measurement"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              },
+              "length_cm": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/Measurement"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              },
+              "width_cm": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/Measurement"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              },
+              "height_cm": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/Measurement"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              },
+              "description": {
+                "default": "",
+                "maxLength": 1000,
+                "title": "Description",
+                "type": "string"
+              }
+            },
+            "required": [
+              "passenger_id",
+              "item_type"
+            ],
+            "title": "ExtraItem",
+            "type": "object"
+          },
+          "Identifier": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "Measurement": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "properties": {
+          "reference": {
+            "maxLength": 36,
+            "minLength": 1,
+            "title": "Reference",
+            "type": "string"
+          },
+          "idempotency_key": {
+            "description": "Unique action key. Reuse the exact key and request on retry.",
+            "maxLength": 128,
+            "minLength": 8,
+            "title": "Idempotency Key",
+            "type": "string"
+          },
+          "caller_id": {
+            "$ref": "#/$defs/Identifier",
+            "description": "Stable simulated caller or conversation ID for the audit history."
+          },
+          "items": {
+            "items": {
+              "$ref": "#/$defs/ExtraItem"
+            },
+            "maxItems": 20,
+            "minItems": 1,
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "reference",
+          "idempotency_key",
+          "caller_id",
+          "items"
+        ],
+        "title": "AddBookingItemsTool",
+        "type": "object"
+      }
+    }
+  ]
+}

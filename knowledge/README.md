@@ -71,5 +71,7 @@ done
 
 `sources/` remains an ignored local drop location for future source documents.
 The policy JSON files are outside that ignored directory so they can be version controlled.
-Loading, parsing into domain models, indexing, retrieval, and provider upload are
-not implemented.
+The booking service loads these JSON rule details at API startup and stores a
+policy snapshot with each booking. Baggage pricing, changes, and cancellation
+outcomes use that snapshot. Semantic indexing, retrieval, and provider upload
+remain unimplemented.
