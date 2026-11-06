@@ -1,0 +1,53 @@
+{
+  "agent_id": "agent_8201m6saw2rjf87ahsykcca66x8e",
+  "knowledge_base": {
+    "booking_changes.json": {
+      "id": "mhxqQzNM23i082irMHyY",
+      "type": "file",
+      "name": "booking_changes.txt",
+      "sha256": "2b323f1aab1c056b36dbb3d2be0f95fe5ddcc3565a6d82d9bc253457cf32a65b"
+    },
+    "baggage.json": {
+      "id": "GbXxA6LxDHcYNE5nkxGR",
+      "type": "file",
+      "name": "baggage.txt",
+      "sha256": "4d16ae685f42e8a89bfd4bbae1044c01ba792294deaaeda6da237b938a4cc2ce"
+    },
+    "special_assistance.json": {
+      "id": "LkbFw3mNaGan0AK3ZrIr",
+      "type": "file",
+      "name": "special_assistance.txt",
+      "sha256": "053e1c67198da2392b10de5f488a20a4e7b6e8aa1d5e0f62f68ab779d525d396"
+    },
+    "check_in.json": {
+      "id": "QVoMyKbvDoCGs9VX7Uzj",
+      "type": "file",
+      "name": "check_in.txt",
+      "sha256": "bcac8956f88e4335606d09bf31b88436d964526a50386a114ddbda95d3b8c229"
+    },
+    "pet_policy.json": {
+      "id": "ix0JXI8OJ3WnrZSvCAfz",
+      "type": "file",
+      "name": "pet_policy.txt",
+      "sha256": "1e329aae8ec7bc5db3e50c57d67c1bd76539feb5fb116a4d76a74dd9570fbf77"
+    },
+    "cancellation_and_refunds.json": {
+      "id": "sZ15v228t0IcMGI7fj1j",
+      "type": "file",
+      "name": "cancellation_and_refunds.txt",
+      "sha256": "6f178470da1f39b15dcbb454e79a9db885ccf0fffec255e1395e2ca001e3451f"
+    }
+  },
+  "branch_id": "agtbrch_2201m6saw4z3fectrm49r0y9pd56",
+  "api_base_url": "https://ronald-collections-pacific-risks.trycloudflare.com",
+  "tools": {
+    "search_flights": "tool_8901m6sbq7bnfd6tqtg8yyzxwrtr",
+    "book_flight": "tool_3301m6sbq7x5f8wrfyvxyz73xtpt",
+    "get_booking": "tool_0201m6sbq9njeam9xptqgr6engxb",
+    "cancel_booking": "tool_7901m6sbqawre4svf3j082pwnhrs",
+    "reschedule_booking": "tool_5401m6sbqb6gf5q95rgtf8xqjsar",
+    "add_booking_items": "tool_6701m6sbqbgxe0raer1vnpje25zy"
+  },
+  "secret_id": "kL68W2kWswgped78uBKQ",
+  "version_id": "agtvrsn_6001m6sbxtwdepa8r3jymnr9px8n"
+}

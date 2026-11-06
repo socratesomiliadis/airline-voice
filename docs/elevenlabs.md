@@ -1,5 +1,75 @@
 # ElevenLabs booking webhook tools
 
+## Configured development agent
+
+[Airline Voice Demo in ElevenLabs](https://elevenlabs.io/app/agents/agents/agent_8201m6saw2rjf87ahsykcca66x8e/agent)
+is a private English voice agent. Open **Preview** while signed in to talk or chat.
+It has the six booking tools below, the end-conversation system tool, and all six
+fictional policy documents. The existing Eric voice and DeepSeek Flash 4.1 model
+are retained. Tool progress speech is disabled to prevent repeated acknowledgments.
+Tools run sequentially, and mutation caller IDs are injected from
+`system__conversation_id`. The agent requires customer confirmation before writes.
+
+The current temporary API URL is
+`https://ronald-collections-pacific-risks.trycloudflare.com`. The database, backend,
+and tunnel were started locally. The URL works only while the backend, tunnel, and
+Mac remain available; a new quick tunnel normally has a different URL.
+
+`config/elevenlabs-agent.json` records this workspace's resource IDs and policy
+hashes, without credential values. Credentials are in the ignored root `.env`.
+`AGENT_API_KEY` authenticates ElevenLabs tool calls to FastAPI;
+`ELEVENLABS_API_KEY` authenticates the setup script to ElevenLabs. The latter is
+never sent to the booking backend or exposed to the model.
+
+## Restart or update the development connection
+
+Check existing processes before starting another backend or tunnel:
+
+```sh
+lsof -nP -iTCP:8000 -sTCP:LISTEN
+pgrep -fl cloudflared
+```
+
+If needed, start Docker Desktop and the database, then run the API and tunnel in
+separate terminals from the project root:
+
+```sh
+docker compose up -d database
+.venv/bin/python -m uvicorn airline_api.main:app --host 127.0.0.1 --port 8000
+```
+
+```sh
+cloudflared tunnel --url http://127.0.0.1:8000 --no-autoupdate
+```
+
+Set `PUBLIC_API_BASE_URL` in `.env` to the HTTPS origin printed by cloudflared.
+The fictional dataset uses `SIMULATION_NOW=2026-11-06T12:00:00Z` so later tests
+can continue booking the November 9–15 week. Restart the backend after changing
+its environment settings. Reuse the existing database; do not reset it.
+
+Publish a changed URL, prompt, or policies using:
+
+```sh
+.venv/bin/python scripts/configure_elevenlabs.py
+```
+
+The script checks connectivity, updates the six managed tools and shared secret,
+attaches the policy documents, and publishes a private agent version. It preserves
+the voice/model and records created IDs immediately for retrying an interrupted
+setup. Updated policies create new document revisions; old documents are retained.
+The canonical policies remain six separate JSON files in `knowledge/`. The initial
+uploads are `.txt` copies because the UI file picker does not accept `.json`;
+their policy content matches the JSON sources. Later script uploads use text
+documents directly. The manifest below remains the backend schema contract, not
+a direct provider import file; the script translates its schema dialect.
+
+Real provider Chat Mode calls verified search, booking, retrieval from another
+conversation, special items, rescheduling, and cancellation against PostgreSQL.
+The cancelled synthetic booking remains as audit history. Browser microphone and
+audio quality still need a manual voice check in Preview.
+
+## Backend endpoints
+
 The API exposes six ordinary JSON POST endpoints for ElevenLabs webhook tools.
 They call the same transactional booking service as REST, so every simulated
 caller shares the same persisted bookings and seat inventory.
@@ -10,7 +80,7 @@ headers. See the official [webhook tool configuration and authentication guide](
 ## Configure the tools
 
 Start the database, apply migrations, seed flights, and run the API. For the fixed
-fictional week, optionally set `SIMULATION_NOW=2026-11-05T12:00:00Z`. The API must
+fictional week, optionally set `SIMULATION_NOW=2026-11-06T12:00:00Z`. The API must
 be reachable at your HTTPS base URL from ElevenLabs. Localhost alone is accessible
 only to local simulations.
 
@@ -67,9 +137,13 @@ the REST mutation fields. All successful tool responses are HTTP `200` JSON.
    have been recorded but still require acceptance; `review_required` settlements
    require the missing tax/payment detail. Monetary events use a simulation ledger.
 
+Booking responses include `flight.departure_local`, `flight.arrival_local`, and
+the airport timezone names. Speak these local values; `departure_at` and
+`arrival_at` can be UTC and must not be labeled local.
+
 These routes handle agent tool invocations. Post-call transcript/audio ingestion
-and outbound ElevenLabs agent/session provisioning remain future work. No tool
-configuration or agent has been uploaded to an ElevenLabs account by this change.
+into the local dashboard and phone-number provisioning remain future work.
+Conversation transcripts and tool results are available in ElevenLabs.
 
 ## Persistence verification
 

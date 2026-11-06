@@ -173,6 +173,10 @@ def test_persistence_between_callers_instances_and_idempotent_retries(
     first = client.post("/api/v1/bookings", json=request)
     assert first.status_code == 201, first.text
     record = first.json()
+    assert record["flight"]["departure_local"] == offer["departure_local"]
+    assert record["flight"]["arrival_local"] == offer["arrival_local"]
+    assert record["flight"]["origin_timezone"] == "America/Los_Angeles"
+    assert record["flight"]["departure_local"] != record["flight"]["departure_at"]
     assert client.post("/api/v1/bookings", json=request).json() == record
     assert client.post(f"{TOOLS}/book_flight", json=request).json() == record
     with TestClient(create_app(settings(postgres_url)), headers=HEADERS) as next_caller:

@@ -707,6 +707,9 @@ class BookingService:
     async def _view(self, booking: Booking) -> BookingView:
         flight = await self.session.get(Flight, booking.flight_id)
         assert flight is not None
+        departure_airport = await self.session.get(Airport, flight.origin_code)
+        arrival_airport = await self.session.get(Airport, flight.destination_code)
+        assert departure_airport is not None and arrival_airport is not None
         passengers = (
             await self.session.scalars(
                 select(BookingPassenger)
@@ -740,6 +743,12 @@ class BookingService:
                 "destination": flight.destination_code,
                 "departure_at": flight.departure_at,
                 "arrival_at": flight.arrival_at,
+                "departure_local": flight.departure_at.astimezone(
+                    ZoneInfo(departure_airport.timezone)
+                ),
+                "arrival_local": flight.arrival_at.astimezone(ZoneInfo(arrival_airport.timezone)),
+                "origin_timezone": departure_airport.timezone,
+                "destination_timezone": arrival_airport.timezone,
                 "route_type": flight.route_type,
                 "status": flight.status,
             },
