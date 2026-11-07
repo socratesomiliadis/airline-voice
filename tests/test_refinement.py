@@ -829,7 +829,19 @@ def test_defaults_suite_validation_and_artifact_secret_redaction(tmp_path):
     config = load_config(Path("config/refinement.example.toml"))
     assert config.pass_score == PASS_SCORE == 8
     assert config.max_iterations == MAX_ITERATIONS == 5
-    assert len(load_scenarios(Path("scenarios/airline.json"))) == 8
+    ids = {scenario.id for scenario in load_scenarios(Path("scenarios/airline.json"))}
+    assert {
+        "next-available-flight",
+        "cheapest-following-week",
+        "cabin-pet",
+        "reschedule-booking",
+        "baggage-policy",
+        "cancel-booking",
+        "seat-preference",
+        "checked-baggage",
+        "flight-information",
+        "special-assistance",
+    }.issubset(ids)
     path = tmp_path / "invalid.json"
     for data in ([], [{"id": "bad"}]):
         path.write_text(json.dumps(data))
@@ -900,6 +912,54 @@ def test_local_reload_refuses_unrelated_listener(monkeypatch, tmp_path):
     )
     with pytest.raises(RefinementError, match="unrecognized"):
         reload_service.reload_local(8000, {321}, tmp_path / "command.json")
+
+
+def test_watched_api_is_rejected_before_patch_or_process_mutation(monkeypatch, tmp_path):
+    from airline_refiner import reload_service
+
+    monkeypatch.setattr(reload_service, "listeners", lambda port: {321})
+    monkeypatch.setattr(
+        reload_service,
+        "output",
+        lambda command: "python -m uvicorn airline_api.main:app --reload --port 8000",
+    )
+    monkeypatch.setattr(reload_service.os, "kill", lambda *a: pytest.fail("Must not stop service"))
+    with pytest.raises(RefinementError, match="auto-reload"):
+        reload_service.check_api()
+    state = tmp_path / "command.json"
+    with pytest.raises(RefinementError, match="auto-reload"):
+        reload_service.reload_local(8000, {321}, state)
+    assert not state.exists()
+
+
+def test_repair_checks_activation_safety_before_source_changes(rig, monkeypatch):
+    runner, config, _, provider, _, root = rig
+    config.reload_command = [sys.executable, "-m", "airline_refiner.reload_service"]
+    calls = []
+
+    async def reject(command, log, artifacts):
+        calls.append(command)
+        raise RefinementError("API auto-reload is enabled")
+
+    monkeypatch.setattr(runner.workspace, "command", reject)
+    sources = runner.workspace.source()
+    repair = Repair(
+        explanation="Correct fare",
+        system_prompt=None,
+        edits=[
+            FileEdit(
+                path="backend/service.py",
+                function="quote",
+                old_text="return 1",
+                new_text="return 2",
+            )
+        ],
+    )
+    with pytest.raises(RefinementError, match="auto-reload"):
+        asyncio.run(runner.apply_repair(repair, "Original", sources, "repair", [code_fault()]))
+    assert calls == [[*config.reload_command, "--check"]]
+    assert (root / "backend/service.py").read_text() == service_source(1)
+    assert provider.updates == []
 
 
 def test_local_reload_recovery_uses_saved_command_when_candidate_did_not_start(

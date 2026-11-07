@@ -64,10 +64,17 @@ class Booking(Base):
 
 class BookingPassenger(Base):
     __tablename__ = "booking_passengers"
+    __table_args__ = (
+        CheckConstraint(
+            "seat_preference IS NULL OR seat_preference IN ('window', 'aisle', 'extra_legroom')",
+            name="valid_seat_preference",
+        ),
+    )
 
     booking_id: Mapped[UUID] = mapped_column(ForeignKey("bookings.id"), primary_key=True)
     passenger_id: Mapped[str] = mapped_column(String(128), primary_key=True)
     full_name: Mapped[str] = mapped_column(String(160))
+    seat_preference: Mapped[str | None] = mapped_column(String(16))
 
 
 class PassengerReservation(Base):

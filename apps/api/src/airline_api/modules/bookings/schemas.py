@@ -16,6 +16,7 @@ from pydantic import (
 
 type SeatClass = Literal["economy", "premium_economy", "business"]
 type FareTier = Literal["basic", "standard", "flexible", "business"]
+type SeatPreference = Literal["window", "aisle", "extra_legroom"]
 type Identifier = Annotated[
     str, StringConstraints(strip_whitespace=True, min_length=1, max_length=128)
 ]
@@ -37,6 +38,12 @@ class FlightSearch(Input):
     departure_date: date | None = Field(
         default=None, description="Local departure date at the origin airport, YYYY-MM-DD."
     )
+    departure_date_from: date | None = Field(
+        default=None, description="Inclusive first local departure date, YYYY-MM-DD."
+    )
+    departure_date_to: date | None = Field(
+        default=None, description="Inclusive last local departure date, YYYY-MM-DD."
+    )
     min_price_cents: int | None = Field(
         default=None, ge=0, description="Minimum per-passenger fare in USD cents."
     )
@@ -52,6 +59,16 @@ class FlightSearch(Input):
 
     @model_validator(mode="after")
     def price_bounds(self) -> Self:
+        if self.departure_date is not None and (
+            self.departure_date_from is not None or self.departure_date_to is not None
+        ):
+            raise ValueError("Use departure_date or a departure date range, not both")
+        if (
+            self.departure_date_from is not None
+            and self.departure_date_to is not None
+            and self.departure_date_from > self.departure_date_to
+        ):
+            raise ValueError("First departure date cannot exceed last departure date")
         if (
             self.min_price_cents is not None
             and self.max_price_cents is not None
@@ -66,6 +83,13 @@ class Passenger(Input):
         description="Stable passenger ID. Reuse across calls and retries."
     )
     full_name: str = Field(min_length=2, max_length=160)
+    seat_preference: SeatPreference | None = Field(
+        default=None,
+        description=(
+            "Requested seating: window, aisle, or extra_legroom. Recorded as a request only; "
+            "no seat assignment or extra-legroom price/availability is guaranteed."
+        ),
+    )
 
     @field_validator("passenger_id")
     @classmethod
@@ -203,6 +227,33 @@ class FlightSearchResult(BaseModel):
     has_more: bool
 
 
+class FlightInformationQuery(Input):
+    flight_number: str = Field(min_length=1, max_length=12)
+    departure_date: date = Field(description="Local departure date at the origin airport.")
+
+
+class FlightInformation(BaseModel):
+    flight_id: UUID
+    flight_number: str
+    origin: str
+    destination: str
+    departure_local: datetime
+    arrival_local: datetime
+    origin_timezone: str
+    destination_timezone: str
+    status: Literal["scheduled", "cancelled", "departed", "arrived"]
+    gate: str | None
+    information_mode: Literal["fictional_database"] = "fictional_database"
+
+
+class FlightInformationResult(BaseModel):
+    flights: list[FlightInformation]
+
+
+class PassengerView(Passenger):
+    seat_preference_status: Literal["requested", "not_requested"] = "not_requested"
+
+
 class ExtraView(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -240,7 +291,7 @@ class BookingView(BaseModel):
     flight: dict[str, Any]
     seat_class: str
     fare_tier: str
-    passengers: list[Passenger]
+    passengers: list[PassengerView]
     unit_price_cents: int
     ticket_total_cents: int
     currency: str

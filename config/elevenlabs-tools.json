@@ -6,6 +6,35 @@
   },
   "tools": [
     {
+      "name": "get_flight_information",
+      "description": "Get fictional gate, local times, and status by flight number and local departure date. Includes cancelled, departed, sold-out, and arrived flights; does not change bookings.",
+      "method": "POST",
+      "path": "/api/v1/voice/webhooks/elevenlabs/get_flight_information",
+      "request_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "flight_number": {
+            "maxLength": 12,
+            "minLength": 1,
+            "title": "Flight Number",
+            "type": "string"
+          },
+          "departure_date": {
+            "description": "Local departure date at the origin airport.",
+            "format": "date",
+            "title": "Departure Date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "flight_number",
+          "departure_date"
+        ],
+        "title": "FlightInformationQuery",
+        "type": "object"
+      }
+    },
+    {
       "name": "search_flights",
       "description": "Find available flights and current prices before offering or booking travel.",
       "method": "POST",
@@ -74,6 +103,34 @@
             "default": null,
             "description": "Local departure date at the origin airport, YYYY-MM-DD.",
             "title": "Departure Date"
+          },
+          "departure_date_from": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Inclusive first local departure date, YYYY-MM-DD.",
+            "title": "Departure Date From"
+          },
+          "departure_date_to": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Inclusive last local departure date, YYYY-MM-DD.",
+            "title": "Departure Date To"
           },
           "min_price_cents": {
             "anyOf": [
@@ -192,6 +249,18 @@
                 "minLength": 2,
                 "title": "Full Name",
                 "type": "string"
+              },
+              "seat_preference": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/SeatPreference"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Requested seating: window, aisle, or extra_legroom. Recorded as a request only; no seat assignment or extra-legroom price/availability is guaranteed."
               }
             },
             "required": [
@@ -206,6 +275,14 @@
               "economy",
               "premium_economy",
               "business"
+            ],
+            "type": "string"
+          },
+          "SeatPreference": {
+            "enum": [
+              "window",
+              "aisle",
+              "extra_legroom"
             ],
             "type": "string"
           }

@@ -13,6 +13,8 @@ from airline_api.modules.bookings.schemas import (
     BookingView,
     CancelBooking,
     CancelBookingTool,
+    FlightInformationQuery,
+    FlightInformationResult,
     FlightSearch,
     FlightSearchResult,
     RescheduleBooking,
@@ -36,6 +38,13 @@ async def search_flights(request: FlightSearch, service: BookingServiceDep) -> F
 @tools.post("/book_flight", response_model=BookingView)
 async def book_flight(request: BookFlight, service: BookingServiceDep) -> BookingView:
     return await service.book(request)
+
+
+@tools.post("/get_flight_information", response_model=FlightInformationResult)
+async def get_flight_information(
+    request: FlightInformationQuery, service: BookingServiceDep
+) -> FlightInformationResult:
+    return await service.flight_information(request)
 
 
 @tools.post("/get_booking", response_model=BookingView)

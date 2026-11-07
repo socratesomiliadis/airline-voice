@@ -1,25 +1,46 @@
 # ElevenLabs booking webhook tools
 
-## Configured development agent
+## First-time setup on your own account
 
-[Airline Voice Demo in ElevenLabs](https://elevenlabs.io/app/agents/agents/agent_8201m6saw2rjf87ahsykcca66x8e/agent)
-is a private English voice agent. Open **Preview** while signed in to talk or chat.
-It has the six booking tools below, the end-conversation system tool, and all six
-fictional policy documents. The existing Eric voice and DeepSeek Flash 4.1 model
-are retained. Tool progress speech is disabled to prevent repeated acknowledgments.
-Tools run sequentially, and mutation caller IDs are injected from
-`system__conversation_id`. The agent requires customer confirmation before writes.
+Install the workspace (`make setup`), start PostgreSQL, run `make migrate` and
+`make seed-flights`, then start the API with `make dev-api`. Set these in `.env`:
 
-The current temporary API URL is
-`https://completely-described-exclusively-works.trycloudflare.com`. The database, backend,
-and tunnel were started locally. The URL works only while the backend, tunnel, and
-Mac remain available; a new quick tunnel normally has a different URL.
+```dotenv
+ELEVENLABS_API_KEY=your-account-key
+AGENT_API_KEY=your-own-shared-webhook-secret
+SIMULATION_NOW=2026-11-06T12:00:00Z
+PUBLIC_API_BASE_URL=https://your-public-api-origin
+```
 
-`config/elevenlabs-agent.json` records this workspace's resource IDs and policy
-hashes, without credential values. Credentials are in the ignored root `.env`.
-`AGENT_API_KEY` authenticates ElevenLabs tool calls to FastAPI;
-`ELEVENLABS_API_KEY` authenticates the setup script to ElevenLabs. The latter is
-never sent to the booking backend or exposed to the model.
+Expose the API through a public HTTPS tunnel or deployment. Check for an existing
+tunnel with `pgrep -fl cloudflared` before starting one. For a local tunnel run
+`cloudflared tunnel --url http://127.0.0.1:8000 --no-autoupdate` and set
+`PUBLIC_API_BASE_URL` to its HTTPS origin. Update the agent when that URL changes.
+
+Create and configure a private agent in your account:
+
+```sh
+uv run --all-packages python scripts/configure_elevenlabs.py --create-agent "Airline assessment"
+```
+
+Set `ELEVENLABS_AGENT_ID` in `.env` to the printed ID. Creation uses the provider's
+default voice/model; review these in your account if desired. The script attaches
+six policies, seven tools, secret-header authentication and the system prompt.
+Open the agent's Preview in your ElevenLabs account to speak or chat, then run
+`make refine` for autonomous text simulations after setting the model credentials.
+
+To configure an existing agent, use `--agent-id YOUR_AGENT_ID` instead. Existing
+agents retain their voice/model. No account resource IDs are shipped in the repo.
+Resumable manifests live under ignored `.local/elevenlabs/`. Existing agents use
+their ID as the filename; a name-based creation receipt points to that same
+manifest. Repeating a creation command resumes that agent. Use a different name or
+`--state-file .local/another-agent.json` for an independent setup.
+
+`AGENT_API_KEY` authenticates tools to FastAPI; `ELEVENLABS_API_KEY` authenticates
+provisioning and never reaches the booking backend or model. For older checkouts,
+move your own `config/elevenlabs-agent.json` to
+`.local/elevenlabs/<your-agent-id>.json` before syncing that agent. Never copy
+another account's resource IDs.
 
 ## Restart or update the development connection
 
@@ -53,7 +74,7 @@ Publish a changed URL, prompt, or policies using:
 .venv/bin/python scripts/configure_elevenlabs.py
 ```
 
-The script checks connectivity, updates the six managed tools and shared secret,
+The script checks connectivity, updates the seven managed tools and shared secret,
 attaches the policy documents, and publishes a private agent version. It preserves
 the voice/model and records created IDs immediately for retrying an interrupted
 setup. Updated policies create new document revisions; old documents are retained.
@@ -65,14 +86,14 @@ a direct provider import file; the script translates its schema dialect.
 
 Real provider Chat Mode calls verified search, booking, retrieval from another
 conversation, special items, rescheduling, and cancellation against PostgreSQL.
-The cancelled synthetic booking remains as audit history. The full eight-scenario
-autonomous suite passed, and synthetic spoken input was recognized and answered
+The cancelled synthetic booking remains as audit history. The original eight-scenario
+autonomous suite passed before the suite was expanded, and synthetic spoken input was recognized and answered
 with generated audio. Physical microphone and speaker quality still need a
 hands-on voice check in Preview.
 
 ## Backend endpoints
 
-The API exposes six ordinary JSON POST endpoints for ElevenLabs webhook tools.
+The API exposes seven ordinary JSON POST endpoints for ElevenLabs webhook tools.
 They call the same transactional booking service as REST, so every simulated
 caller shares the same persisted bookings and seat inventory.
 
@@ -94,6 +115,7 @@ Create these tools with method `POST` and content type `application/json`:
 
 | Tool name | Path after your API base URL | Body model |
 | --- | --- | --- |
+| `get_flight_information` | `/api/v1/voice/webhooks/elevenlabs/get_flight_information` | `FlightInformationQuery` |
 | `search_flights` | `/api/v1/voice/webhooks/elevenlabs/search_flights` | `FlightSearch` |
 | `book_flight` | `/api/v1/voice/webhooks/elevenlabs/book_flight` | `BookFlight` |
 | `get_booking` | `/api/v1/voice/webhooks/elevenlabs/get_booking` | `BookingReference` |
@@ -156,6 +178,6 @@ uv run --all-packages pytest tests/test_bookings_api.py
 ```
 
 Set `TEST_DATABASE_URL` in the environment first. Tests use isolated disposable
-databases and cover all six tool paths, cross-caller visibility, application
+databases and cover the tool paths, cross-caller visibility, application
 restart persistence, parallel last-seat races, concurrent retries/cancellations,
 reschedule rollback, duplicate passengers, policy fees, and original paid values.

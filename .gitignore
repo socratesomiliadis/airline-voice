@@ -1,6 +1,7 @@
 # Local configuration and secrets
 .env
 .env.*
+.local/
 !.env.example
 !.env.*.example
 

@@ -38,11 +38,14 @@ from airline_api.modules.bookings.schemas import (
     CancelBooking,
     EventView,
     ExtraView,
+    FlightInformation,
+    FlightInformationQuery,
+    FlightInformationResult,
     FlightOffer,
     FlightSearch,
     FlightSearchResult,
     Mutation,
-    Passenger,
+    PassengerView,
     RescheduleBooking,
 )
 
@@ -90,6 +93,11 @@ class BookingService:
                 cast(func.timezone(origin.timezone, Flight.departure_at), Date)
                 == query.departure_date
             )
+        local_date = cast(func.timezone(origin.timezone, Flight.departure_at), Date)
+        if query.departure_date_from is not None:
+            statement = statement.where(local_date >= query.departure_date_from)
+        if query.departure_date_to is not None:
+            statement = statement.where(local_date <= query.departure_date_to)
         if query.min_price_cents is not None:
             statement = statement.where(FlightFare.price_cents >= query.min_price_cents)
         if query.max_price_cents is not None:
@@ -141,6 +149,43 @@ class BookingService:
             offers=offers, limit=query.limit, offset=query.offset, has_more=len(rows) > query.limit
         )
 
+    async def flight_information(self, query: FlightInformationQuery) -> FlightInformationResult:
+        origin, destination = aliased(Airport), aliased(Airport)
+        rows = (
+            await self.session.execute(
+                select(Flight, origin, destination)
+                .join(origin, origin.code == Flight.origin_code)
+                .join(destination, destination.code == Flight.destination_code)
+                .where(
+                    func.upper(Flight.flight_number) == query.flight_number.upper(),
+                    cast(func.timezone(origin.timezone, Flight.departure_at), Date)
+                    == query.departure_date,
+                )
+                .order_by(Flight.departure_at, Flight.id)
+            )
+        ).all()
+        return FlightInformationResult(
+            flights=[
+                FlightInformation.model_validate(
+                    {
+                        "flight_id": flight.id,
+                        "flight_number": flight.flight_number,
+                        "origin": flight.origin_code,
+                        "destination": flight.destination_code,
+                        "departure_local": flight.departure_at.astimezone(
+                            ZoneInfo(departure.timezone)
+                        ),
+                        "arrival_local": flight.arrival_at.astimezone(ZoneInfo(arrival.timezone)),
+                        "origin_timezone": departure.timezone,
+                        "destination_timezone": arrival.timezone,
+                        "status": flight.status,
+                        "gate": flight.gate,
+                    }
+                )
+                for flight, departure, arrival in rows
+            ]
+        )
+
     async def get(self, reference: str) -> BookingView:
         booking = await self._find(reference)
         return await self._view(booking)
@@ -180,20 +225,32 @@ class BookingService:
     async def _mutate(
         self, operation: str, request: Mutation, action: Callable[[], Awaitable[BookingView]]
     ) -> BookingView:
-        fingerprint = hashlib.sha256(
-            json.dumps(
-                {"operation": operation, "request": request.model_dump(mode="json")},
-                sort_keys=True,
-                separators=(",", ":"),
-            ).encode()
-        ).hexdigest()
+        payloads = [request.model_dump(mode="json")]
+        if isinstance(request, BookFlight):
+            # Before seat requests existed, serialized passengers had no preference key.
+            # Accept those durable receipts without changing retries into new reservations.
+            legacy = request.model_dump(mode="json")
+            for passenger in legacy["passengers"]:
+                if passenger.get("seat_preference") is None:
+                    passenger.pop("seat_preference", None)
+            payloads.append(legacy)
+        fingerprints = [
+            hashlib.sha256(
+                json.dumps(
+                    {"operation": operation, "request": payload},
+                    sort_keys=True,
+                    separators=(",", ":"),
+                ).encode()
+            ).hexdigest()
+            for payload in payloads
+        ]
         try:
             async with self.session.begin():
                 await self.session.execute(
                     insert(ApiOperation)
                     .values(
                         idempotency_key=request.idempotency_key,
-                        request_hash=fingerprint,
+                        request_hash=fingerprints[0],
                         operation=operation,
                         response=None,
                         created_at=self.clock(),
@@ -207,7 +264,7 @@ class BookingService:
                         .with_for_update()
                     )
                 ).one()
-                if receipt.request_hash != fingerprint:
+                if receipt.request_hash not in fingerprints:
                     raise BookingError(
                         "idempotency_conflict",
                         "This idempotency key was already used for a different request.",
@@ -751,11 +808,21 @@ class BookingService:
                 "destination_timezone": arrival_airport.timezone,
                 "route_type": flight.route_type,
                 "status": flight.status,
+                "gate": flight.gate,
             },
             seat_class=booking.seat_class,
             fare_tier=booking.fare_tier,
             passengers=[
-                Passenger(passenger_id=passenger.passenger_id, full_name=passenger.full_name)
+                PassengerView.model_validate(
+                    {
+                        "passenger_id": passenger.passenger_id,
+                        "full_name": passenger.full_name,
+                        "seat_preference": passenger.seat_preference,
+                        "seat_preference_status": (
+                            "requested" if passenger.seat_preference else "not_requested"
+                        ),
+                    }
+                )
                 for passenger in passengers
             ],
             unit_price_cents=booking.unit_price_cents,

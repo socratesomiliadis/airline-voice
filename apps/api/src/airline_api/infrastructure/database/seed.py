@@ -70,6 +70,7 @@ class FlightSeed(SeedRecord):
     arrival_at: AwareDatetime
     route_type: Literal["domestic", "international"]
     status: Literal["scheduled"]
+    gate: str | None = Field(default=None, min_length=1, max_length=16)
     cabins: list[CabinSeed] = Field(min_length=3, max_length=3)
 
     @model_validator(mode="after")
@@ -143,7 +144,13 @@ async def seed_dataset(database_url: str, dataset: FlightDataset) -> dict[str, i
     cabins: list[dict[str, object]] = []
     fares: list[dict[str, object]] = []
     for flight in dataset.flights:
-        flights.append({**flight.model_dump(exclude={"cabins"}), "airline": dataset.airline})
+        flights.append(
+            {
+                **flight.model_dump(exclude={"cabins"}),
+                "gate": flight.gate or f"A{int(flight.flight_number[4:]) % 20 + 1}",
+                "airline": dataset.airline,
+            }
+        )
         for cabin in flight.cabins:
             cabins.append({"flight_id": flight.id, **cabin.model_dump(exclude={"fares"})})
             for fare in cabin.fares:

@@ -4,22 +4,34 @@
     "goal": "Book one economy standard ticket from San Francisco to New York on November 10, 2026.",
     "customer_facts": "You are Jordan Taylor. Use the supplied passenger ID. You want SFO to JFK, one passenger, economy cabin, standard fare. Choose the cheapest suitable offered standard ticket and explicitly confirm the total when asked. Give your full name and supplied stable passenger ID when requested.",
     "expected_outcome": "search_flights precedes book_flight; the selected exact quote, passenger and confirmed price match the saved confirmed booking. The assistant clearly gives its reference, local flight times and USD total, identifying the transaction as simulated.",
-    "required_tools": ["search_flights", "book_flight"]
+    "required_tools": [
+      "search_flights",
+      "book_flight"
+    ]
   },
   {
     "id": "cancel-booking",
     "goal": "Cancel the supplied existing booking and find out the recorded refund or credit.",
     "customer_facts": "You are Jordan Taylor. Supply the existing booking reference when asked. You voluntarily want to cancel the entire booking. Ask what refund or credit applies, then explicitly confirm cancellation.",
     "expected_outcome": "get_booking precedes cancel_booking after explicit confirmation. Saved status is cancelled; any refund or credit matches recorded settlement. If review_required, the assistant explains the review without inventing an amount.",
-    "required_tools": ["get_booking", "cancel_booking"],
-    "setup": {"fare_tier": "flexible"}
+    "required_tools": [
+      "get_booking",
+      "cancel_booking"
+    ],
+    "setup": {
+      "fare_tier": "flexible"
+    }
   },
   {
     "id": "reschedule-booking",
     "goal": "Move the supplied SFO to JFK booking to November 11, 2026, keeping economy standard for one passenger.",
     "customer_facts": "You are Jordan Taylor. Supply the existing booking reference. Your new departure date is November 11, 2026. Keep SFO to JFK, economy standard. Choose a suitable replacement and explicitly confirm the quoted fare difference and change fee.",
     "expected_outcome": "get_booking and search_flights precede reschedule_booking. The persisted flight departs SFO to JFK on November 11 local time. Exact replacement quote parameters and saved settlement agree with the assistant's confirmation.",
-    "required_tools": ["get_booking", "search_flights", "reschedule_booking"],
+    "required_tools": [
+      "get_booking",
+      "search_flights",
+      "reschedule_booking"
+    ],
     "setup": {}
   },
   {
@@ -27,7 +39,10 @@
     "goal": "Add two checked bags for yourself to the supplied booking, and understand the total extra charge.",
     "customer_facts": "You are Jordan Taylor. Supply the existing booking reference. Both bags are yours; each weighs 20 kg and measures 70 by 45 by 25 cm. You have not added checked bags before. You want two bags in total, including any already included by the standard fare. Confirm the extra charge when asked.",
     "expected_outcome": "The agent retrieves the booking, applies the purchased standard fare allowance without charging an included bag twice, uses add_booking_items with correct passenger ID and all checked bag measurements for chargeable additions, and confirms the saved USD charge accurately.",
-    "required_tools": ["get_booking", "add_booking_items"],
+    "required_tools": [
+      "get_booking",
+      "add_booking_items"
+    ],
     "setup": {}
   },
   {
@@ -35,7 +50,10 @@
     "goal": "Request cabin travel for your cat on the supplied booking and understand whether it is approved.",
     "customer_facts": "You are Jordan Taylor. Supply the booking reference. Your cat and soft carrier together weigh 6 kg; the carrier measures 40 by 30 by 20 cm. The cat is 2 years old. You want the pet attached to your passenger record, understand any policy and fees, and explicitly confirm submitting a request. Do not accept a promise of approval without confirmation.",
     "expected_outcome": "Pet policy advice agrees with pet_policy.json. get_booking and add_booking_items save a cabin_pet request for the booked passenger, with pending_confirmation clearly explained. The assistant does not treat seat inventory or a saved request as pet approval or a completed pet charge.",
-    "required_tools": ["get_booking", "add_booking_items"],
+    "required_tools": [
+      "get_booking",
+      "add_booking_items"
+    ],
     "setup": {}
   },
   {
@@ -43,7 +61,10 @@
     "goal": "Request assistance with your manual folding wheelchair for the supplied booking.",
     "customer_facts": "You are Jordan Taylor. Supply the booking reference. You use a manual folding wheelchair weighing 12 kg and measuring 90 by 60 by 85 cm, with no battery. You can transfer into an aircraft seat but need help through the airport. Ask to record your mobility aid and explicitly confirm the request. Provide details if asked.",
     "expected_outcome": "The assistant uses the special assistance policy, retrieves the correct booking and records a mobility_aid request for the correct passenger. It accurately describes saved pending status and does not promise compatibility or charge a fee not established by policy/API.",
-    "required_tools": ["get_booking", "add_booking_items"],
+    "required_tools": [
+      "get_booking",
+      "add_booking_items"
+    ],
     "setup": {}
   },
   {
@@ -58,7 +79,57 @@
     "goal": "Find out whether the supplied basic fare can be voluntarily moved to November 11 without buying another ticket.",
     "customer_facts": "You are Jordan Taylor. Supply the existing booking reference. This is your own voluntary date change, not an airline disruption. You want November 11, 2026. If basic fares cannot change, ask for the available policy options but decline cancellation and a new purchase for now.",
     "expected_outcome": "The assistant retrieves the booking and explains the basic fare restriction from booking_changes.json. It offers cancellation/new booking as applicable, respects the declined mutation and leaves the original booking confirmed without claiming a free reschedule.",
-    "required_tools": ["get_booking"],
-    "setup": {"fare_tier": "basic"}
+    "required_tools": [
+      "get_booking"
+    ],
+    "setup": {
+      "fare_tier": "basic"
+    }
+  },
+  {
+    "id": "next-available-flight",
+    "goal": "Book the next available flight from San Francisco to Los Angeles for one passenger, as soon as possible.",
+    "customer_facts": "You are Jordan Taylor with the supplied stable passenger ID. You want SFO to LAX, one passenger, economy, any fare tier. You have no date preference: take the earliest future departure available, not a later cheaper departure. Confirm the offered total when asked.",
+    "expected_outcome": "search_flights uses sort_by departure without an exact departure_date restriction. book_flight selects the earliest bookable SFO-LAX departure. The saved quote and passenger agree with the offered flight. Confirmation includes reference, local times, USD total and simulation disclosure.",
+    "required_tools": [
+      "search_flights",
+      "book_flight"
+    ]
+  },
+  {
+    "id": "cheapest-following-week",
+    "goal": "Find and book the cheapest SFO to JFK economy ticket within the following calendar week.",
+    "customer_facts": "You are Jordan Taylor with the supplied stable passenger ID. The demo business date is Friday November 6, 2026, so by following week you mean Monday November 9 through Sunday November 15 inclusive. Any departure in that window and any economy fare tier is acceptable. Ask for the cheapest ticket across the whole week, not just on one date. Explicitly confirm its total.",
+    "expected_outcome": "search_flights uses departure_date_from 2026-11-09 and departure_date_to 2026-11-15, sort_by price, economy and one passenger. The selected quote is the cheapest available within the full window. book_flight saves that exact quote, with clear reference, local times, USD total and simulation disclosure.",
+    "required_tools": [
+      "search_flights",
+      "book_flight"
+    ]
+  },
+  {
+    "id": "seat-preference",
+    "goal": "Book an SFO to JFK economy standard flight on November 12, 2026 with a window-seat preference.",
+    "customer_facts": "You are Jordan Taylor with the supplied stable passenger ID. You prefer a window seat. You understand the airline can record a preference but cannot guarantee a particular assigned seat or charge for one. Accept the requested-only status and confirm booking after the quoted fare is given.",
+    "expected_outcome": "search_flights precedes book_flight. The passenger in the saved booking has seat_preference window and seat_preference_status requested. The assistant explains that this is a recorded request, not an assigned or guaranteed seat, and does not invent a seat number or seat fee. Booking confirmation contains the reference, price and simulation disclosure.",
+    "required_tools": [
+      "search_flights",
+      "book_flight"
+    ]
+  },
+  {
+    "id": "baggage-policy",
+    "goal": "Understand cabin and checked baggage allowance, weight limits, and excess fees for a domestic economy standard ticket.",
+    "customer_facts": "You are only asking about policy. You are traveling domestically SFO to JFK on economy standard. Ask what personal item and cabin bag are allowed, the included checked bag weight and size limits, the first extra checked bag fee, and how overweight and oversized fees combine. Do not request a booking or an item addition.",
+    "expected_outcome": "Answers match baggage.json, distinguish cabin from hold baggage, purchased fare tier from cabin class, and explain additive excess fees in USD. No mutation tool is called.",
+    "required_tools": []
+  },
+  {
+    "id": "flight-information",
+    "goal": "Find the gate, departure-airport local time and current fictional status of DEMO301 on November 12, 2026.",
+    "customer_facts": "You have no booking reference. Ask about DEMO301 on November 12, 2026, including its gate and whether it is cancelled or scheduled. You only need information and do not want to book or change anything.",
+    "expected_outcome": "get_flight_information is called with flight_number DEMO301 and departure_date 2026-11-12. The assistant accurately reports returned status, gate and local departure time, makes clear this is fictional demo information, and does not invent live airport data or call mutation tools.",
+    "required_tools": [
+      "get_flight_information"
+    ]
   }
 ]

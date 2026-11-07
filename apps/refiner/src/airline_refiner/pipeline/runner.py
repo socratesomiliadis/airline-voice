@@ -66,6 +66,7 @@ class RefinementRunner:
         code_applied, prompt_attempted = False, False
         try:
             if repair.edits:
+                await self.workspace.check_service(self.artifacts)
                 if self.observer:
                     self.observer.phase("verifying")
                 transaction.apply()
@@ -140,6 +141,7 @@ class RefinementRunner:
                     raise RefinementError("No policy documents found for grounded evaluation")
                 sources = self.workspace.source()
                 await self.api.ready(self.config.readiness_timeout_seconds)
+                await self.workspace.check_service(self.artifacts)
                 prompt = await self.provider.configure_chat()
                 self.artifacts.write_text("initial-prompt.md", prompt)
                 self.artifacts.write(

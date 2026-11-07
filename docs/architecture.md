@@ -86,8 +86,9 @@ baggage, accessibility, check-in, cancellations and refunds, and flight changes.
 Each file includes metadata, stable rule IDs, plain-language answers, and
 structured details. The API loads policy details at startup and persists a policy
 snapshot on each booking. Baggage fees, fare-change rules, disruption handling,
-and cancellation outcomes use that snapshot. Semantic retrieval and ElevenLabs
-knowledge uploads are not implemented.
+and cancellation outcomes use that snapshot. The provisioning script uploads the
+six policies to ElevenLabs for provider-managed retrieval during calls. The local
+knowledge ingestion/search API remains reserved.
 
 All money is integer cents in a simulated ledger; no payment processor is called.
 Refunds use stored paid amounts. Basic/standard unused-tax and credit settlements

@@ -26,6 +26,7 @@ consumer login or identity-verification flow.
 | Method | Path | Result |
 | --- | --- | --- |
 | GET | `/flights` | Search current available cabin/fare offers |
+| GET | `/flights/information` | Gate/status by flight number and local date |
 | POST | `/bookings` | Create a booking and reserve seats; returns `201` |
 | GET | `/bookings` | List committed bookings; supports `caller_id`, `limit`, `offset` |
 | GET | `/bookings/{reference}` | Retrieve the current booking and its saved history |
@@ -43,6 +44,8 @@ Supported filters:
 
 - `destination`, `origin`: IATA code or exact city name, case-insensitively.
 - `departure_date`: `YYYY-MM-DD` in the origin airport's local time.
+- `departure_date_from`, `departure_date_to`: inclusive local date bounds. Do not
+  combine with `departure_date`; reversed bounds return `422`.
 - `min_price_cents`, `max_price_cents`: bounds on the per-passenger fare in USD cents.
 - `seat_class`: `economy`, `premium_economy`, or `business`.
 - `fare_tier`: `basic`, `standard`, `flexible`, or `business`.
@@ -63,6 +66,19 @@ Each offer contains the flight UUID/number, airport codes/cities, UTC and local
 timestamps, route type, cabin, tier, available seats, per-passenger price, group
 total, currency, and the corresponding checked-bag allowance. Prices include
 fictional taxes and exclude optional services.
+
+For the next departure, omit date filters and sort by `departure`. For the cheapest
+following calendar week from the demo date, use `departure_date_from=2026-11-09`,
+`departure_date_to=2026-11-15`, `sort_by=price`.
+
+## Flight information
+
+`GET /flights/information?flight_number=DEMO301&departure_date=2026-11-12`
+returns `flights` with local times, timezone names, status and gate. It includes
+cancelled, departed, arrived and sold-out flights. The date is departure-airport
+local; unknown flights return an empty list. Null gate means unassigned. These
+are fictional database records, not a live airport feed. The webhook
+`get_flight_information` exposes the same operation.
 
 ## Book
 
@@ -92,6 +108,12 @@ The response contains `reference`, booking status, fare and original paid-price
 snapshots, passengers, current flight details, extras, and audit/financial events.
 The fare is rechecked against `expected_unit_price_cents` before seats are taken.
 A price change returns `409 fare_price_changed`; search and confirm again.
+
+Each passenger may include `seat_preference`: `window`, `aisle` or `extra_legroom`.
+It persists across callers, restarts and rescheduling. Responses include
+`seat_preference_status=requested` (or `not_requested`). This is a request, not an
+assigned seat; the demo has no guaranteed placement or seat-selection charges.
+The agent must explain this distinction before purchase and in its confirmation.
 
 ## Idempotency and concurrency
 

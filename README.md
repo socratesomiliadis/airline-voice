@@ -1,12 +1,13 @@
 # Airline Voice
 
-Scaffold for an autonomous airline customer service agent powered by ElevenLabs,
+An autonomous airline customer service agent powered by ElevenLabs,
 with a FastAPI backend, PostgreSQL persistence, a Python refinement worker, and
 a Next.js monitoring dashboard.
 
 **Persistent booking APIs and ElevenLabs webhook tools are implemented.** The API
 searches flights, books travel, retrieves bookings, cancels or reschedules, and
-adds baggage or special-item requests. Operations use PostgreSQL transactions,
+adds baggage or special-item requests, records seat preferences, and provides
+fictional flight gates/status. Operations use PostgreSQL transactions,
 shared cabin inventory, versioned JSON policies, and durable retry receipts.
 Payments are simulated ledger entries. The autonomous refinement worker simulates
 text conversations, scores them, repairs prompts and backend code, reloads the
@@ -117,6 +118,10 @@ make dev-api
 make dev-dashboard
 ```
 
+`make dev-api` runs without auto-reload so repairs are verified before activation.
+Use `make dev-api-watch` only for interactive editing; refinement refuses an API
+started with `--reload`.
+
 These targets check whether their port already has a listener before starting a
 development server. Do not start a local app on a port occupied by Compose.
 The dashboard connects through a server-side, read-only observation proxy. It
@@ -124,6 +129,7 @@ updates automatically when the worker starts; an empty workspace contains no
 sample data. See [dashboard setup and streaming](docs/monitoring.md). API liveness
 does not imply booking database or model-provider readiness.
 
+Provision your own agent using the [first-time ElevenLabs setup](docs/elevenlabs.md).
 Run the autonomous refinement worker after configuring its model credentials:
 
 ```sh
@@ -209,3 +215,22 @@ The [refinement worker](docs/refinement.md) implements outbound text conversatio
 evaluation, diagnosis, prompt/code repair and deployment. The [observation UI](docs/monitoring.md)
 streams its progress without exposing run controls. Other reserved API features
 remain for subsequent implementation.
+
+## Assessment scenarios and recorded evidence
+
+Thirteen scenarios cover all ten requested call types, including next departure,
+cheapest across a week, seat preferences, baggage policy and gate/status lookup.
+Seat preferences are saved requests, not guaranteed assignments. Flight status
+and gates are fictional database records. See [coverage](scenarios/README.md).
+
+The [recorded example](examples/recorded-run/README.md) includes a real provider
+run, starting/final prompts, scores, diagnoses, changes and an improvement summary.
+Raw local artifacts stay ignored; export completed runs with:
+
+```sh
+uv run --all-packages python scripts/export_refinement_run.py artifacts/RUN_ID --output examples/recorded-run
+```
+
+The exporter includes conversation/tool evidence and saved booking state, excludes
+provider headers, URLs, debug events and environment configuration, and redacts
+known credentials. Only fictional customer data belongs in examples.

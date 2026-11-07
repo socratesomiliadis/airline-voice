@@ -185,6 +185,12 @@ class Workspace:
         if process.returncode != 0:
             raise RefinementError(f"Configured command exited {process.returncode}; see {log}")
 
+    async def check_service(self, artifacts: Artifacts) -> None:
+        if "airline_refiner.reload_service" in self.config.reload_command:
+            await self.command(
+                [*self.config.reload_command, "--check"], Path("service-check.log"), artifacts
+            )
+
 
 class PatchTransaction:
     def __init__(self, originals: dict[Path, str], candidates: dict[Path, str]) -> None:

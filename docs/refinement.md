@@ -36,7 +36,9 @@ patching or host process management.
 
 Use the existing development API and database. Check for listeners before
 starting either service. If needed, follow the README's database migration and
-flight seeding steps and start the API with `make dev-api`. Ensure the ElevenLabs
+flight seeding steps and start the API with `make dev-api` (without `--reload`). The worker checks the
+existing service before simulation and before writing a backend patch. Watched
+services are rejected; `make dev-api-watch` is only for interactive editing. Ensure the ElevenLabs
 agent's webhook URLs point at this API (including a working public HTTPS tunnel
 for a local API), with the matching `AGENT_API_KEY`. Agent provisioning is covered
 in [ElevenLabs setup](elevenlabs.md).
@@ -134,9 +136,9 @@ remain reserved; the UI exposes no commands.
 
 ## Scenarios and artifacts
 
-`scenarios/airline.json` contains eight fictional fixtures: booking, cancellation,
-rescheduling, checked baggage, cabin pets, mobility assistance, check-in policy,
-and basic-fare change restrictions. Each includes a customer goal/facts, required
+`scenarios/airline.json` contains thirteen fictional fixtures covering all ten
+assessment call types plus booking and policy regressions. See
+[the coverage mapping](../scenarios/README.md). Each includes a customer goal/facts, required
 tools, expected outcome, and optional prerequisite booking specification. All
 iterations use new passenger/action IDs, and successful cleanup releases seats
 without deleting audit history. Simulation and cleanup errors prevent passing
@@ -176,3 +178,10 @@ as an unavailable agent; check provider availability and account status before r
 - [Agent REST updates](https://elevenlabs.io/docs/api-reference/agents/update)
 - [Anthropic structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs)
 - [Anthropic models](https://platform.claude.com/docs/en/models/overview)
+
+Custom `reload_command` implementations must enforce the same activation boundary:
+running services must not watch candidate source while verification is in progress.
+The bundled local/Compose helper checks this automatically.
+
+Completed live runs can be exported using `scripts/export_refinement_run.py`.
+The export preserves actual scores and diagnoses, including regressions.

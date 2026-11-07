@@ -10,11 +10,18 @@ from airline_api.modules.bookings.schemas import (
     BookFlight,
     BookingReference,
     CancelBookingTool,
+    FlightInformationQuery,
     FlightSearch,
     RescheduleBookingTool,
 )
 
 TOOL_MODELS: list[tuple[str, type[BaseModel], str]] = [
+    (
+        "get_flight_information",
+        FlightInformationQuery,
+        "Get fictional gate, local times, and status by flight number and local departure date. "
+        "Includes cancelled, departed, sold-out, and arrived flights; does not change bookings.",
+    ),
     (
         "search_flights",
         FlightSearch,

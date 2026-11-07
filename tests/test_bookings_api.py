@@ -1,6 +1,8 @@
 """Real PostgreSQL booking, webhook, restart, rollback, and concurrent request tests."""
 
 import asyncio
+import hashlib
+import json
 from collections.abc import Iterator
 from concurrent.futures import ThreadPoolExecutor
 from copy import deepcopy
@@ -194,6 +196,117 @@ def test_persistence_between_callers_instances_and_idempotent_retries(
     assert conflict.json()["error"]["code"] == "idempotency_conflict"
     assert availability(postgres_url, offer) == before - 1
     assert sql(postgres_url, "SELECT count(*) FROM bookings")[0][0] == 1
+
+
+def test_week_search_is_bounded_sorted_and_inclusive(client: TestClient) -> None:
+    params = {
+        "origin": "SFO",
+        "destination": "JFK",
+        "departure_date_from": "2026-11-10",
+        "departure_date_to": "2026-11-12",
+        "seat_class": "economy",
+        "sort_by": "price",
+        "limit": 200,
+    }
+    response = client.post(f"{TOOLS}/search_flights", json=params)
+    assert response.status_code == 200, response.text
+    found = response.json()["offers"]
+    assert {o["departure_local"][:10] for o in found} == {"2026-11-10", "2026-11-11", "2026-11-12"}
+    assert [o["unit_price_cents"] for o in found] == sorted(o["unit_price_cents"] for o in found)
+    next_flight = client.get(
+        "/api/v1/flights", params={"origin": "SFO", "destination": "JFK", "sort_by": "departure"}
+    ).json()["offers"][0]
+    assert next_flight["departure_local"].startswith("2026-11-09")
+    for invalid in [
+        {**params, "departure_date": "2026-11-11"},
+        {**params, "departure_date_from": "2026-11-13"},
+    ]:
+        assert client.post(f"{TOOLS}/search_flights", json=invalid).status_code == 422
+
+
+def test_preference_extension_preserves_pre_upgrade_idempotency_receipts(
+    client: TestClient, postgres_url: str
+) -> None:
+    request = payload(offers(client)[0])
+    response = client.post("/api/v1/bookings", json=request)
+    assert response.status_code == 201
+    legacy_response = response.json()
+    for passenger in legacy_response["passengers"]:
+        passenger.pop("seat_preference")
+        passenger.pop("seat_preference_status")
+    legacy_hash = hashlib.sha256(
+        json.dumps(
+            {"operation": "book", "request": request}, sort_keys=True, separators=(",", ":")
+        ).encode()
+    ).hexdigest()
+    sql(
+        postgres_url,
+        "UPDATE api_operations SET request_hash=:hash, response=CAST(:response AS jsonb) "
+        "WHERE idempotency_key=:key",
+        hash=legacy_hash,
+        response=json.dumps(legacy_response),
+        key=request["idempotency_key"],
+    )
+    retry = client.post("/api/v1/bookings", json=request)
+    assert retry.status_code == 201, retry.text
+    assert retry.json()["reference"] == legacy_response["reference"]
+    assert retry.json()["passengers"][0]["seat_preference_status"] == "not_requested"
+    assert sql(postgres_url, "SELECT count(*) FROM bookings")[0][0] == 1
+
+
+@pytest.mark.parametrize("preference", ["window", "aisle", "extra_legroom"])
+def test_seat_preferences_persist_across_calls_and_rescheduling(
+    client: TestClient, postgres_url: str, preference: str
+) -> None:
+    offer = offers(client)[0]
+    request = payload(offer)
+    request["passengers"][0]["seat_preference"] = preference
+    response = client.post(f"{TOOLS}/book_flight", json=request)
+    assert response.status_code == 200, response.text
+    booking = response.json()
+    passenger = booking["passengers"][0]
+    assert passenger["seat_preference"] == preference
+    assert passenger["seat_preference_status"] == "requested"
+    assert "seat_number" not in passenger
+    with TestClient(create_app(settings(postgres_url)), headers=HEADERS) as next_caller:
+        saved = next_caller.get(f"/api/v1/bookings/{booking['reference']}").json()
+        assert saved["passengers"] == booking["passengers"]
+        changed = next_caller.post(
+            f"/api/v1/bookings/{booking['reference']}/reschedule",
+            json=replacement(offers(next_caller, "2026-11-10")[0]),
+        )
+        assert changed.status_code == 200, changed.text
+        assert changed.json()["passengers"] == booking["passengers"]
+
+
+@pytest.mark.parametrize("status", ["scheduled", "cancelled", "departed", "arrived"])
+def test_flight_information_is_independent_of_availability(
+    client: TestClient, postgres_url: str, status: str
+) -> None:
+    offer = offers(client, destination="JFK")[0]
+    sql(
+        postgres_url,
+        "UPDATE flights SET status=:status, gate='B17' WHERE id=:id",
+        status=status,
+        id=offer["flight_id"],
+    )
+    sql(
+        postgres_url,
+        "UPDATE flight_cabins SET available_seats=0 WHERE flight_id=:id",
+        id=offer["flight_id"],
+    )
+    query = {"flight_number": offer["flight_number"].lower(), "departure_date": "2026-11-09"}
+    result = client.post(f"{TOOLS}/get_flight_information", json=query)
+    assert result.status_code == 200, result.text
+    info = result.json()["flights"][0]
+    assert info["flight_id"] == offer["flight_id"]
+    assert info["status"] == status and info["gate"] == "B17"
+    assert info["departure_local"] == offer["departure_local"]
+    assert info["information_mode"] == "fictional_database"
+    assert client.get("/api/v1/flights/information", params=query).json() == result.json()
+    assert client.post(
+        f"{TOOLS}/get_flight_information", json={**query, "flight_number": "NONE"}
+    ).json() == {"flights": []}
 
 
 def test_concurrent_last_seat_cannot_be_oversold(client: TestClient, postgres_url: str) -> None:

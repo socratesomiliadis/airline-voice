@@ -51,6 +51,7 @@ class Flight(Base):
     arrival_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     route_type: Mapped[str] = mapped_column(String(16))
     status: Mapped[str] = mapped_column(String(16), server_default="scheduled")
+    gate: Mapped[str | None] = mapped_column(String(16))
 
 
 class FlightCabin(Base):

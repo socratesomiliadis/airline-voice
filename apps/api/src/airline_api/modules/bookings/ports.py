@@ -7,6 +7,8 @@ from airline_api.modules.bookings.schemas import (
     BookFlight,
     BookingView,
     CancelBooking,
+    FlightInformationQuery,
+    FlightInformationResult,
     FlightSearch,
     FlightSearchResult,
     RescheduleBooking,
@@ -15,6 +17,10 @@ from airline_api.modules.bookings.schemas import (
 
 class BookingOperations(Protocol):
     async def search(self, query: FlightSearch) -> FlightSearchResult: ...
+
+    async def flight_information(
+        self, query: FlightInformationQuery
+    ) -> FlightInformationResult: ...
 
     async def get(self, reference: str) -> BookingView: ...
 
