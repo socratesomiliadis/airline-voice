@@ -10,7 +10,8 @@ adds baggage or special-item requests. Operations use PostgreSQL transactions,
 shared cabin inventory, versioned JSON policies, and durable retry receipts.
 Payments are simulated ledger entries. The autonomous refinement worker simulates
 text conversations, scores them, repairs prompts and backend code, reloads the
-service and repeats. Live dashboard data and other reserved platform features
+service and repeats. The read-only dashboard streams live conversations, evaluation
+scores, prompt/code diffs and iteration history. Other reserved platform features
 remain unimplemented.
 
 ## Repository layout
@@ -40,8 +41,8 @@ apps/
     src/
       app/                 Next.js App Router pages
       components/          Shared layout and UI components
-      features/monitoring/ Monitoring view shells
-      lib/api/             Future API and event-stream contracts
+      features/monitoring/ Live conversations, scores, diffs, and history
+      lib/api/             Read-only API proxy and observation contracts
 packages/contracts/        Shared Python payload and event contracts
 config/                    Webhook contracts and runtime refinement configuration
 data/flights/              Fictional flight week and database setup instructions
@@ -118,8 +119,10 @@ make dev-dashboard
 
 These targets check whether their port already has a listener before starting a
 development server. Do not start a local app on a port occupied by Compose.
-The dashboard makes no API requests yet. Both application shells can start without
-PostgreSQL or ElevenLabs credentials; liveness does not imply dependency readiness.
+The dashboard connects through a server-side, read-only observation proxy. It
+updates automatically when the worker starts; an empty workspace contains no
+sample data. See [dashboard setup and streaming](docs/monitoring.md). API liveness
+does not imply booking database or model-provider readiness.
 
 Run the autonomous refinement worker after configuring its model credentials:
 
@@ -137,7 +140,8 @@ saved under `artifacts/<run-id>/`. See [setup and recovery](docs/refinement.md).
 The API reads `.env` relative to its working directory. Run local Python commands
 from the repository root. Compose injects container-specific addresses, including
 the `database` hostname instead of `localhost`. The dashboard has a separate
-`.env.local`; its reserved `API_BASE_URL` is server-side and currently unused.
+`.env.local`; `API_BASE_URL` is server-side. Locally, the observation proxy reads
+`AGENT_API_KEY` from the repository root `.env`.
 
 Set `AGENT_API_KEY` and configure the matching `X-Agent-Api-Key` secret header for
 ElevenLabs webhook tools and trusted simulation clients. Development/test mode
@@ -202,5 +206,6 @@ See [architecture](docs/architecture.md), [development guidance](docs/developmen
 the [booking API reference](docs/api.md), [ElevenLabs setup](docs/elevenlabs.md),
 and the [fictional JSON knowledge base](knowledge/README.md).
 The [refinement worker](docs/refinement.md) implements outbound text conversations,
-evaluation, diagnosis, prompt/code repair and deployment. Real-time monitoring
-and API/dashboard run controls remain for subsequent implementation.
+evaluation, diagnosis, prompt/code repair and deployment. The [observation UI](docs/monitoring.md)
+streams its progress without exposing run controls. Other reserved API features
+remain for subsequent implementation.

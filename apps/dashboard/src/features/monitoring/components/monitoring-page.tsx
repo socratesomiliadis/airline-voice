@@ -1,10 +1,26 @@
-import { EmptyState } from "@/components/ui/empty-state";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
 import { PageHeading } from "@/components/ui/page-heading";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { type MonitoringView, monitoringViews } from "@/features/monitoring/view-definitions";
 
 export function MonitoringPage({ view }: { view: MonitoringView }) {
   const definition = monitoringViews[view];
-
+  const Icon = definition.icon;
   return (
     <>
       <PageHeading
@@ -12,36 +28,39 @@ export function MonitoringPage({ view }: { view: MonitoringView }) {
         title={definition.title}
         description={definition.description}
       />
-      <section
-        aria-label={definition.title}
-        className="overflow-hidden rounded-2xl border border-slate-200 bg-white"
-      >
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[480px] text-left text-xs">
-            <caption className="sr-only">{definition.title}; data is not connected</caption>
-            <thead className="border-b border-slate-100 bg-slate-50/70 text-slate-500">
-              <tr>
+      <Card className="py-0" aria-label={definition.title}>
+        <CardContent className="p-0">
+          <Table className="min-w-[480px] text-xs">
+            <TableCaption className="sr-only">
+              {definition.title}; data is not connected
+            </TableCaption>
+            <TableHeader>
+              <TableRow>
                 {definition.columns.map((column) => (
-                  <th key={column} scope="col" className="px-6 py-4 font-medium">
+                  <TableHead key={column} scope="col" className="px-6 py-4">
                     {column}
-                  </th>
+                  </TableHead>
                 ))}
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td colSpan={definition.columns.length}>
-                  <EmptyState
-                    icon={definition.icon}
-                    title={definition.emptyTitle}
-                    description={definition.emptyDescription}
-                  />
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <TableRow>
+                <TableCell colSpan={definition.columns.length}>
+                  <Empty className="min-h-64">
+                    <EmptyHeader>
+                      <EmptyMedia variant="icon">
+                        <Icon aria-hidden="true" />
+                      </EmptyMedia>
+                      <EmptyTitle>{definition.emptyTitle}</EmptyTitle>
+                      <EmptyDescription>{definition.emptyDescription}</EmptyDescription>
+                    </EmptyHeader>
+                  </Empty>
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
     </>
   );
 }

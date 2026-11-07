@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-
 import { DashboardShell } from "@/components/layout/dashboard-shell";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { MonitoringProvider } from "@/features/monitoring/monitoring-provider";
 
 import "./globals.css";
 
@@ -10,14 +11,18 @@ export const metadata: Metadata = {
     default: "Airline Voice · Operations",
     template: "%s · Airline Voice",
   },
-  description: "Monitoring workspace for the airline customer service agent.",
+  description: "Observe autonomous airline conversations, evaluation scores and improvements live.",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
-      <body className="min-h-screen bg-slate-50 font-sans text-slate-900 antialiased">
-        <DashboardShell>{children}</DashboardShell>
+    <html lang="en" className="font-sans">
+      <body className="min-h-screen bg-[#f8faf9] font-sans text-slate-900 antialiased">
+        <TooltipProvider>
+          <MonitoringProvider>
+            <DashboardShell>{children}</DashboardShell>
+          </MonitoringProvider>
+        </TooltipProvider>
       </body>
     </html>
   );

@@ -121,8 +121,9 @@ are supplied to subsequent repair calls. If recovery fails, the run stops with a
 error instead of continuing against an unknown version.
 
 Code is applied and checked in the configured development checkout; this is not
-an execution sandbox. Backend API refinement/monitoring HTTP endpoints and live
-dashboard integration remain separate work. Run artifacts are local JSON files.
+an execution sandbox. The [read-only observation dashboard](monitoring.md) streams live progress, scores,
+changes and history from the local artifacts. Backend refinement-control endpoints
+remain reserved; the UI exposes no commands.
 
 ## Scenarios and artifacts
 
@@ -141,7 +142,7 @@ been executed, rather than merely mentioned by the assistant. The evaluator also
 checks ordering, arguments, outcomes and policy facts against source, the full
 transcript, persisted state and `knowledge/*.json`.
 
-Each run writes `artifacts/<run-id>/run.json`, the resolved nonsecret config,
+Each run writes `artifacts/<run-id>/run.json`, a live redacted `monitor.json`, the resolved nonsecret config,
 scenario snapshots, original prompt, and iteration directories containing:
 
 - `<scenario>.simulation.json`: conversation ID, dialogue, full transcript, tool

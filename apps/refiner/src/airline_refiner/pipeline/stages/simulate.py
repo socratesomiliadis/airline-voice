@@ -1,5 +1,6 @@
 """LLM customer conversations against the real ElevenLabs agent in Chat Mode."""
 
+from collections.abc import Callable
 from typing import Any
 
 from airline_refiner.adapters.api import AirlineAPI
@@ -35,14 +36,17 @@ class Simulator:
         self, config: RefinementConfig, model: Model, provider: ElevenLabs, api: AirlineAPI
     ) -> None:
         self.config, self.model, self.provider, self.api = config, model, provider, api
+        self.on_update: Callable[[Simulation], None] | None = None
 
     async def run(self, scenario: Scenario, caller: str) -> Simulation:
         result = Simulation(scenario_id=scenario.id)
+        result._on_change = self.on_update
         session: ChatSession | None = None
         try:
             result.fixture = await self.api.prepare(scenario, caller)
             session = await self.provider.connect(result)
             await session.receive_turn(self.config.turn_timeout_seconds)
+            result.notify()
             for _ in range(self.config.max_customer_turns):
                 if session.closed:
                     break
@@ -61,6 +65,7 @@ class Simulator:
                     raise RefinementError("Customer model returned an empty message")
                 await session.send(turn.message)
                 await session.receive_turn(self.config.turn_timeout_seconds)
+                result.notify()
                 if turn.done:
                     result.completed = True
                     break
@@ -107,4 +112,5 @@ class Simulator:
                     if isinstance(error, RefinementError)
                     else f"Fixture cleanup failed ({type(error).__name__})"
                 )
+        result.notify()
         return result

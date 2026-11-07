@@ -1,7 +1,9 @@
 """Autonomous simulate → evaluate → repair → reload/publish → repeat orchestration."""
 
+import asyncio
 import json
 import logging
+from contextlib import suppress
 from pathlib import Path
 from typing import Any
 from uuid import uuid4
@@ -15,6 +17,7 @@ from airline_refiner.adapters.workspace import Artifacts, Workspace, atomic_writ
 from airline_refiner.config import RefinementConfig
 from airline_refiner.errors import RecoveryError, RefinementError
 from airline_refiner.models import CodeFault, Iteration, Repair, RunResult, Scenario
+from airline_refiner.observation import RunObserver
 from airline_refiner.pipeline.stages.evaluate import Evaluator
 from airline_refiner.pipeline.stages.propose import FixProposer
 from airline_refiner.pipeline.stages.simulate import Simulator
@@ -44,6 +47,7 @@ class RefinementRunner:
         self.simulator = Simulator(config, model, provider, api)
         self.evaluator = Evaluator(config, model)
         self.proposer = FixProposer(config, model)
+        self.observer: RunObserver | None = None
 
     async def apply_repair(
         self,
@@ -55,11 +59,15 @@ class RefinementRunner:
     ) -> str:
         transaction = self.workspace.plan(repair.edits, sources, code_faults)
         self.artifacts.write_text(prefix + "/code.patch", transaction.diff(self.workspace.root))
+        if self.observer:
+            self.observer.patch(transaction.diff(self.workspace.root))
         prompt_path = self.workspace.root / self.config.prompt_path
         local_prompt = prompt_path.read_text() if prompt_path.exists() else None
         code_applied, prompt_attempted = False, False
         try:
             if repair.edits:
+                if self.observer:
+                    self.observer.phase("verifying")
                 transaction.apply()
                 code_applied = True
                 await self.workspace.command(
@@ -67,17 +75,23 @@ class RefinementRunner:
                     Path(prefix) / "verification.log",
                     self.artifacts,
                 )
+                if self.observer:
+                    self.observer.phase("reloading")
                 await self.workspace.command(
                     self.config.reload_command, Path(prefix) / "reload.log", self.artifacts
                 )
                 await self.api.ready(self.config.readiness_timeout_seconds)
             if repair.system_prompt is not None:
+                if self.observer:
+                    self.observer.phase("publishing")
                 prompt_attempted = True
                 await self.provider.update_prompt(repair.system_prompt)
                 atomic_write(prompt_path, repair.system_prompt + "\n")
                 prompt = repair.system_prompt
             return prompt
         except BaseException:
+            if self.observer:
+                self.observer.phase("rollback")
             try:
                 if prompt_attempted:
                     # A timeout can mean the provider accepted the write: explicitly restore it.
@@ -109,6 +123,9 @@ class RefinementRunner:
             pass_score=self.config.pass_score,
             max_iterations=self.config.max_iterations,
         )
+        self.observer = RunObserver(result.run_id, self.config, self.artifacts)
+        self.simulator.on_update = self.observer.conversation
+        heartbeat = asyncio.create_task(self.observer.heartbeat())
         self.artifacts.write("configuration.json", self.config.model_dump(mode="json"))
         try:
             with self.workspace.lock():
@@ -130,6 +147,7 @@ class RefinementRunner:
                 )
                 previous_errors: list[str] = []
                 for number in range(1, self.config.max_iterations + 1):
+                    self.observer.start_iteration(number, scenarios)
                     iteration = Iteration(number=number)
                     result.iterations.append(iteration)
                     prefix = f"iteration-{number:02d}"
@@ -140,16 +158,19 @@ class RefinementRunner:
                             "Iteration %d/%d: %s", number, self.config.max_iterations, scenario.id
                         )
                         caller = f"ref-{result.run_id[:12]}-{number}-{scenario.id}"[:100]
+                        self.observer.phase("simulating", scenario.id)
                         simulation = await self.simulator.run(scenario, caller)
                         iteration.simulations.append(simulation)
                         self.artifacts.write(
                             prefix + f"/{scenario.id}.simulation.json",
                             simulation.model_dump(mode="json"),
                         )
+                        self.observer.phase("evaluating", scenario.id)
                         evaluation = await self.evaluator.run(
                             scenario, simulation, prompt, sources, knowledge
                         )
                         iteration.evaluations.append(evaluation)
+                        self.observer.evaluated(evaluation)
                         self.artifacts.write(
                             prefix + f"/{scenario.id}.evaluation.json",
                             evaluation.model_dump(mode="json"),
@@ -163,12 +184,14 @@ class RefinementRunner:
                         result.status = "iteration_limit"
                         break  # Never leave a final, unevaluated repair deployed.
                     try:
+                        self.observer.phase("repairing")
                         repair = await self.proposer.run(
                             iteration, prompt, sources, knowledge, previous_errors
                         )
                         self.artifacts.write(
                             prefix + "/repair.json", repair.model_dump(mode="json")
                         )
+                        self.observer.proposed(repair, prompt)
                         code_faults = [
                             fault
                             for evaluation in iteration.evaluations
@@ -179,6 +202,7 @@ class RefinementRunner:
                             repair, prompt, sources, prefix, code_faults
                         )
                         iteration.repair_applied = True
+                        self.observer.repaired()
                         sources = self.workspace.source()
                     except RecoveryError:
                         raise
@@ -189,6 +213,7 @@ class RefinementRunner:
                             else type(error).__name__
                         )
                         iteration.repair_error = message
+                        self.observer.repaired(message)
                         logs = []
                         for name in ("verification.log", "reload.log"):
                             path = self.artifacts.directory / prefix / name
@@ -206,5 +231,9 @@ class RefinementRunner:
             result.error = f"Refinement failed ({type(error).__name__})"
             result.status = "error"
         finally:
+            heartbeat.cancel()
+            with suppress(asyncio.CancelledError):
+                await heartbeat
+            self.observer.finish(result.status, result.error)
             self.artifacts.write("run.json", result.model_dump(mode="json"))
         return result

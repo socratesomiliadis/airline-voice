@@ -192,6 +192,7 @@ class ChatSession:
         except Exception:
             raise RefinementError("Unable to send ElevenLabs customer message") from None
         self.result.dialogue.append({"role": "user", "message": text})
+        self.result.notify()
 
     async def receive_turn(self, timeout_seconds: float) -> None:
         """Wait for explicit turn completion; tool preambles are not completed turns."""
@@ -225,9 +226,11 @@ class ChatSession:
                                 message["message"] = correction
                                 break
                     elif kind == "agent_response_complete":
+                        self.result.notify()
                         return
                     elif kind in {"client_tool_call", "client_error", "error"}:
                         raise RefinementError(f"Unexpected ElevenLabs event: {kind}")
+                    self.result.notify()
         except TimeoutError:
             raise RefinementError("ElevenLabs agent turn timed out") from None
         except (ValueError, KeyError, TypeError):

@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 
-import { MonitoringPage } from "@/features/monitoring/components/monitoring-page";
+import { RefinementDashboard } from "@/features/monitoring/components/refinement-dashboard";
 
 export const metadata: Metadata = { title: "Iteration history" };
 
 export default function Page() {
-  return <MonitoringPage view="iterations" />;
+  return <RefinementDashboard view="iterations" />;
 }

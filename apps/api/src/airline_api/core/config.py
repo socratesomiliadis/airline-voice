@@ -21,4 +21,5 @@ class Settings(BaseSettings):
     elevenlabs_webhook_secret: SecretStr | None = None
     agent_api_key: SecretStr | None = None
     knowledge_dir: Path = Path("knowledge")
+    refiner_artifacts_dir: Path = Path("artifacts")
     simulation_now: AwareDatetime | None = None

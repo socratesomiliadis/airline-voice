@@ -32,6 +32,9 @@ services:
       ELEVENLABS_API_KEY: ${ELEVENLABS_API_KEY:-}
       ELEVENLABS_AGENT_ID: ${ELEVENLABS_AGENT_ID:-}
       ELEVENLABS_WEBHOOK_SECRET: ${ELEVENLABS_WEBHOOK_SECRET:-}
+      REFINER_ARTIFACTS_DIR: /app/artifacts
+    volumes:
+      - ./artifacts:/app/artifacts:ro
     ports:
       - "127.0.0.1:${API_PORT:-8000}:8000"
     depends_on:
@@ -46,6 +49,9 @@ services:
   dashboard:
     build:
       context: apps/dashboard
+    environment:
+      API_BASE_URL: http://api:8000
+      AGENT_API_KEY: ${AGENT_API_KEY:-}
     ports:
       - "127.0.0.1:${DASHBOARD_PORT:-3000}:3000"
     depends_on:

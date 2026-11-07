@@ -9,6 +9,7 @@
     "ignoreUnknown": true,
     "includes": [
       "src/**",
+      "tests/**",
       "*.ts",
       "*.mjs",
       "package.json",

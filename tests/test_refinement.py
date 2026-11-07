@@ -251,6 +251,13 @@ def test_mixed_repairs_are_applied_reloaded_published_and_retested(rig):
     assert "return 2" in (root / "artifacts/iteration-01/code.patch").read_text()
     report = json.loads((root / "artifacts/run.json").read_text())
     assert report["status"] == "passed"
+    observed = json.loads((root / "artifacts/monitor.json").read_text())
+    assert observed["status"] == "passed" and observed["stage"] == "completed"
+    assert len(observed["iterations"]) == 2
+    assert observed["iterations"][0]["change_status"] == "applied"
+    assert "+Improved prompt 1" in observed["iterations"][0]["prompt_diff"]
+    assert observed["iterations"][0]["scenarios"][0]["evaluation"]["scores"]["understanding"] == 4
+    assert observed["iterations"][1]["scenarios"][0]["dialogue"]
     assert report["iterations"][0]["evaluations"][0]["failures"][1]["root_cause"] == "code"
     assert model.calls == [
         ("gpt-4.1-mini", "CustomerTurn"),

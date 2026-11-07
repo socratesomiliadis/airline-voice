@@ -13,6 +13,7 @@ from airline_api.core.logging import configure_logging
 from airline_api.infrastructure.database.session import Database
 from airline_api.modules.bookings.errors import BookingError
 from airline_api.modules.bookings.policies import PolicyCatalog
+from airline_api.modules.monitoring.store import ObservationStore
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -39,6 +40,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         lifespan=lifespan,
     )
     app.state.settings = settings
+    app.state.observation_store = ObservationStore(settings.refiner_artifacts_dir)
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.cors_origins,

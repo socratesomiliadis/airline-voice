@@ -223,5 +223,14 @@ FastAPI validation errors use its standard `detail` array; authentication errors
 also use `detail`. Unknown input fields are rejected.
 
 Unrelated baggage inquiries, general support, conversations, knowledge ingestion,
-monitoring, refinement control, and voice-session creation remain reserved `501`
+refinement control and voice-session creation remain reserved `501`
 routes. Agent tool webhook setup is documented in [elevenlabs.md](elevenlabs.md).
+
+## Observation-only monitoring
+
+Authenticated GET `/api/v1/monitoring/snapshot` returns run summaries and the selected
+run's live conversations, evaluations, changes and history. GET
+`/api/v1/monitoring/events` streams the same payload as SSE `snapshot` events, with
+transport heartbeats. Both accept an optional `run_id`; omitted selects the latest.
+The API reads worker artifacts and provides no monitoring write operations. See
+[monitoring setup and replay](monitoring.md).

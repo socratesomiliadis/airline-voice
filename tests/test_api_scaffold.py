@@ -53,7 +53,6 @@ def test_exported_webhook_contracts_match_code_and_openapi(client: TestClient) -
         ("GET", "/knowledge/documents"),
         ("POST", "/knowledge/documents"),
         ("POST", "/knowledge/search"),
-        ("GET", "/monitoring/events"),
         ("POST", "/refinement/runs"),
         ("GET", "/refinement/iterations"),
         ("GET", "/refinement/evaluations"),

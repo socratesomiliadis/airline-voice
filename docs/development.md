@@ -7,9 +7,11 @@ Use `uv add --package airline-api <dependency>` or
 Use `uv add --dev <dependency>` for root development tooling. Commit `uv.lock`.
 
 Run `npm install <dependency>` in `apps/dashboard` for dashboard dependencies and
-commit `package-lock.json`. Use the shadcn `add` command if shadcn components are
-introduced. The scaffold currently uses small composable React components,
-Tailwind utility classes, and Lucide SVG icons without shadcn.
+commit `package-lock.json`. The dashboard uses shadcn/ui with Base UI primitives
+and the `base-nova` preset in `apps/dashboard/components.json`. Install components
+with `npx shadcn@latest add <component>` from `apps/dashboard`; compose the installed
+components for feature views rather than introducing replacement UI primitives.
+Tailwind utilities and Lucide SVG icons provide layout, theme and icons.
 
 Biome handles dashboard linting, formatting, and import organization. Run
 `npm run format` from `apps/dashboard` to apply safe fixes and formatting.
@@ -37,13 +39,13 @@ Regression tests in `tests/test_refinement.py` exercise mixed repairs, terminati
 provider contracts, evidence checks and rollback without external credentials.
 See [the refinement guide](refinement.md) before changing runtime policies.
 
-## Connecting dashboard data
+## Dashboard monitoring
 
-Implement the API boundary in `src/lib/api/`, then use it through feature-owned
-data access. Keep provider secrets server-side. Implement live transport through
-the event-stream boundary, including connection status and cleanup, before changing
-the shell's static connection indicator. Replace empty states with actual records
-only after the corresponding API endpoints are available.
+Observation schemas live in `packages/contracts/monitoring.py`, mirrored by the
+dashboard's typed contracts. The worker publishes snapshots; the API only reads
+and streams them. Keep credentials in the server-side proxy, and keep view state
+separate from autonomous execution. Add no mutation routes or controls to the
+observation UI. See [streaming, configuration and tests](monitoring.md).
 
 ## Local servers
 

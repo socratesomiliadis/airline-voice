@@ -1,8 +1,9 @@
 """Validated contracts shared by simulation, judging, repair, and run artifacts."""
 
+from collections.abc import Callable
 from typing import Any, Literal, Self
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, PrivateAttr, model_validator
 
 type Criterion = Literal["understanding", "api_correctness", "outcome_confirmation", "naturalness"]
 
@@ -34,6 +35,12 @@ class CustomerTurn(Contract):
 
 
 class Simulation(Contract):
+    _on_change: Callable[["Simulation"], None] | None = PrivateAttr(default=None)
+
+    def notify(self) -> None:
+        if self._on_change:
+            self._on_change(self)
+
     scenario_id: str
     conversation_id: str | None = None
     dialogue: list[dict[str, Any]] = Field(default_factory=list)

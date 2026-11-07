@@ -25,6 +25,7 @@ check-dashboard:
 	npm --prefix apps/dashboard run lint
 	npm --prefix apps/dashboard run format:check
 	npm --prefix apps/dashboard run typecheck
+	npm --prefix apps/dashboard test
 	npm --prefix apps/dashboard run build
 
 up:

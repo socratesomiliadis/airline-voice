@@ -13,10 +13,11 @@ It does not import API internals or write directly to the API's database. Its
 workspace adapter applies bounded backend edits, verifies them, reloads the
 service and restores failed changes. See [autonomous refinement](refinement.md).
 
-The dashboard contains presentation components and monitoring view definitions.
-A future server-side API adapter will load data; a dedicated event-stream adapter
-will supply live updates. Neither exists yet. Navigation and empty states are the
-only current UI behavior.
+The dashboard observes the worker through a server-side GET-only proxy. The API
+reads redacted worker snapshots from a shared artifacts directory and streams
+server-sent events. A client provider handles reconnects, transport heartbeats and
+selection across views. Conversations, scores, changes and history update without
+manual commands. See [observation architecture](monitoring.md).
 
 `packages/contracts` is a leaf dependency shared by Python apps. It contains a
 generic JSON payload type, a proposed event envelope, and event transport ports.
@@ -112,11 +113,17 @@ run-control routes still return `501`; the executable entry point is the host CL
 
 ## Events and monitoring
 
-The proposed event envelope includes an explicit ID, name, timestamp, correlation
-ID, and JSON payload. Publishing, persistence, delivery semantics, replay,
-subscriber authentication, and event names are deferred. The `/monitoring/events`
-route returns `501`; no SSE or WebSocket connection is opened. Select the transport
-when its durability and scaling requirements are known.
+The worker publishes durable, redacted `monitor.json` snapshots as conversations
+and stages progress. Shared Pydantic observation contracts live in
+`packages/contracts`. The authenticated monitoring API exposes snapshots and
+server-sent events; it does not write to the worker or run it. Full snapshots make
+reconnect and replay idempotent across API reloads. The dashboard proxies the
+stream with server-only credentials. Worker and transport heartbeats are separate,
+and the viewer shows stale/disconnected state without inventing activity.
+
+The earlier generic event envelope remains available for future broader platform
+events. Current monitoring uses the concrete observation contracts described in
+[the monitoring guide](monitoring.md).
 
 ## Current runtime guarantees
 
@@ -124,7 +131,7 @@ when its durability and scaling requirements are known.
 - The liveness endpoint reports process availability only.
 - Flight and booking operations persist to PostgreSQL; unrelated platform routes return `501`.
 - The worker CLI autonomously simulates, evaluates, patches and redeploys within configured limits.
-- Dashboard views contain no fabricated operational data or automated network calls.
+- Dashboard views contain only recorded observations and accept no loop-control commands.
 - Provider credentials stay in server-side settings; artifacts redact known secret values.
 
 The implementation follows the documented [FastAPI router composition](https://fastapi.tiangolo.com/tutorial/bigger-applications/),

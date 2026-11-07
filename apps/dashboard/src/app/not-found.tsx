@@ -1,16 +1,27 @@
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyTitle,
+} from "@/components/ui/empty";
 
 export default function NotFound() {
   return (
-    <div className="py-20 text-center">
-      <h1 className="text-2xl font-semibold">Page not found</h1>
-      <p className="mt-3 text-sm text-slate-500">This workspace page does not exist.</p>
-      <Link
-        href="/"
-        className="mt-6 inline-block text-sm font-medium text-emerald-700 underline underline-offset-4"
-      >
-        Return to overview
-      </Link>
-    </div>
+    <Empty className="py-20">
+      <EmptyHeader>
+        <EmptyTitle>
+          <h1>Page not found</h1>
+        </EmptyTitle>
+        <EmptyDescription>This workspace page does not exist.</EmptyDescription>
+      </EmptyHeader>
+      <EmptyContent>
+        <Button variant="outline" nativeButton={false} render={<Link href="/" />}>
+          Return to overview
+        </Button>
+      </EmptyContent>
+    </Empty>
   );
 }
