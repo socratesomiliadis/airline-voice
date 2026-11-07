@@ -80,6 +80,26 @@ def test_export_preserves_repair_and_scores_without_provider_headers(tmp_path, m
     exported = "".join(path.read_text() for path in output.iterdir())
     assert "private-value" not in exported and "private-url" not in exported
     assert "tool_details" not in exported and "headers" not in exported
+    # New run reports carry their own prompts, scenarios and repair proposals.
+    run["initial_prompt"] = "Initial private-value"
+    run["final_prompt"] = "Final"
+    run["scenario_definitions"] = [{"id": "booking"}]
+    for iteration in iterations:
+        repair = source / f"iteration-{iteration['number']:02d}/repair.json"
+        iteration["repair"] = json.loads(repair.read_text()) if repair.exists() else None
+    (source / "run.json").write_text(json.dumps(run))
+    import shutil
+
+    for path in list(source.iterdir()):
+        if path.name == "run.json":
+            continue
+        if path.is_dir():
+            shutil.rmtree(path)
+        else:
+            path.unlink()
+    standalone = export_run(source / "run.json", tmp_path / "standalone")
+    assert standalone["performance_summary"] == report["performance_summary"]
+    assert standalone["iterations"][0]["change_explanation"] == "Include missing reference"
     run["status"] = "error"
     (source / "run.json").write_text(json.dumps(run))
     with pytest.raises(ValueError, match="completed runs"):

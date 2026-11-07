@@ -53,6 +53,17 @@ class AirlineAPI:
     async def prepare(self, scenario: Scenario, caller: str) -> dict[str, Any]:
         identity = {"passenger_id": caller, "full_name": "Jordan Taylor"}
         fixture: dict[str, Any] = {"passenger": identity}
+        if scenario.assertions.selection:
+            query = scenario.assertions.tool_parameters.get("search_flights", {})
+            offers = await request(
+                self.client,
+                "GET",
+                "api/v1/flights",
+                params={**{k: v for k, v in query.items() if v is not None}, "limit": 1},
+            )
+            if not isinstance(offers, dict) or not offers.get("offers"):
+                raise RefinementError("No reference offer available for selection assertion")
+            fixture["expected_offer"] = offers["offers"][0]
         if scenario.setup is None:
             return fixture
         result = await request(

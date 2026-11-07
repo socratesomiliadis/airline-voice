@@ -9,6 +9,8 @@ from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse
+from uuid import uuid4
 
 from airline_refiner.config import RefinementConfig
 from airline_refiner.errors import RefinementError
@@ -45,10 +47,15 @@ class Artifacts:
 
 
 class Workspace:
-    def __init__(self, config: RefinementConfig) -> None:
+    def __init__(self, config: RefinementConfig, test_database_url: str | None = None) -> None:
         self.config = config
         self.root = config.workspace_root.resolve()
         self.roots = [self.root / name for name in config.editable_roots]
+        self.test_database_url = (
+            os.environ.get("TEST_DATABASE_URL", "")
+            if test_database_url is None
+            else test_database_url
+        )
         for root in self.roots:
             if not root.resolve().is_relative_to(self.root) or root.is_symlink():
                 raise RefinementError(
@@ -153,7 +160,13 @@ class Workspace:
                 ) from None
         return PatchTransaction(originals, candidates)
 
-    async def command(self, command: list[str], log: Path, artifacts: Artifacts) -> None:
+    async def command(
+        self,
+        command: list[str],
+        log: Path,
+        artifacts: Artifacts,
+        environment: dict[str, str] | None = None,
+    ) -> None:
         """Only trusted configuration supplies argv; generated code supplies no shell commands."""
         try:
             process = await asyncio.create_subprocess_exec(
@@ -162,7 +175,7 @@ class Workspace:
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.STDOUT,
                 start_new_session=True,
-                env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"},
+                env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1", **(environment or {})},
             )
         except OSError:
             raise RefinementError(f"Cannot execute configured command: {command[0]}") from None
@@ -190,6 +203,51 @@ class Workspace:
             await self.command(
                 [*self.config.reload_command, "--check"], Path("service-check.log"), artifacts
             )
+
+    def require_database_verification(self) -> None:
+        parsed = urlparse(self.test_database_url)
+        if parsed.scheme != "postgresql+asyncpg" or not parsed.hostname:
+            raise RefinementError(
+                "Backend repairs require TEST_DATABASE_URL (postgresql+asyncpg) for disposable "
+                "PostgreSQL regressions; no candidate source was activated."
+            )
+
+    async def verify(self, prefix: str, artifacts: Artifacts) -> dict[str, Any]:
+        self.require_database_verification()
+        report_path = (artifacts.directory / prefix / "verification.json").resolve()
+        nonce = uuid4().hex
+        plugins = set(filter(None, os.environ.get("PYTEST_PLUGINS", "").split(",")))
+        plugins.add("airline_refiner.verification")
+        await self.command(
+            self.config.verification_command,
+            Path(prefix) / "verification.log",
+            artifacts,
+            environment={
+                "TEST_DATABASE_URL": self.test_database_url,
+                "PYTEST_PLUGINS": ",".join(sorted(plugins)),
+                "AIRLINE_VERIFICATION_REPORT": str(report_path),
+                "AIRLINE_VERIFICATION_NONCE": nonce,
+                "AIRLINE_REQUIRED_DATABASE_TESTS": json.dumps(self.config.required_database_tests),
+            },
+        )
+        try:
+            report: dict[str, Any] = json.loads(report_path.read_text())
+            if (
+                not isinstance(report, dict)
+                or report.get("nonce") != nonce
+                or report.get("passed") is not True
+                or report.get("required_groups") != self.config.required_database_tests
+                or not report.get("passed_nodeids")
+                or report.get("incomplete_nodeids")
+                or report.get("deselected_nodeids")
+            ):
+                raise ValueError("Required database verification did not pass")
+        except (OSError, ValueError, TypeError):
+            raise RefinementError(
+                "Verification produced no valid PostgreSQL test receipt; a successful command "
+                "alone cannot authorize a backend reload."
+            ) from None
+        return report
 
 
 class PatchTransaction:

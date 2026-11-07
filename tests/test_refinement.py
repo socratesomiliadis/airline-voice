@@ -48,6 +48,38 @@ def code_fault(path="backend/service.py", function="quote"):
     )
 
 
+def booking_evidence(passenger):
+    return {
+        "id": "booking-1",
+        "reference": "ABC123",
+        "status": "confirmed",
+        "flight": {"id": "flight-1"},
+        "seat_class": "economy",
+        "fare_tier": "standard",
+        "unit_price_cents": 100,
+        "ticket_total_cents": 100,
+        "passengers": [passenger],
+        "extras": [],
+        "events": [{"charged_cents": 100, "refunded_cents": 0, "credit_cents": 0}],
+        "total_charged_cents": 100,
+        "total_refunded_cents": 0,
+        "total_credit_cents": 0,
+    }
+
+
+class OfflineWorkspace(Workspace):
+    """Orchestration tests substitute verification; real Workspace gates are tested separately."""
+
+    def require_database_verification(self):
+        pass
+
+    async def verify(self, prefix, artifacts):
+        await self.command(
+            self.config.verification_command, Path(prefix) / "verification.log", artifacts
+        )
+        return {"passed": True, "adapter": "offline-test"}
+
+
 class ScriptedModel:
     """Exercises real stages and their validators with deterministic model responses."""
 
@@ -164,6 +196,7 @@ class FakeProvider:
         return session
 
     async def transcript(self, conversation_id, timeout_seconds):
+        passenger = self.sessions[-1].result.fixture["passenger"]
         return [
             {
                 "role": "agent",
@@ -171,9 +204,26 @@ class FakeProvider:
                 "tool_calls": [
                     {
                         "tool_name": "book_flight",
+                        "request_id": "call-book",
                         "tool_has_been_called": True,
-                        "params_as_json": '{"flight_id":"flight-1"}',
+                        "params_as_json": json.dumps(
+                            {
+                                "flight_id": "flight-1",
+                                "seat_class": "economy",
+                                "fare_tier": "standard",
+                                "expected_unit_price_cents": 100,
+                                "passengers": [passenger],
+                            }
+                        ),
                     },
+                ],
+                "tool_results": [
+                    {
+                        "request_id": "call-book",
+                        "tool_name": "book_flight",
+                        "result_value": json.dumps(booking_evidence(passenger)),
+                        "is_error": False,
+                    }
                 ],
             }
         ]
@@ -191,7 +241,7 @@ class FakeAPI:
         return {"passenger": {"passenger_id": caller, "full_name": "Jordan Taylor"}}
 
     async def capture(self, fixture, conversation_id):
-        return [{"reference": "ABC123", "status": "confirmed"}]
+        return [booking_evidence(fixture["passenger"])]
 
     async def cleanup(self, fixture, conversation_id, caller):
         self.cleanups.append(caller)
@@ -258,7 +308,7 @@ def rig(tmp_path):
         reload_command=[sys.executable, "-c", "open('reloaded', 'a').write('reload\\n')"],
     )
     model, provider, api = ScriptedModel(), FakeProvider(), FakeAPI()
-    workspace = Workspace(config)
+    workspace = OfflineWorkspace(config)
     artifacts = Artifacts(tmp_path / "artifacts")
     runner = RefinementRunner(config, model, provider, api, workspace, artifacts)
     return runner, config, model, provider, api, tmp_path
@@ -371,6 +421,99 @@ def test_initially_passing_suite_makes_no_changes(rig):
     assert model.repairs == 0 and not provider.updates and not (root / "reloaded").exists()
 
 
+@pytest.mark.parametrize("mode", ["passed", "limit", "error"])
+def test_terminal_iterations_and_self_contained_run_summary_are_always_written(
+    rig, mode, monkeypatch
+):
+    runner, config, model, provider, api, root = rig
+    if mode == "limit":
+        config.max_iterations = 1
+        model.fail_rounds = 100
+    if mode == "error":
+
+        async def unavailable(*args):
+            raise RefinementError("Provider unavailable")
+
+        monkeypatch.setattr(provider, "connect", unavailable)
+    result = asyncio.run(runner.run())
+    report = json.loads((root / "artifacts/run.json").read_text())
+    assert report["finished_at"] and report["started_at"]
+    assert report["initial_prompt"] == "Original prompt"
+    assert report["final_prompt"] == result.final_prompt
+    assert (root / "artifacts/final-prompt.md").read_text() == result.final_prompt
+    assert report["initial_source_sha256"] and report["final_source_sha256"]
+    assert report["configuration"]["pass_score"] == config.pass_score
+    for iteration in report["iterations"]:
+        saved = json.loads(
+            (root / f"artifacts/iteration-{iteration['number']:02d}/iteration.json").read_text()
+        )
+        assert saved == iteration
+        assert saved["finished_at"] and saved["status"] != "running"
+    if mode == "passed":
+        change = report["iterations"][0]
+        assert change["repair"]["explanation"] and change["repair"]["edits"]
+        assert change["prompt_diff"] and change["code_diff"]
+        assert change["change_status"] == "applied"
+        assert change["verification"]["passed"]
+        assert report["performance_summary"]["booking"]["change"]["understanding"] == 5
+        assert report["baseline_complete"] and report["final_complete"]
+    elif mode == "limit":
+        assert report["status"] == "iteration_limit"
+        assert not report["iterations"][-1]["repair_applied"]
+    else:
+        assert report["status"] == "error" and not report["final_complete"]
+        assert report["performance_summary"]["booking"]["final"] is None
+        assert report["performance_summary"]["booking"]["change"] is None
+
+
+def test_partial_run_summary_does_not_substitute_older_scores_for_untested_scenarios(
+    rig, monkeypatch
+):
+    runner, _, model, _, api, root = rig
+    data = json.loads((root / "scenarios.json").read_text())
+    data.append({**data[0], "id": "second"})
+    (root / "scenarios.json").write_text(json.dumps(data))
+    model.fail_rounds = 0
+    prepare = api.prepare
+
+    async def prepare_fixture(scenario, caller):
+        if scenario.id == "second":
+            raise RefinementError("Fixture unavailable")
+        return await prepare(scenario, caller)
+
+    monkeypatch.setattr(api, "prepare", prepare_fixture)
+    result = asyncio.run(runner.run())
+    assert result.status == "error" and not result.final_complete
+    assert result.performance_summary["second"].final is None
+    assert result.performance_summary["second"].change is None
+    assert result.iterations[-1].status == "error"
+
+
+def test_real_workspace_rejects_code_repair_without_database_before_writing_source(rig):
+    runner, config, _, _, _, root = rig
+    runner.workspace = Workspace(config, test_database_url="")
+    repair = Repair(
+        explanation="Correct fare",
+        system_prompt=None,
+        edits=[
+            FileEdit(
+                path="backend/service.py",
+                function="quote",
+                old_text="return 1",
+                new_text="return 2",
+            )
+        ],
+    )
+    with pytest.raises(RefinementError, match="TEST_DATABASE_URL"):
+        asyncio.run(
+            runner.apply_repair(
+                repair, "Original", runner.workspace.source(), "repair", [code_fault()]
+            )
+        )
+    assert (root / "backend/service.py").read_text() == service_source(1)
+    assert not (root / "reloaded").exists()
+
+
 def test_verification_failure_restores_code_and_next_iteration_recovers(rig):
     runner, config, _, provider, _, root = rig
     config.verification_command = [sys.executable, "-c", "raise SystemExit(1)"]
@@ -408,6 +551,25 @@ def test_unrecoverable_reload_stops_instead_of_testing_unknown_state(rig):
     assert "rollback" in result.error
     assert model.judged == 1
     assert (root / "backend/service.py").read_text() == service_source(1)
+    assert not result.deployment_consistent
+    assert result.final_prompt is None and result.final_source_sha256 is None
+    assert result.iterations[0].change_status == "recovery_failed"
+
+
+def test_cancellation_finalizes_iteration_and_run_before_propagating(rig, monkeypatch):
+    runner, _, _, provider, _, root = rig
+
+    async def interrupted(*args):
+        raise asyncio.CancelledError()
+
+    monkeypatch.setattr(provider, "connect", interrupted)
+    with pytest.raises(asyncio.CancelledError):
+        asyncio.run(runner.run())
+    report = json.loads((root / "artifacts/run.json").read_text())
+    assert report["status"] == "error" and report["error"] == "Refinement interrupted"
+    assert report["finished_at"] and not report["final_complete"]
+    assert report["iterations"][0]["status"] == "error"
+    assert (root / "artifacts/iteration-01/iteration.json").exists()
 
 
 def test_prompt_publish_failure_rolls_back_both_prompt_and_code(rig):

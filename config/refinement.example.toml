@@ -13,8 +13,13 @@ prompt_path = "prompts/agent/system.md"
 knowledge_dir = "knowledge"
 editable_roots = ["apps/api/src/airline_api"]
 max_patch_files = 6
-# Tests run before reload. Supply TEST_DATABASE_URL to include PostgreSQL regressions.
+# Backend repairs require TEST_DATABASE_URL and passing receipts for these PostgreSQL groups.
 verification_command = ["uv", "run", "--all-packages", "pytest", "-q"]
+required_database_tests = [
+    "tests/test_bookings_api.py",
+    "tests/test_flight_database.py",
+    "tests/test_refinement.py::test_real_fixture_lifecycle_releases_inventory_between_iterations",
+]
 # Restart the existing local Uvicorn API, or rebuild its existing Compose container.
 # The helper checks listeners before launching; it refuses unrelated processes.
 reload_command = ["uv", "run", "--package", "airline-refiner", "python", "-m", "airline_refiner.reload_service"]

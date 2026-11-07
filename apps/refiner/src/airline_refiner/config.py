@@ -29,6 +29,9 @@ class Settings(BaseSettings):
         validation_alias=AliasChoices("ANTHROPIC_API_KEY", "REFINER_MODEL_API_KEY"),
     )
     model_base_url: HttpUrl = HttpUrl("https://api.anthropic.com/v1")
+    test_database_url: SecretStr = Field(
+        default=SecretStr(""), validation_alias="TEST_DATABASE_URL"
+    )
 
 
 class RefinementConfig(BaseModel):
@@ -56,6 +59,11 @@ class RefinementConfig(BaseModel):
     max_patch_files: int = Field(default=6, ge=1, le=20)
     max_source_chars: int = Field(default=350_000, ge=1)
     verification_command: list[str] = ["uv", "run", "--all-packages", "pytest", "-q"]
+    required_database_tests: list[str] = [
+        "tests/test_bookings_api.py",
+        "tests/test_flight_database.py",
+        "tests/test_refinement.py::test_real_fixture_lifecycle_releases_inventory_between_iterations",
+    ]
     reload_command: list[str] = [
         "uv",
         "run",
@@ -68,7 +76,12 @@ class RefinementConfig(BaseModel):
 
     @model_validator(mode="after")
     def require_commands(self) -> Self:
-        for name in ("verification_command", "reload_command", "editable_roots"):
+        for name in (
+            "verification_command",
+            "reload_command",
+            "editable_roots",
+            "required_database_tests",
+        ):
             if not getattr(self, name):
                 raise ValueError(f"{name} cannot be empty")
         return self

@@ -1,4 +1,4 @@
-.PHONY: setup dev-api dev-api-watch dev-dashboard refine check check-python check-dashboard up down migrate seed-flights
+.PHONY: setup dev-api dev-api-watch dev-dashboard refine verify-backend check check-python check-dashboard up down migrate seed-flights
 
 # Use the checkout's uv installation for worker verification and reload subprocesses.
 export PATH := $(CURDIR)/.tools/bin:$(PATH)
@@ -24,6 +24,9 @@ dev-dashboard:
 
 refine:
 	$(UV) run --package airline-refiner airline-refiner run
+
+verify-backend:
+	$(UV) run --all-packages python -m airline_refiner.verification
 
 check: check-python check-dashboard
 

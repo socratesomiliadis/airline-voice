@@ -7,13 +7,20 @@ The Python worker runs the complete cycle without interactive approvals:
    authenticated WebSocket, with `conversation.text_only=true`. No audio is sent.
 2. Close the chat and retrieve ElevenLabs' authoritative transcript, including
    tool calls, exact arguments and tool results. Capture persisted booking state
-   before cancelling test bookings to release inventory.
+   before cancelling test bookings to release inventory. Next/cheapest scenarios
+   also capture a reference REST offer before the conversation.
 3. A separate, stateless evaluator LLM call scores understanding, API correctness,
    outcome confirmation and naturalness from 1–10. Each failed criterion must
    have an actual evidence quote, explanation and `prompt` or `code` root cause.
    Each code failure identifies its existing file, qualified function, and the
    faulty behavior versus expected behavior. Backend errors are distinguished
-   from valid rejection of bad agent arguments.
+   from valid rejection of bad agent arguments. Deterministic checks independently
+   validate successful tools, correct references/quotes/passengers, dates, seat
+   requests, item quantities/measurements/fees, ledger totals and forbidden writes.
+   Explicit `assertions` in the scenario JSON define expected state and tool order.
+   Failed checks require grounded API/outcome failure diagnoses from the judge;
+   high model scores cannot override them. Correct recovery from a tool error is
+   allowed when a later call succeeds and persisted outcomes match.
 4. A repair LLM rewrites the complete system prompt for prompt failures and
    proposes exact-text Python edits to the diagnosed functions for code failures.
    It receives those files and behavior diagnoses. Both fix types can occur together.
@@ -27,6 +34,7 @@ The Python worker runs the complete cycle without interactive approvals:
 
 `PASS_SCORE` and `MAX_ITERATIONS` in the worker's `config.py` define the defaults;
 TOML and CLI options override them. A high average cannot hide a failing criterion.
+A failed deterministic outcome check also prevents passing, even at threshold 1.
 
 ## Running
 
@@ -109,11 +117,30 @@ refiner itself are outside the default editable paths. Model-generated shell
 commands are never executed; commands come only from the trusted TOML config.
 The workspace lock prevents concurrent runs from patching the same checkout.
 
-The default verification command is `uv run --all-packages pytest -q`. Set
-`TEST_DATABASE_URL` in the worker's **environment** to include PostgreSQL
-regressions; those tests create and drop their own disposable databases. Without
-it, database integration tests are skipped. Verification runs on the host before
-service reload, so dependencies for all workspace packages must be installed.
+Backend repairs require `TEST_DATABASE_URL` in the worker environment or root
+`.env`. Use a PostgreSQL role with `CREATE DATABASE`: fixtures create and drop
+random disposable databases and do not reset the airline database. The worker
+rejects missing/non-PostgreSQL configuration before writing candidate source.
+
+The default command remains `uv run --all-packages pytest -q`. The worker injects
+a pytest verification plugin and a fresh receipt nonce. `required_database_tests`
+in TOML identifies the required booking, migration and fixture-lifecycle groups.
+Every required test must be collected, use the PostgreSQL fixture, and pass setup,
+call and teardown. Skips, xfails, deselection, missing groups, stale receipts and
+commands that return success without a valid receipt all prevent activation.
+The receipt is saved as `verification.json`. Other optional offline tests may
+still skip outside those required groups. Custom verification commands must also
+run the plugin and produce a passing receipt; they cannot authorize reload by
+exit status alone. A failed check restores candidate source before recovery.
+
+Run the same strict gate directly (it loads the root `.env`):
+
+```sh
+make verify-backend
+```
+
+Verification runs on the host before service reload, so install all workspace
+packages and development dependencies. CI uses this strict gate with PostgreSQL.
 
 The default reload helper checks for an existing listener. For the local airline
 Uvicorn process it saves its launch command, terminates that specific service,
@@ -151,15 +178,29 @@ been executed, rather than merely mentioned by the assistant. The evaluator also
 checks ordering, arguments, outcomes and policy facts against source, the full
 transcript, persisted state and `knowledge/*.json`.
 
-Each run writes `artifacts/<run-id>/run.json`, a live redacted `monitor.json`, the resolved nonsecret config,
-scenario snapshots, original prompt, and iteration directories containing:
+Each run writes a self-contained `artifacts/<run-id>/run.json` plus a live redacted
+`monitor.json`. The aggregate report contains timestamps, configuration, scenario
+contracts, starting/final prompts, backend source hashes, every simulation and
+evaluation (including deterministic checks), complete repair proposals and reasons,
+prompt/code diffs, application/rollback status, verification receipts and bounded
+execution-log excerpts. `performance_summary` records initial/final scores and
+per-criterion changes for each scenario. `baseline_complete` and `final_complete`
+identify partial runs; an untested scenario has null scores/deltas, never invented
+improvement. `deployment_consistent=false` identifies unrecoverable deployment
+state, and its final prompt/source metadata are marked unknown.
+
+`final-prompt.md` is also written separately. Every iteration is finalized to
+`iteration.json`, including the terminal passing/limit iteration and interrupted
+or failed iterations. Further evidence files include:
 
 - `<scenario>.simulation.json`: conversation ID, dialogue, full transcript, tool
   events, fixture, persisted booking state, and execution/cleanup errors.
 - `<scenario>.evaluation.json`: four scores, rationale, failure quotes, root
   causes and precise file/function/behavior diagnoses for code failures.
 - `prompt.md` and `source.json`: the prompt and source used in that iteration.
-- `repair.json`, `code.patch`, verification/reload logs when a repair is attempted.
+- `repair.json`, `code.patch`, verification receipts and verification/reload logs
+  when a repair is attempted. Log excerpts in the aggregate report are capped at
+  12,000 characters per command; complete command logs remain alongside it.
 
 Provider transport, malformed model output and evidence validation have bounded
 retries. Customer turns, per-turn waiting, transcript processing, subprocesses
@@ -185,3 +226,7 @@ The bundled local/Compose helper checks this automatically.
 
 Completed live runs can be exported using `scripts/export_refinement_run.py`.
 The export preserves actual scores and diagnoses, including regressions.
+
+The exporter accepts either a run directory or its standalone `run.json`. New
+reports need no prompt, scenario or repair sidecar files to produce the portable
+bundle. Older recorded examples remain readable through the legacy sidecar path.

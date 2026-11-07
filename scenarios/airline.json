@@ -7,7 +7,21 @@
     "required_tools": [
       "search_flights",
       "book_flight"
-    ]
+    ],
+    "assertions": {
+      "booking_status": "confirmed",
+      "origin": "SFO",
+      "destination": "JFK",
+      "seat_class": "economy",
+      "fare_tier": "standard",
+      "departure_date": "2026-11-10",
+      "tool_order": [
+        [
+          "search_flights",
+          "book_flight"
+        ]
+      ]
+    }
   },
   {
     "id": "cancel-booking",
@@ -20,6 +34,16 @@
     ],
     "setup": {
       "fare_tier": "flexible"
+    },
+    "assertions": {
+      "booking_status": "cancelled",
+      "tool_order": [
+        [
+          "get_booking",
+          "cancel_booking"
+        ]
+      ],
+      "full_refund": true
     }
   },
   {
@@ -32,7 +56,25 @@
       "search_flights",
       "reschedule_booking"
     ],
-    "setup": {}
+    "setup": {},
+    "assertions": {
+      "booking_status": "confirmed",
+      "origin": "SFO",
+      "destination": "JFK",
+      "seat_class": "economy",
+      "fare_tier": "standard",
+      "departure_date": "2026-11-11",
+      "tool_order": [
+        [
+          "get_booking",
+          "reschedule_booking"
+        ],
+        [
+          "search_flights",
+          "reschedule_booking"
+        ]
+      ]
+    }
   },
   {
     "id": "checked-baggage",
@@ -43,7 +85,24 @@
       "get_booking",
       "add_booking_items"
     ],
-    "setup": {}
+    "setup": {},
+    "assertions": {
+      "booking_status": "confirmed",
+      "items": [
+        {
+          "item_type": "checked_bag",
+          "count": 2,
+          "status": "confirmed"
+        }
+      ],
+      "item_charge_cents": 3500,
+      "tool_order": [
+        [
+          "get_booking",
+          "add_booking_items"
+        ]
+      ]
+    }
   },
   {
     "id": "cabin-pet",
@@ -54,7 +113,24 @@
       "get_booking",
       "add_booking_items"
     ],
-    "setup": {}
+    "setup": {},
+    "assertions": {
+      "booking_status": "confirmed",
+      "items": [
+        {
+          "item_type": "cabin_pet",
+          "count": 1,
+          "status": "pending_confirmation"
+        }
+      ],
+      "item_charge_cents": 0,
+      "tool_order": [
+        [
+          "get_booking",
+          "add_booking_items"
+        ]
+      ]
+    }
   },
   {
     "id": "special-assistance",
@@ -65,14 +141,34 @@
       "get_booking",
       "add_booking_items"
     ],
-    "setup": {}
+    "setup": {},
+    "assertions": {
+      "booking_status": "confirmed",
+      "items": [
+        {
+          "item_type": "mobility_aid",
+          "count": 1,
+          "status": "pending_confirmation"
+        }
+      ],
+      "item_charge_cents": 0,
+      "tool_order": [
+        [
+          "get_booking",
+          "add_booking_items"
+        ]
+      ]
+    }
   },
   {
     "id": "check-in-policy",
     "goal": "Find out how and when to check in for a domestic SFO to JFK flight, and the airport deadlines.",
     "customer_facts": "You are an adult on a domestic Airline Voice Demo economy standard SFO to JFK flight on November 12, 2026 with one checked bag. Ask about online check-in opening and closing, when to arrive, bag drop and boarding cutoffs. You are only asking for policy, not asking to check in or change your booking.",
     "expected_outcome": "The assistant answers using check_in.json with correct domestic timings and departure-airport local time, distinguishes recommended arrival from hard deadlines, and does not invent check-in completion or call a mutation tool.",
-    "required_tools": []
+    "required_tools": [],
+    "assertions": {
+      "forbid_mutations": true
+    }
   },
   {
     "id": "basic-change-restriction",
@@ -84,6 +180,11 @@
     ],
     "setup": {
       "fare_tier": "basic"
+    },
+    "assertions": {
+      "booking_status": "confirmed",
+      "forbid_mutations": true,
+      "unchanged_booking": true
     }
   },
   {
@@ -94,7 +195,30 @@
     "required_tools": [
       "search_flights",
       "book_flight"
-    ]
+    ],
+    "assertions": {
+      "booking_status": "confirmed",
+      "origin": "SFO",
+      "destination": "LAX",
+      "seat_class": "economy",
+      "selection": "earliest",
+      "tool_order": [
+        [
+          "search_flights",
+          "book_flight"
+        ]
+      ],
+      "tool_parameters": {
+        "search_flights": {
+          "origin": "SFO",
+          "destination": "LAX",
+          "seat_class": "economy",
+          "passengers": 1,
+          "sort_by": "departure",
+          "departure_date": null
+        }
+      }
+    }
   },
   {
     "id": "cheapest-following-week",
@@ -104,7 +228,31 @@
     "required_tools": [
       "search_flights",
       "book_flight"
-    ]
+    ],
+    "assertions": {
+      "booking_status": "confirmed",
+      "origin": "SFO",
+      "destination": "JFK",
+      "seat_class": "economy",
+      "selection": "cheapest",
+      "tool_order": [
+        [
+          "search_flights",
+          "book_flight"
+        ]
+      ],
+      "tool_parameters": {
+        "search_flights": {
+          "origin": "SFO",
+          "destination": "JFK",
+          "seat_class": "economy",
+          "passengers": 1,
+          "sort_by": "price",
+          "departure_date_from": "2026-11-09",
+          "departure_date_to": "2026-11-15"
+        }
+      }
+    }
   },
   {
     "id": "seat-preference",
@@ -114,14 +262,32 @@
     "required_tools": [
       "search_flights",
       "book_flight"
-    ]
+    ],
+    "assertions": {
+      "booking_status": "confirmed",
+      "origin": "SFO",
+      "destination": "JFK",
+      "seat_class": "economy",
+      "fare_tier": "standard",
+      "departure_date": "2026-11-12",
+      "seat_preference": "window",
+      "tool_order": [
+        [
+          "search_flights",
+          "book_flight"
+        ]
+      ]
+    }
   },
   {
     "id": "baggage-policy",
     "goal": "Understand cabin and checked baggage allowance, weight limits, and excess fees for a domestic economy standard ticket.",
     "customer_facts": "You are only asking about policy. You are traveling domestically SFO to JFK on economy standard. Ask what personal item and cabin bag are allowed, the included checked bag weight and size limits, the first extra checked bag fee, and how overweight and oversized fees combine. Do not request a booking or an item addition.",
     "expected_outcome": "Answers match baggage.json, distinguish cabin from hold baggage, purchased fare tier from cabin class, and explain additive excess fees in USD. No mutation tool is called.",
-    "required_tools": []
+    "required_tools": [],
+    "assertions": {
+      "forbid_mutations": true
+    }
   },
   {
     "id": "flight-information",
@@ -130,6 +296,15 @@
     "expected_outcome": "get_flight_information is called with flight_number DEMO301 and departure_date 2026-11-12. The assistant accurately reports returned status, gate and local departure time, makes clear this is fictional demo information, and does not invent live airport data or call mutation tools.",
     "required_tools": [
       "get_flight_information"
-    ]
+    ],
+    "assertions": {
+      "forbid_mutations": true,
+      "tool_parameters": {
+        "get_flight_information": {
+          "flight_number": "DEMO301",
+          "departure_date": "2026-11-12"
+        }
+      }
+    }
   }
 ]

@@ -19,9 +19,11 @@ def read_json(path: Path) -> Any:
 
 
 def export_run(source: Path, destination: Path) -> dict[str, Any]:
-    run = read_json(source / "run.json")
+    run_path = source if source.is_file() else source / "run.json"
+    source = run_path.parent
+    run = read_json(run_path)
     config_path, monitor_path = source / "configuration.json", source / "monitor.json"
-    config = read_json(config_path) if config_path.exists() else {}
+    config = run.get("configuration") or (read_json(config_path) if config_path.exists() else {})
     monitor = read_json(monitor_path) if monitor_path.exists() else {}
     if run["status"] not in {"passed", "iteration_limit"}:
         raise ValueError("Only completed runs can be exported as recorded examples")
@@ -37,7 +39,11 @@ def export_run(source: Path, destination: Path) -> dict[str, Any]:
     for iteration in run["iterations"]:
         prefix = source / f"iteration-{iteration['number']:02d}"
         repair_path = prefix / "repair.json"
-        repair = read_json(repair_path) if repair_path.exists() else None
+        repair = (
+            iteration.get("repair")
+            if "repair" in iteration
+            else (read_json(repair_path) if repair_path.exists() else None)
+        )
         conversations = []
         for simulation in iteration["simulations"]:
             transcript = []
@@ -83,6 +89,10 @@ def export_run(source: Path, destination: Path) -> dict[str, Any]:
                 "change_explanation": repair["explanation"] if repair else None,
                 "code_edits": repair["edits"] if repair else [],
                 "prompt_changed": bool(repair and repair["system_prompt"] is not None),
+                "change_status": iteration.get("change_status"),
+                "verification": iteration.get("verification"),
+                "prompt_diff": iteration.get("prompt_diff", ""),
+                "code_diff": iteration.get("code_diff", ""),
             }
         )
     first, final = iterations[0], iterations[-1]
@@ -93,17 +103,22 @@ def export_run(source: Path, destination: Path) -> dict[str, Any]:
     report = {
         "format": "airline-recorded-run-v1",
         "source_run_id": run["run_id"],
-        "started_at": monitor.get("started_at"),
-        "finished_at": monitor.get("updated_at"),
+        "started_at": run.get("started_at") or monitor.get("started_at"),
+        "finished_at": run.get("finished_at") or monitor.get("updated_at"),
         "models": {
             name: config.get(name) for name in ("customer_model", "evaluator_model", "repair_model")
         },
         "status": run["status"],
         "pass_score": run["pass_score"],
         "max_iterations": run["max_iterations"],
-        "scenario_definitions": read_json(source / "scenarios.json"),
+        "scenario_definitions": run.get("scenario_definitions")
+        or read_json(source / "scenarios.json"),
+        "baseline_complete": run.get("baseline_complete"),
+        "final_complete": run.get("final_complete"),
+        "deployment_consistent": run.get("deployment_consistent", True),
         "iterations": iterations,
-        "performance_summary": {
+        "performance_summary": run.get("performance_summary")
+        or {
             name: {
                 "initial": initial_scores[name],
                 "final": final_scores[name],
@@ -115,8 +130,12 @@ def export_run(source: Path, destination: Path) -> dict[str, Any]:
             for name in initial_scores
         },
     }
-    initial_prompt = (source / "initial-prompt.md").read_text()
-    final_prompt = (source / f"iteration-{final['number']:02d}" / "prompt.md").read_text()
+    initial_prompt = run.get("initial_prompt")
+    if initial_prompt is None:
+        initial_prompt = (source / "initial-prompt.md").read_text()
+    final_prompt = run.get("final_prompt")
+    if final_prompt is None:
+        final_prompt = (source / f"iteration-{final['number']:02d}" / "prompt.md").read_text()
     environment = {**dotenv_values(".env"), **os.environ}
     secrets = [
         value

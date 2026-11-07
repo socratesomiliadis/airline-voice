@@ -32,3 +32,10 @@ scoring, repairs and saved run evidence. Do not add real customer data.
 is November 6, 2026; the following calendar week is November 9–15. Each iteration
 creates fresh fixtures and releases their seats afterward. Gate/status inquiries
 need no reference. Seat preferences remain unassigned requests.
+
+Each scenario's `assertions` object is an executable acceptance contract. It can
+specify saved status/route/date/fare, seat request, item counts/status/charges,
+read-only behavior, unchanged bookings, tool ordering and exact parameters.
+Next/cheapest selection also checks a REST reference offer captured before the
+conversation. These checks are enforced independently of the LLM's scores.
+Policy wording and conversational confirmation remain the LLM judge's job.

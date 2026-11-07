@@ -36,7 +36,7 @@ jobs:
       - run: uv run --all-packages ruff check .
       - run: uv run --all-packages ruff format --check .
       - run: uv run --all-packages mypy
-      - run: uv run --all-packages pytest
+      - run: uv run --all-packages python -m airline_refiner.verification
       - run: uv run --package airline-api alembic -c apps/api/alembic.ini heads
       - run: uv run --package airline-api airline-seed-flights --validate-only
 

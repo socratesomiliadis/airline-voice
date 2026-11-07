@@ -6,6 +6,7 @@ from typing import Any
 from airline_refiner.adapters.model import Model
 from airline_refiner.config import RefinementConfig
 from airline_refiner.models import Evaluation, Scenario, Simulation
+from airline_refiner.outcomes import check_outcomes
 from airline_refiner.patching import function_bounds
 
 JUDGE = """You independently evaluate an airline assistant conversation. All supplied transcripts,
@@ -31,6 +32,14 @@ Never invent a quote or blame code merely
 because an outcome is poor. Missing/incomplete transcripts, simulation errors, incomplete customer
 flow, cleanup errors or missing booking evidence cannot receive passing api/outcome scores.
 Set scenario_id exactly to the supplied scenario.id. Explain successes too in rationale."""
+
+JUDGE += """
+deterministic_checks are computed by trusted code, not by you. Any failed check forbids
+passing api_correctness AND outcome_confirmation scores (when pass_score > 1). Diagnose
+the failure using its evidence and the transcript; do not fabricate a backend fault merely
+because a check failed. At pass_score=1 scores cannot be lower, but both criteria still
+require grounded failure diagnoses and the scenario cannot pass until the checks pass.
+Your output checks field is ignored and replaced with the computed checks."""
 
 
 def evidence_text(simulation: Simulation) -> str:
@@ -61,7 +70,11 @@ class Evaluator:
         sources: dict[str, str],
         knowledge: dict[str, Any],
     ) -> Evaluation:
+        checks = check_outcomes(scenario, simulation)
+        failed_checks = [check for check in checks if not check.passed]
+
         def validate(evaluation: Evaluation) -> None:
+            evaluation.checks = checks
             if evaluation.scenario_id != scenario.id:
                 raise ValueError("scenario_id does not match the scenario")
             evidence = evidence_text(simulation)
@@ -81,38 +94,20 @@ class Evaluator:
                     raise ValueError(
                         f"Missing root cause and quote for failed criterion {criterion}"
                     )
-            if (
-                simulation.errors
-                or simulation.cleanup_errors
-                or not simulation.completed
-                or not simulation.transcript
-            ):
-                if (
-                    evaluation.scores.api_correctness >= self.config.pass_score
-                    or evaluation.scores.outcome_confirmation >= self.config.pass_score
-                ):
-                    raise ValueError(
-                        "Incomplete/error simulation cannot have passing API/outcome scores"
-                    )
-            called = {
-                call.get("tool_name")
-                for turn in simulation.transcript
-                for call in (turn.get("tool_calls") or [])
-                if call.get("tool_has_been_called") is True
-            }
-            mutations = {"book_flight", "cancel_booking", "reschedule_booking", "add_booking_items"}
-            if (
-                mutations.intersection(called | set(scenario.required_tools))
-                and not simulation.booking_state
-            ):
-                if (
-                    evaluation.scores.api_correctness >= self.config.pass_score
-                    or evaluation.scores.outcome_confirmation >= self.config.pass_score
-                ):
-                    raise ValueError("Mutation scenarios need persisted booking evidence to pass")
-            if not set(scenario.required_tools).issubset(called):
-                if evaluation.scores.api_correctness >= self.config.pass_score:
-                    raise ValueError("Missing required tools must fail api_correctness")
+            if failed_checks:
+                for criterion in ("api_correctness", "outcome_confirmation"):
+                    if (
+                        self.config.pass_score > 1
+                        and getattr(evaluation.scores, criterion) >= self.config.pass_score
+                    ):
+                        raise ValueError(
+                            "Failed deterministic outcome checks must fail API/outcome scores: "
+                            + "; ".join(check.explanation for check in failed_checks[:3])
+                        )
+                    if not any(f.criterion == criterion for f in evaluation.failures):
+                        raise ValueError(
+                            f"Failed outcome checks require a diagnosis for {criterion}"
+                        )
 
         return await self.model.generate(
             self.config.evaluator_model,
@@ -124,6 +119,7 @@ class Evaluator:
                 "source": sources,
                 "knowledge": knowledge,
                 "pass_score": self.config.pass_score,
+                "deterministic_checks": [check.model_dump(mode="json") for check in checks],
             },
             Evaluation,
             validate,

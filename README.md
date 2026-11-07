@@ -204,7 +204,9 @@ Checks cover Python linting, formatting, strict typing, infrastructure smoke tes
 dashboard linting and formatting with Biome, TypeScript, and the Next.js production
 build. Dataset and scaffold tests require no external services. The PostgreSQL
 integration test runs when `TEST_DATABASE_URL` is set and uses its own disposable
-database. CI supplies PostgreSQL and also builds all three application images.
+database. Backend repair verification always requires PostgreSQL and rejects
+skipped required regressions; run `make verify-backend` to execute that gate using
+`.env`. CI uses the strict gate and also builds all three application images.
 
 ## Architecture and next implementation steps
 
@@ -234,3 +236,8 @@ uv run --all-packages python scripts/export_refinement_run.py artifacts/RUN_ID -
 The exporter includes conversation/tool evidence and saved booking state, excludes
 provider headers, URLs, debug events and environment configuration, and redacts
 known credentials. Only fictional customer data belongs in examples.
+
+Each new run's `run.json` is self-contained: prompts, scenario assertions, tool and
+booking evidence, scores, root causes, repair proposals/reasons, diffs, deployment
+outcomes and first-to-final score changes are included. Terminal and interrupted
+iterations are finalized. See [report and verification semantics](docs/refinement.md).

@@ -1,9 +1,10 @@
 """Validated contracts shared by simulation, judging, repair, and run artifacts."""
 
 from collections.abc import Callable
+from datetime import UTC, datetime
 from typing import Any, Literal, Self
 
-from pydantic import BaseModel, ConfigDict, Field, PrivateAttr, model_validator
+from pydantic import BaseModel, ConfigDict, Field, JsonValue, PrivateAttr, model_validator
 
 type Criterion = Literal["understanding", "api_correctness", "outcome_confirmation", "naturalness"]
 
@@ -20,6 +21,30 @@ class BookingSetup(Contract):
     fare_tier: str = "standard"
 
 
+class ItemExpectation(Contract):
+    item_type: str
+    count: int = Field(ge=1)
+    status: Literal["confirmed", "pending_confirmation"]
+
+
+class OutcomeExpectations(Contract):
+    booking_status: Literal["confirmed", "cancelled"] | None = None
+    origin: str | None = None
+    destination: str | None = None
+    departure_date: str | None = None
+    seat_class: str | None = None
+    fare_tier: str | None = None
+    seat_preference: Literal["window", "aisle", "extra_legroom"] | None = None
+    items: list[ItemExpectation] = Field(default_factory=list)
+    item_charge_cents: int | None = Field(default=None, ge=0)
+    full_refund: bool = False
+    forbid_mutations: bool = False
+    unchanged_booking: bool = False
+    tool_order: list[list[str]] = Field(default_factory=list)
+    tool_parameters: dict[str, dict[str, JsonValue]] = Field(default_factory=dict)
+    selection: Literal["earliest", "cheapest"] | None = None
+
+
 class Scenario(Contract):
     id: str = Field(pattern=r"^[a-z0-9][a-z0-9_-]{0,63}$")
     goal: str = Field(min_length=1)
@@ -27,6 +52,7 @@ class Scenario(Contract):
     expected_outcome: str = Field(min_length=1)
     required_tools: list[str]
     setup: BookingSetup | None = None
+    assertions: OutcomeExpectations = Field(default_factory=OutcomeExpectations)
 
 
 class CustomerTurn(Contract):
@@ -68,6 +94,13 @@ class CodeFault(Contract):
     )
 
 
+class OutcomeCheck(Contract):
+    name: str
+    passed: bool
+    explanation: str
+    evidence: str = ""
+
+
 class Failure(Contract):
     criterion: Criterion
     root_cause: Literal["prompt", "code"]
@@ -89,9 +122,12 @@ class Evaluation(Contract):
     scores: Scores
     rationale: str = Field(min_length=1)
     failures: list[Failure]
+    checks: list[OutcomeCheck] = Field(default_factory=list)
 
     def passes(self, threshold: int) -> bool:
-        return all(score >= threshold for score in self.scores.model_dump().values())
+        return all(check.passed for check in self.checks) and all(
+            score >= threshold for score in self.scores.model_dump().values()
+        )
 
 
 class FileEdit(Contract):
@@ -115,16 +151,48 @@ class Repair(Contract):
 
 class Iteration(Contract):
     number: int
+    started_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    finished_at: datetime | None = None
+    status: Literal["running", "completed", "error"] = "running"
+    error: str | None = None
     simulations: list[Simulation] = Field(default_factory=list)
     evaluations: list[Evaluation] = Field(default_factory=list)
     repair_applied: bool = False
     repair_error: str | None = None
+    repair: Repair | None = None
+    change_status: Literal["none", "proposed", "applied", "rolled_back", "recovery_failed"] = "none"
+    prompt_before: str | None = None
+    prompt_after: str | None = None
+    prompt_diff: str = ""
+    code_diff: str = ""
+    source_sha256: str | None = None
+    verification: dict[str, Any] | None = None
+    execution_logs: dict[str, str] = Field(default_factory=dict)
+
+
+class ScenarioPerformance(Contract):
+    initial: Scores | None = None
+    final: Scores | None = None
+    change: dict[str, int] | None = None
 
 
 class RunResult(Contract):
+    format_version: Literal["airline-refinement-run-v2"] = "airline-refinement-run-v2"
     run_id: str
-    status: Literal["passed", "iteration_limit", "error"]
+    status: Literal["running", "passed", "iteration_limit", "error"]
     pass_score: int
     max_iterations: int
     iterations: list[Iteration] = Field(default_factory=list)
     error: str | None = None
+    started_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    finished_at: datetime | None = None
+    scenario_definitions: list[Scenario] = Field(default_factory=list)
+    initial_prompt: str | None = None
+    final_prompt: str | None = None
+    initial_source_sha256: str | None = None
+    final_source_sha256: str | None = None
+    performance_summary: dict[str, ScenarioPerformance] = Field(default_factory=dict)
+    configuration: dict[str, Any] = Field(default_factory=dict)
+    baseline_complete: bool = False
+    final_complete: bool = False
+    deployment_consistent: bool = True

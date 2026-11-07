@@ -1,9 +1,12 @@
 """Autonomous simulate → evaluate → repair → reload/publish → repeat orchestration."""
 
 import asyncio
+import difflib
+import hashlib
 import json
 import logging
 from contextlib import suppress
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 from uuid import uuid4
@@ -16,13 +19,48 @@ from airline_refiner.adapters.model import Model
 from airline_refiner.adapters.workspace import Artifacts, Workspace, atomic_write
 from airline_refiner.config import RefinementConfig
 from airline_refiner.errors import RecoveryError, RefinementError
-from airline_refiner.models import CodeFault, Iteration, Repair, RunResult, Scenario
+from airline_refiner.models import (
+    CodeFault,
+    Iteration,
+    Repair,
+    RunResult,
+    Scenario,
+    ScenarioPerformance,
+)
 from airline_refiner.observation import RunObserver
 from airline_refiner.pipeline.stages.evaluate import Evaluator
 from airline_refiner.pipeline.stages.propose import FixProposer
 from airline_refiner.pipeline.stages.simulate import Simulator
 
 logger = logging.getLogger(__name__)
+
+
+def source_hash(sources: dict[str, str]) -> str:
+    return hashlib.sha256(json.dumps(sources, sort_keys=True).encode()).hexdigest()
+
+
+def summarize(result: RunResult) -> None:
+    if not result.iterations:
+        return
+    first, last = result.iterations[0], result.iterations[-1]
+    initial = {e.scenario_id: e.scores for e in first.evaluations}
+    final = {e.scenario_id: e.scores for e in last.evaluations}
+    expected = {s.id for s in result.scenario_definitions}
+    result.baseline_complete = first.status == "completed" and initial.keys() == expected
+    result.final_complete = last.status == "completed" and final.keys() == expected
+    result.performance_summary = {
+        name: ScenarioPerformance(
+            initial=initial.get(name),
+            final=final.get(name),
+            change={
+                key: value - initial[name].model_dump()[key]
+                for key, value in final[name].model_dump().items()
+            }
+            if name in initial and name in final
+            else None,
+        )
+        for name in sorted(expected)
+    }
 
 
 def load_scenarios(path: Path) -> list[Scenario]:
@@ -48,6 +86,7 @@ class RefinementRunner:
         self.evaluator = Evaluator(config, model)
         self.proposer = FixProposer(config, model)
         self.observer: RunObserver | None = None
+        self.current_iteration: Iteration | None = None
 
     async def apply_repair(
         self,
@@ -59,6 +98,8 @@ class RefinementRunner:
     ) -> str:
         transaction = self.workspace.plan(repair.edits, sources, code_faults)
         code_diff = transaction.diff(self.workspace.root)
+        if self.current_iteration:
+            self.current_iteration.code_diff = code_diff
         self.artifacts.write_text(prefix + "/code.patch", code_diff)
         if self.observer:
             self.observer.patch(code_diff)
@@ -68,15 +109,14 @@ class RefinementRunner:
         try:
             if repair.edits:
                 await self.workspace.check_service(self.artifacts)
+                self.workspace.require_database_verification()
                 if self.observer:
                     self.observer.phase("verifying")
                 transaction.apply()
                 code_applied = True
-                await self.workspace.command(
-                    self.config.verification_command,
-                    Path(prefix) / "verification.log",
-                    self.artifacts,
-                )
+                verified = await self.workspace.verify(prefix, self.artifacts)
+                if self.current_iteration:
+                    self.current_iteration.verification = verified
                 if self.observer:
                     self.observer.phase("reloading")
                 await self.workspace.command(
@@ -121,9 +161,10 @@ class RefinementRunner:
     async def run(self, run_id: str | None = None) -> RunResult:
         result = RunResult(
             run_id=run_id or uuid4().hex,
-            status="error",
+            status="running",
             pass_score=self.config.pass_score,
             max_iterations=self.config.max_iterations,
+            configuration=self.config.model_dump(mode="json"),
         )
         self.observer = RunObserver(result.run_id, self.config, self.artifacts)
         self.simulator.on_update = self.observer.conversation
@@ -132,6 +173,7 @@ class RefinementRunner:
         try:
             with self.workspace.lock():
                 scenarios = load_scenarios(self.workspace.root / self.config.scenarios_path)
+                result.scenario_definitions = scenarios
                 knowledge: dict[str, Any] = {
                     path.name: json.loads(path.read_text())
                     for path in sorted(
@@ -141,9 +183,11 @@ class RefinementRunner:
                 if not knowledge:
                     raise RefinementError("No policy documents found for grounded evaluation")
                 sources = self.workspace.source()
+                result.initial_source_sha256 = result.final_source_sha256 = source_hash(sources)
                 await self.api.ready(self.config.readiness_timeout_seconds)
                 await self.workspace.check_service(self.artifacts)
                 prompt = await self.provider.configure_chat()
+                result.initial_prompt = result.final_prompt = prompt
                 self.artifacts.write_text("initial-prompt.md", prompt)
                 self.artifacts.write(
                     "scenarios.json", [s.model_dump(mode="json") for s in scenarios]
@@ -151,100 +195,167 @@ class RefinementRunner:
                 previous_errors: list[str] = []
                 for number in range(1, self.config.max_iterations + 1):
                     self.observer.start_iteration(number, scenarios)
-                    iteration = Iteration(number=number)
+                    iteration = Iteration(
+                        number=number,
+                        prompt_before=prompt,
+                        prompt_after=prompt,
+                        source_sha256=source_hash(sources),
+                    )
+                    self.current_iteration = iteration
                     result.iterations.append(iteration)
                     prefix = f"iteration-{number:02d}"
-                    self.artifacts.write_text(prefix + "/prompt.md", prompt)
-                    self.artifacts.write(prefix + "/source.json", sources)
-                    for scenario in scenarios:
-                        logger.info(
-                            "Iteration %d/%d: %s", number, self.config.max_iterations, scenario.id
-                        )
-                        caller = f"ref-{result.run_id[:12]}-{number}-{scenario.id}"[:100]
-                        self.observer.phase("simulating", scenario.id)
-                        simulation = await self.simulator.run(scenario, caller)
-                        iteration.simulations.append(simulation)
-                        self.artifacts.write(
-                            prefix + f"/{scenario.id}.simulation.json",
-                            simulation.model_dump(mode="json"),
-                        )
-                        if (
-                            simulation.errors
-                            or simulation.cleanup_errors
-                            or not simulation.completed
-                            or not simulation.transcript
-                        ):
-                            details = "; ".join(simulation.errors + simulation.cleanup_errors)
-                            raise RefinementError(
-                                f"Scenario {scenario.id} could not be evaluated: "
-                                + (details or "Conversation or transcript is incomplete")
-                            )
-                        self.observer.phase("evaluating", scenario.id)
-                        evaluation = await self.evaluator.run(
-                            scenario, simulation, prompt, sources, knowledge
-                        )
-                        iteration.evaluations.append(evaluation)
-                        self.observer.evaluated(evaluation)
-                        self.artifacts.write(
-                            prefix + f"/{scenario.id}.evaluation.json",
-                            evaluation.model_dump(mode="json"),
-                        )
-                        logger.info("Scores %s: %s", scenario.id, evaluation.scores.model_dump())
-                        self.artifacts.write("run.json", result.model_dump(mode="json"))
-                    if all(e.passes(self.config.pass_score) for e in iteration.evaluations):
-                        result.status = "passed"
-                        break
-                    if number == self.config.max_iterations:
-                        result.status = "iteration_limit"
-                        break  # Never leave a final, unevaluated repair deployed.
                     try:
-                        self.observer.phase("repairing")
-                        repair = await self.proposer.run(
-                            iteration, prompt, sources, knowledge, previous_errors
-                        )
-                        self.artifacts.write(
-                            prefix + "/repair.json", repair.model_dump(mode="json")
-                        )
-                        self.observer.proposed(repair, prompt)
-                        code_faults = [
-                            fault
-                            for evaluation in iteration.evaluations
-                            for failure in evaluation.failures
-                            for fault in failure.code_faults
-                        ]
-                        prompt = await self.apply_repair(
-                            repair, prompt, sources, prefix, code_faults
-                        )
-                        iteration.repair_applied = True
-                        self.observer.repaired()
-                        sources = self.workspace.source()
-                    except RecoveryError:
-                        raise
-                    except (RefinementError, OSError) as error:
-                        message = (
+                        self.artifacts.write_text(prefix + "/prompt.md", prompt)
+                        self.artifacts.write(prefix + "/source.json", sources)
+                        for scenario in scenarios:
+                            logger.info(
+                                "Iteration %d/%d: %s",
+                                number,
+                                self.config.max_iterations,
+                                scenario.id,
+                            )
+                            caller = f"ref-{result.run_id[:12]}-{number}-{scenario.id}"[:100]
+                            self.observer.phase("simulating", scenario.id)
+                            simulation = await self.simulator.run(scenario, caller)
+                            iteration.simulations.append(simulation)
+                            self.artifacts.write(
+                                prefix + f"/{scenario.id}.simulation.json",
+                                simulation.model_dump(mode="json"),
+                            )
+                            if (
+                                simulation.errors
+                                or simulation.cleanup_errors
+                                or not simulation.completed
+                                or not simulation.transcript
+                            ):
+                                details = "; ".join(simulation.errors + simulation.cleanup_errors)
+                                raise RefinementError(
+                                    f"Scenario {scenario.id} could not be evaluated: "
+                                    + (details or "Conversation or transcript is incomplete")
+                                )
+                            self.observer.phase("evaluating", scenario.id)
+                            evaluation = await self.evaluator.run(
+                                scenario, simulation, prompt, sources, knowledge
+                            )
+                            iteration.evaluations.append(evaluation)
+                            self.observer.evaluated(evaluation)
+                            self.artifacts.write(
+                                prefix + f"/{scenario.id}.evaluation.json",
+                                evaluation.model_dump(mode="json"),
+                            )
+                            logger.info(
+                                "Scores %s: %s", scenario.id, evaluation.scores.model_dump()
+                            )
+                            self.artifacts.write("run.json", result.model_dump(mode="json"))
+                        if all(e.passes(self.config.pass_score) for e in iteration.evaluations):
+                            result.status = "passed"
+                            break
+                        if number == self.config.max_iterations:
+                            result.status = "iteration_limit"
+                            break  # Never leave a final, unevaluated repair deployed.
+                        try:
+                            self.observer.phase("repairing")
+                            repair = await self.proposer.run(
+                                iteration, prompt, sources, knowledge, previous_errors
+                            )
+                            self.artifacts.write(
+                                prefix + "/repair.json", repair.model_dump(mode="json")
+                            )
+                            iteration.repair = repair
+                            iteration.change_status = "proposed"
+                            if repair.system_prompt is not None:
+                                iteration.prompt_diff = "".join(
+                                    difflib.unified_diff(
+                                        prompt.splitlines(keepends=True),
+                                        repair.system_prompt.splitlines(keepends=True),
+                                        fromfile="system.md (before)",
+                                        tofile="system.md (after)",
+                                    )
+                                )
+                            self.observer.proposed(repair, prompt)
+                            code_faults = [
+                                fault
+                                for evaluation in iteration.evaluations
+                                for failure in evaluation.failures
+                                for fault in failure.code_faults
+                            ]
+                            prompt = await self.apply_repair(
+                                repair, prompt, sources, prefix, code_faults
+                            )
+                            iteration.repair_applied = True
+                            iteration.change_status = "applied"
+                            iteration.prompt_after = result.final_prompt = prompt
+                            self.observer.repaired()
+                            sources = self.workspace.source()
+                            result.final_source_sha256 = source_hash(sources)
+                        except RecoveryError as error:
+                            iteration.change_status = "recovery_failed"
+                            iteration.repair_error = str(error)
+                            iteration.prompt_after = result.final_prompt = None
+                            result.final_source_sha256 = None
+                            result.deployment_consistent = False
+                            raise
+                        except (RefinementError, OSError) as error:
+                            message = (
+                                str(error)
+                                if isinstance(error, RefinementError)
+                                else type(error).__name__
+                            )
+                            iteration.repair_error = message
+                            iteration.change_status = "rolled_back"
+                            self.observer.repaired(message)
+                            logs = []
+                            for name in ("verification.log", "reload.log"):
+                                path = self.artifacts.directory / prefix / name
+                                if path.exists():
+                                    logs.append(path.read_text()[-12_000:])
+                            previous_errors.append(message + "\n" + "\n".join(logs))
+                            logger.warning("Repair rejected and rolled back: %s", message)
+                    except BaseException as error:
+                        iteration.status = "error"
+                        iteration.error = (
                             str(error)
                             if isinstance(error, RefinementError)
                             else type(error).__name__
                         )
-                        iteration.repair_error = message
-                        self.observer.repaired(message)
-                        logs = []
-                        for name in ("verification.log", "reload.log"):
+                        raise
+                    finally:
+                        iteration.finished_at = datetime.now(UTC)
+                        if iteration.status != "error":
+                            iteration.status = "completed"
+                        for name in ("verification.log", "reload.log", "rollback-reload.log"):
                             path = self.artifacts.directory / prefix / name
                             if path.exists():
-                                logs.append(path.read_text()[-12_000:])
-                        previous_errors.append(message + "\n" + "\n".join(logs))
-                        logger.warning("Repair rejected and rolled back: %s", message)
-                    self.artifacts.write(
-                        prefix + "/iteration.json", iteration.model_dump(mode="json")
-                    )
+                                iteration.execution_logs[name] = path.read_text()[-12000:]
+                        receipt = self.artifacts.directory / prefix / "verification.json"
+                        if receipt.exists():
+                            try:
+                                payload = json.loads(receipt.read_text())
+                                if not isinstance(payload, dict):
+                                    raise ValueError("Receipt must be an object")
+                                iteration.verification = payload
+                            except (OSError, ValueError):
+                                iteration.verification = {
+                                    "passed": False,
+                                    "errors": ["Invalid verification receipt"],
+                                }
+                        self.artifacts.write(
+                            prefix + "/iteration.json", iteration.model_dump(mode="json")
+                        )
         except RefinementError as error:
             result.error = str(error)
             result.status = "error"
+        except (asyncio.CancelledError, KeyboardInterrupt):
+            result.status = "error"
+            result.error = "Refinement interrupted"
+            raise
         except Exception as error:
             result.error = f"Refinement failed ({type(error).__name__})"
             result.status = "error"
         finally:
+            result.finished_at = datetime.now(UTC)
+            summarize(result)
+            self.artifacts.write_text("final-prompt.md", result.final_prompt or "")
             heartbeat.cancel()
             with suppress(asyncio.CancelledError):
                 await heartbeat

@@ -44,6 +44,7 @@ async def execute(settings: Settings, config: RefinementConfig) -> int:
             settings.elevenlabs_api_key.get_secret_value(),
             settings.model_api_key.get_secret_value(),
             settings.agent_api_key.get_secret_value(),
+            settings.test_database_url.get_secret_value(),
         ],
     )
     async with AsyncExitStack() as stack:
@@ -76,7 +77,7 @@ async def execute(settings: Settings, config: RefinementConfig) -> int:
             JsonModel(model_client, config.model_attempts, config.model_max_tokens),
             ElevenLabs(provider_client, settings.elevenlabs_agent_id, config.agent_branch_id),
             AirlineAPI(api_client),
-            Workspace(config),
+            Workspace(config, test_database_url=settings.test_database_url.get_secret_value()),
             artifacts,
         )
         result = await runner.run(run_id)
