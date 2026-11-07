@@ -26,9 +26,9 @@ class Settings(BaseSettings):
     agent_api_key: SecretStr = Field(default=SecretStr(""), validation_alias="AGENT_API_KEY")
     model_api_key: SecretStr = Field(
         default=SecretStr(""),
-        validation_alias=AliasChoices("REFINER_MODEL_API_KEY", "OPENAI_API_KEY"),
+        validation_alias=AliasChoices("ANTHROPIC_API_KEY", "REFINER_MODEL_API_KEY"),
     )
-    model_base_url: HttpUrl = HttpUrl("https://api.openai.com/v1")
+    model_base_url: HttpUrl = HttpUrl("https://api.anthropic.com/v1")
 
 
 class RefinementConfig(BaseModel):
@@ -36,9 +36,10 @@ class RefinementConfig(BaseModel):
 
     pass_score: int = Field(default=PASS_SCORE, ge=1, le=10)
     max_iterations: int = Field(default=MAX_ITERATIONS, ge=1)
-    customer_model: str = "gpt-4.1-mini"
-    evaluator_model: str = "gpt-4.1"
-    repair_model: str = "gpt-4.1"
+    customer_model: str = "claude-haiku-5-5"
+    evaluator_model: str = "claude-sonnet-5-5"
+    repair_model: str = "claude-sonnet-5-5"
+    model_max_tokens: int = Field(default=16384, ge=1)
     max_customer_turns: int = Field(default=18, ge=1, le=100)
     request_timeout_seconds: float = Field(default=120, gt=0)
     turn_timeout_seconds: float = Field(default=90, gt=0)

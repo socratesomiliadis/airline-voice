@@ -1,9 +1,11 @@
 # Run from the repository root against a development agent and database.
 pass_score = 8
 max_iterations = 5
-customer_model = "gpt-4.1-mini"
-evaluator_model = "gpt-4.1"
-repair_model = "gpt-4.1"
+customer_model = "claude-haiku-5-5"
+evaluator_model = "claude-sonnet-5-5"
+repair_model = "claude-sonnet-5-5"
+# Maximum output tokens per call; allow room for complete prompt/code repairs.
+model_max_tokens = 16384
 max_customer_turns = 18
 workspace_root = "."
 scenarios_path = "scenarios/airline.json"

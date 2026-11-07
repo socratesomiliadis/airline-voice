@@ -24,7 +24,7 @@ def preflight(settings: Settings, config: RefinementConfig) -> None:
     for name, value in (
         ("ELEVENLABS_API_KEY", settings.elevenlabs_api_key.get_secret_value()),
         ("ELEVENLABS_AGENT_ID", settings.elevenlabs_agent_id),
-        ("REFINER_MODEL_API_KEY (or OPENAI_API_KEY)", settings.model_api_key.get_secret_value()),
+        ("ANTHROPIC_API_KEY (or REFINER_MODEL_API_KEY)", settings.model_api_key.get_secret_value()),
     ):
         if not value:
             missing.append(name)
@@ -50,7 +50,10 @@ async def execute(settings: Settings, config: RefinementConfig) -> int:
         model_client = await stack.enter_async_context(
             httpx.AsyncClient(
                 base_url=str(settings.model_base_url).rstrip("/") + "/",
-                headers={"Authorization": "Bearer " + settings.model_api_key.get_secret_value()},
+                headers={
+                    "x-api-key": settings.model_api_key.get_secret_value(),
+                    "anthropic-version": "2026-10-21",
+                },
                 timeout=config.request_timeout_seconds,
             )
         )
@@ -70,7 +73,7 @@ async def execute(settings: Settings, config: RefinementConfig) -> int:
         )
         runner = RefinementRunner(
             config,
-            JsonModel(model_client, config.model_attempts),
+            JsonModel(model_client, config.model_attempts, config.model_max_tokens),
             ElevenLabs(provider_client, settings.elevenlabs_agent_id, config.agent_branch_id),
             AirlineAPI(api_client),
             Workspace(config),

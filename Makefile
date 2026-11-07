@@ -1,25 +1,32 @@
-.PHONY: setup dev-api dev-dashboard check check-python check-dashboard up down migrate seed-flights
+.PHONY: setup dev-api dev-dashboard refine check check-python check-dashboard up down migrate seed-flights
+
+# Use the checkout's uv installation for worker verification and reload subprocesses.
+export PATH := $(CURDIR)/.tools/bin:$(PATH)
+UV := $(if $(wildcard $(CURDIR)/.tools/bin/uv),$(CURDIR)/.tools/bin/uv,uv)
 
 setup:
-	uv sync --all-packages --frozen
+	$(UV) sync --all-packages --frozen
 	npm --prefix apps/dashboard ci
 
 # Check for an existing listener before starting either development server.
 dev-api:
 	@if lsof -nP -iTCP:8000 -sTCP:LISTEN >/dev/null 2>&1; then echo "Port 8000 already has a listener; inspect it before starting another API."; exit 1; fi
-	uv run --package airline-api uvicorn airline_api.main:app --reload --host 127.0.0.1 --port 8000
+	$(UV) run --package airline-api uvicorn airline_api.main:app --reload --host 127.0.0.1 --port 8000
 
 dev-dashboard:
 	@if lsof -nP -iTCP:3000 -sTCP:LISTEN >/dev/null 2>&1; then echo "Port 3000 already has a listener; inspect it before starting another dashboard."; exit 1; fi
 	npm --prefix apps/dashboard run dev -- --hostname 127.0.0.1 --port 3000
 
+refine:
+	$(UV) run --package airline-refiner airline-refiner run
+
 check: check-python check-dashboard
 
 check-python:
-	uv run --all-packages ruff check .
-	uv run --all-packages ruff format --check .
-	uv run --all-packages mypy
-	uv run --all-packages pytest
+	$(UV) run --all-packages ruff check .
+	$(UV) run --all-packages ruff format --check .
+	$(UV) run --all-packages mypy
+	$(UV) run --all-packages pytest
 
 check-dashboard:
 	npm --prefix apps/dashboard run lint
@@ -35,7 +42,7 @@ down:
 	docker compose down
 
 migrate:
-	uv run --package airline-api alembic -c apps/api/alembic.ini upgrade head
+	$(UV) run --package airline-api alembic -c apps/api/alembic.ini upgrade head
 
 seed-flights:
-	uv run --package airline-api airline-seed-flights
+	$(UV) run --package airline-api airline-seed-flights

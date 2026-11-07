@@ -47,27 +47,34 @@ Configure `.env`:
 ELEVENLABS_API_KEY=...
 ELEVENLABS_AGENT_ID=...
 AGENT_API_KEY=...
-REFINER_MODEL_API_KEY=...
-REFINER_MODEL_BASE_URL=https://api.openai.com/v1
+ANTHROPIC_API_KEY=...
+REFINER_MODEL_BASE_URL=https://api.anthropic.com/v1
 REFINER_API_BASE_URL=http://localhost:8000
 REFINER_CONFIG_PATH=config/refinement.example.toml
 REFINER_ARTIFACTS_DIR=artifacts
 SIMULATION_NOW=2026-11-06T12:00:00Z
 ```
 
-`OPENAI_API_KEY` is a fallback when `REFINER_MODEL_API_KEY` is absent. The model
-endpoint must implement Chat Completions and strict JSON Schema structured output.
+`REFINER_MODEL_API_KEY` can supply an Anthropic key when `ANTHROPIC_API_KEY` is
+absent. The worker calls Anthropic's native Messages API with `x-api-key` and
+`anthropic-version: 2026-10-21`, using `output_config.format` for JSON Schema output.
+`OPENAI_API_KEY` is no longer used. Any custom `REFINER_MODEL_BASE_URL` must implement
+the Anthropic Messages contract; remove an old OpenAI endpoint override when migrating.
 Customer, evaluator and repair models are independently configurable in TOML;
-they default to `gpt-4.1-mini`, `gpt-4.1` and `gpt-4.1`. Their messages and histories
-are separate; the evaluator receives evidence, never the customer's hidden reasoning.
+they default to `claude-haiku-5-5`, `claude-sonnet-5-5` and `claude-sonnet-5-5`.
+`model_max_tokens` defaults to 16384 per call; increase it if a repair reaches the
+output limit. Unsupported schema constraints are sent as field descriptions and
+enforced locally by Pydantic, alongside evidence validation. Each role keeps its
+messages and history separate; the evaluator receives evidence, never the customer's
+hidden reasoning.
 
 ```sh
 uv sync --all-packages --frozen
-uv run --package airline-refiner airline-refiner run
+make refine
 ```
 
-If `uv` is installed only in this checkout's `.tools/bin`, add that directory to
-`PATH` first so configured verification/reload commands can find it:
+`make refine` puts this checkout's `.tools/bin` on `PATH` for the worker and its
+verification/reload subprocesses. When invoking the CLI directly, add it first:
 
 ```sh
 export PATH="$PWD/.tools/bin:$PATH"
@@ -156,6 +163,10 @@ Provider transport, malformed model output and evidence validation have bounded
 retries. Customer turns, per-turn waiting, transcript processing, subprocesses
 and readiness each have configurable limits. Failed or incomplete conversations
 cannot silently become a passing run.
+If a conversation, transcript, or fixture cleanup fails, the run stops with an
+infrastructure error before evaluation or repair. Empty or failed sessions do not
+trigger prompt rewrites or backend patches. ElevenLabs close code 3000 is reported
+as an unavailable agent; check provider availability and account status before retrying.
 
 ## Provider references
 
@@ -163,4 +174,5 @@ cannot silently become a passing run.
 - [ElevenLabs WebSocket events](https://elevenlabs.io/docs/eleven-agents/api-reference/eleven-agents/websocket)
 - [Conversation/tool transcripts](https://elevenlabs.io/docs/api-reference/conversations/get)
 - [Agent REST updates](https://elevenlabs.io/docs/api-reference/agents/update)
-- [OpenAI structured outputs](https://developers.openai.com/api/docs/guides/structured-outputs?api-mode=chat)
+- [Anthropic structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs)
+- [Anthropic models](https://platform.claude.com/docs/en/models/overview)

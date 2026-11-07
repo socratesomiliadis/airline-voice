@@ -141,11 +141,15 @@ class ElevenLabs:
                 )
             )
             return ChatSession(socket, result)
-        except Exception:
+        except Exception as error:
             if socket is not None:
                 with suppress(Exception):
                     await socket.close()
             # A signed URL is a credential: never let a transport exception expose it.
+            if isinstance(error, ConnectionClosed) and error.rcvd and error.rcvd.code == 3000:
+                raise RefinementError(
+                    "ElevenLabs Chat Mode agent is unavailable (close code 3000)"
+                ) from None
             raise RefinementError("Unable to establish ElevenLabs Chat Mode session") from None
 
 
@@ -179,7 +183,11 @@ class ChatSession:
                 await self.queue.put(None)
             else:
                 await self.queue.put(
-                    RefinementError("ElevenLabs chat connection closed unexpectedly")
+                    RefinementError(
+                        "ElevenLabs Chat Mode agent is unavailable (close code 3000)"
+                        if error.rcvd and error.rcvd.code == 3000
+                        else "ElevenLabs chat connection closed unexpectedly"
+                    )
                 )
         except asyncio.CancelledError:
             raise

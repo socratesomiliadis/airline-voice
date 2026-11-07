@@ -165,6 +165,17 @@ class RefinementRunner:
                             prefix + f"/{scenario.id}.simulation.json",
                             simulation.model_dump(mode="json"),
                         )
+                        if (
+                            simulation.errors
+                            or simulation.cleanup_errors
+                            or not simulation.completed
+                            or not simulation.transcript
+                        ):
+                            details = "; ".join(simulation.errors + simulation.cleanup_errors)
+                            raise RefinementError(
+                                f"Scenario {scenario.id} could not be evaluated: "
+                                + (details or "Conversation or transcript is incomplete")
+                            )
                         self.observer.phase("evaluating", scenario.id)
                         evaluation = await self.evaluator.run(
                             scenario, simulation, prompt, sources, knowledge

@@ -42,7 +42,12 @@ DESCRIPTIONS = {
     "sort_by": "Sort by departure or price.",
     "limit": "Maximum offers to return, 1–200. Use 6 initially to keep responses concise.",
     "offset": "Pagination offset, nonnegative integer; omit for first results.",
-    "items": "Items assigned to booked passengers; 1–20 items per request.",
+    "items": (
+        "New physical items assigned to booked passengers; 1–20 per request. For checked bags, "
+        "register every unrecorded physical bag, including fare-included bags, not just paid "
+        "additional pieces. The backend applies the allowance. Subtract already confirmed "
+        "checked-bag extras from the customer's desired total; never register them twice."
+    ),
     "item_type": "Item category; special items are requests subject to confirmation.",
     "weight_kg": "Positive weight in kilograms. Required for checked_bag.",
     "length_cm": "Positive length in centimeters. Required for checked_bag.",

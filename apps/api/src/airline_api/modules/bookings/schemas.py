@@ -147,7 +147,15 @@ class ExtraItem(Input):
 
 
 class AddBookingItems(Mutation):
-    items: list[ExtraItem] = Field(min_length=1, max_length=20)
+    items: list[ExtraItem] = Field(
+        min_length=1,
+        max_length=20,
+        description=(
+            "New physical items to register. For checked bags, include unrecorded fare-included "
+            "bags as well as paid bags; the backend applies the allowance once per passenger. "
+            "Do not resubmit bags already present in the booking's confirmed extras."
+        ),
+    )
 
 
 class BookingReference(Input):

@@ -127,7 +127,7 @@ does not imply booking database or model-provider readiness.
 Run the autonomous refinement worker after configuring its model credentials:
 
 ```sh
-uv run --package airline-refiner airline-refiner run
+make refine
 ```
 
 It stops when every scenario criterion scores at least 8/10, or after 5 iterations.
@@ -156,8 +156,8 @@ Audit events keep real timestamps and include the effective business time.
 
 `config/refinement.example.toml` defines quality thresholds, iteration and timeout
 limits, separate customer/evaluator/repair models, editable source roots, and
-verification/reload commands. Set `REFINER_MODEL_API_KEY` (or `OPENAI_API_KEY`) for
-structured model calls. The worker uses the existing `ELEVENLABS_API_KEY`,
+verification/reload commands. Set `ANTHROPIC_API_KEY` (or `REFINER_MODEL_API_KEY`)
+for structured Anthropic model calls. The worker uses the existing `ELEVENLABS_API_KEY`,
 `ELEVENLABS_AGENT_ID`, and `AGENT_API_KEY`.
 
 ## Database migrations

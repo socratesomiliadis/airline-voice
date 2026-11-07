@@ -528,6 +528,7 @@
             "description": "Stable simulated caller or conversation ID for the audit history."
           },
           "items": {
+            "description": "New physical items to register. For checked bags, include unrecorded fare-included bags as well as paid bags; the backend applies the allowance once per passenger. Do not resubmit bags already present in the booking's confirmed extras.",
             "items": {
               "$ref": "#/$defs/ExtraItem"
             },

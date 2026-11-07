@@ -403,6 +403,29 @@ def test_premium_economy_uses_purchased_tier_and_reprices_bags(client: TestClien
     assert changed.json()["events"][-1]["details"]["baggage_adjustment_cents"] == -6000
 
 
+def test_standard_bag_registration_uses_included_allowance_once_across_requests(
+    client: TestClient,
+) -> None:
+    booking = book(client, offers(client, destination="JFK")[0])
+    path = f"/api/v1/bookings/{booking['reference']}"
+    first = client.post(path + "/items", json=action(items=[bag()]))
+    assert first.status_code == 200
+    assert first.json()["extras"][0]["price_cents"] == 0
+    request = action(items=[bag()])
+    second = client.post(path + "/items", json=request)
+    assert second.status_code == 200
+    saved = second.json()
+    assert [item["price_cents"] for item in saved["extras"]] == [0, 3500]
+    assert saved["events"][-1]["charged_cents"] == 3500
+    assert saved["total_charged_cents"] == booking["ticket_total_cents"] + 3500
+    assert client.post(path + "/items", json=request).json() == saved
+    target = offers(client, "2026-11-10", "JFK")[0]
+    changed = client.post(path + "/reschedule", json=replacement(target))
+    assert changed.status_code == 200
+    assert [item["price_cents"] for item in changed.json()["extras"]] == [0, 3500]
+    assert changed.json()["events"][-1]["details"]["baggage_adjustment_cents"] == 0
+
+
 def test_fare_restrictions_quote_changes_and_group_uniqueness(
     client: TestClient, postgres_url: str
 ) -> None:

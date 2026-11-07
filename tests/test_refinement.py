@@ -260,11 +260,11 @@ def test_mixed_repairs_are_applied_reloaded_published_and_retested(rig):
     assert observed["iterations"][1]["scenarios"][0]["dialogue"]
     assert report["iterations"][0]["evaluations"][0]["failures"][1]["root_cause"] == "code"
     assert model.calls == [
-        ("gpt-4.1-mini", "CustomerTurn"),
-        ("gpt-4.1", "Evaluation"),
-        ("gpt-4.1", "Repair"),
-        ("gpt-4.1-mini", "CustomerTurn"),
-        ("gpt-4.1", "Evaluation"),
+        ("claude-haiku-5-5", "CustomerTurn"),
+        ("claude-sonnet-5-5", "Evaluation"),
+        ("claude-sonnet-5-5", "Repair"),
+        ("claude-haiku-5-5", "CustomerTurn"),
+        ("claude-sonnet-5-5", "Evaluation"),
     ]
 
 
@@ -276,6 +276,35 @@ def test_single_cause_only_changes_its_target(rig, cause):
     assert bool(provider.updates) == (cause == "prompt")
     assert (root / "reloaded").exists() == (cause == "code")
     assert ((root / "backend/service.py").read_text() != service_source(1)) == (cause == "code")
+
+
+@pytest.mark.parametrize("failure", ["connection", "transcript", "cleanup"])
+def test_infrastructure_failure_stops_before_evaluation_or_repair(rig, failure, monkeypatch):
+    runner, _, model, provider, api, root = rig
+
+    async def fail(*args):
+        raise RefinementError(
+            "Provider unavailable" if failure == "connection" else "Fixture failure"
+        )
+
+    if failure == "cleanup":
+        monkeypatch.setattr(api, "cleanup", fail)
+    else:
+        monkeypatch.setattr(provider, "connect" if failure == "connection" else "transcript", fail)
+    result = asyncio.run(runner.run("infra-test"))
+    assert result.status == "error"
+    assert "could not be evaluated" in result.error
+    assert len(result.iterations) == 1
+    assert not result.iterations[0].evaluations
+    assert model.judged == model.repairs == 0
+    assert provider.updates == []
+    assert (root / "backend/service.py").read_text() == service_source(1)
+    assert not (root / "reloaded").exists()
+    assert all(session.closed for session in provider.sessions)
+    if failure != "cleanup":
+        assert len(api.cleanups) == 1
+    saved = json.loads((root / "artifacts/monitor.json").read_text())
+    assert saved["status"] == "error" and "could not be evaluated" in saved["error"]
 
 
 def test_iteration_limit_includes_baseline_and_never_deploys_untested_final_fix(rig):
@@ -688,22 +717,69 @@ def test_chat_waits_for_complete_and_answers_pings_between_customer_turns():
     asyncio.run(run())
 
 
+@pytest.mark.parametrize("phase", ["connect", "receive"])
+def test_provider_reports_unavailable_agent_without_exposing_signed_url(monkeypatch, phase):
+    from websockets.exceptions import ConnectionClosedError
+    from websockets.frames import Close
+
+    signed_url = "wss://example.test/?token=private-signed-token"
+
+    class Socket:
+        closed = False
+
+        async def send(self, data):
+            if phase == "connect":
+                raise ConnectionClosedError(Close(3000, signed_url), Close(3000, signed_url), True)
+
+        async def recv(self):
+            raise ConnectionClosedError(Close(3000, signed_url), Close(3000, signed_url), True)
+
+        async def close(self):
+            self.closed = True
+
+    socket = Socket()
+
+    async def connect(*args, **kwargs):
+        return socket
+
+    monkeypatch.setattr("airline_refiner.adapters.elevenlabs.connect", connect)
+
+    async def run():
+        async with httpx.AsyncClient(
+            base_url="https://provider.test/v1/",
+            transport=httpx.MockTransport(
+                lambda request: httpx.Response(200, json={"signed_url": signed_url})
+            ),
+        ) as client:
+            provider = ElevenLabs(client, "agent-1")
+            session = None
+            try:
+                with pytest.raises(RefinementError, match="unavailable.*3000") as exc:
+                    session = await provider.connect(Simulation(scenario_id="case"))
+                    await session.receive_turn(1)
+                assert "private-signed-token" not in str(exc.value)
+            finally:
+                if session:
+                    await session.close()
+
+    asyncio.run(run())
+    assert socket.closed
+
+
 def test_model_structured_call_retries_invalid_evidence_without_sharing_role_history():
     requests = []
 
     def transport(request):
+        assert request.url.path == "/v1/messages"
         requests.append(json.loads(request.content))
         message = "bad" if len(requests) == 1 else "good"
         return httpx.Response(
             200,
             json={
-                "choices": [
-                    {
-                        "message": {
-                            "content": json.dumps({"message": message, "done": True}),
-                        }
-                    }
-                ]
+                "stop_reason": "end_turn",
+                "content": [
+                    {"type": "text", "text": json.dumps({"message": message, "done": True})}
+                ],
             },
         )
 
@@ -725,8 +801,10 @@ def test_model_structured_call_retries_invalid_evidence_without_sharing_role_his
     asyncio.run(run())
     assert len(requests) == 2
     assert requests[0]["model"] == "chosen-model"
-    assert requests[0]["response_format"]["json_schema"]["strict"] is True
-    assert requests[0]["messages"][0]["content"] == "Customer role"
+    assert requests[0]["output_config"]["format"]["type"] == "json_schema"
+    assert requests[0]["max_tokens"] == 16384
+    assert requests[0]["system"] == "Customer role"
+    assert requests[0]["messages"] == [{"role": "user", "content": '{"goal": "Book"}'}]
     assert "response must be good" in requests[1]["messages"][-1]["content"]
 
 

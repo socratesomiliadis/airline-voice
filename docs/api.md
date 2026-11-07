@@ -183,6 +183,12 @@ overweight/oversized charges, and absolute acceptance limits come from the booki
 policy snapshot. Limits and fees apply per passenger. A batch succeeds or rolls
 back as a whole.
 
+Checked-bag items register physical bags, including fare-included pieces. To record
+two total bags on a standard fare with no existing items, submit two checked-bag
+items: the first is free and the second receives the first-additional fee. On later
+requests, submit only bags not already recorded in confirmed extras. The included
+allowance alone does not mean that a physical bag has already been registered.
+
 Other supported types are `stroller`, `car_seat`, `medical_device`,
 `sports_equipment`, `musical_instrument`, and `cabin_pet`. These are saved as
 `pending_confirmation` because the current database does not establish provider

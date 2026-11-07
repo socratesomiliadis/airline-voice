@@ -1,4 +1,4 @@
-"""Separate, stateless structured LLM calls over the Chat Completions REST API."""
+"""Separate, stateless structured LLM calls over Anthropic's Messages REST API."""
 
 import asyncio
 import json
@@ -22,23 +22,43 @@ class Model(Protocol):
     ) -> T: ...
 
 
-def strict_schema(value: Any) -> Any:
-    """OpenAI requires every object property, including nullable ones, in required."""
+def anthropic_schema(value: Any) -> Any:
+    """Move unsupported constraints into descriptions; Pydantic still enforces them."""
     if isinstance(value, list):
-        return [strict_schema(item) for item in value]
+        return [anthropic_schema(item) for item in value]
     if not isinstance(value, dict):
         return value
-    result = {key: strict_schema(item) for key, item in value.items() if key != "default"}
+    unsupported = {
+        "minimum",
+        "maximum",
+        "exclusiveMinimum",
+        "exclusiveMaximum",
+        "multipleOf",
+        "minLength",
+        "maxLength",
+        "maxItems",
+        "uniqueItems",
+    }
+    constraints = {key: item for key, item in value.items() if key in unsupported}
+    if value.get("minItems", 0) > 1:
+        constraints["minItems"] = value["minItems"]
+    result = {key: anthropic_schema(item) for key, item in value.items() if key not in constraints}
+    if constraints:
+        result["description"] = (
+            value.get("description", "") + " Constraints: " + json.dumps(constraints)
+        ).strip()
     if result.get("type") == "object":
-        result["required"] = list(result.get("properties", {}))
         result["additionalProperties"] = False
     return result
 
 
 class JsonModel:
-    def __init__(self, client: httpx.AsyncClient, attempts: int = 3) -> None:
+    def __init__(
+        self, client: httpx.AsyncClient, attempts: int = 3, max_tokens: int = 16384
+    ) -> None:
         self.client = client
         self.attempts = attempts
+        self.max_tokens = max_tokens
 
     async def generate[T: BaseModel](
         self,
@@ -52,35 +72,43 @@ class JsonModel:
         for attempt in range(self.attempts):
             try:
                 response = await self.client.post(
-                    "chat/completions",
+                    "messages",
                     json={
                         "model": model,
+                        "max_tokens": self.max_tokens,
+                        "system": instruction,
                         "messages": [
-                            {"role": "system", "content": instruction},
                             {"role": "user", "content": json.dumps(data, ensure_ascii=False)},
                             *([{"role": "user", "content": feedback}] if feedback else []),
                         ],
-                        "response_format": {
-                            "type": "json_schema",
-                            "json_schema": {
-                                "name": schema.__name__,
-                                "strict": True,
-                                "schema": strict_schema(schema.model_json_schema()),
+                        "output_config": {
+                            "format": {
+                                "type": "json_schema",
+                                "schema": anthropic_schema(schema.model_json_schema()),
                             },
                         },
                     },
                 )
                 response.raise_for_status()
-                message = response.json()["choices"][0]["message"]
-                if message.get("refusal"):
+                message = response.json()
+                if message.get("stop_reason") == "refusal":
                     raise RefinementError("Model declined the structured generation request")
-                result = schema.model_validate_json(message["content"])
+                if message.get("stop_reason") == "max_tokens":
+                    raise RefinementError(
+                        "Model output reached model_max_tokens; increase it in refinement config"
+                    )
+                if message.get("stop_reason") != "end_turn":
+                    raise ValueError("Expected a completed model response")
+                content = "".join(
+                    block["text"] for block in message["content"] if block["type"] == "text"
+                )
+                result = schema.model_validate_json(content)
                 if validate:
                     validate(result)
                 return result
             except httpx.HTTPStatusError as error:
                 status = error.response.status_code
-                if status not in {429, 500, 502, 503, 504}:
+                if status not in {429, 500, 502, 503, 504, 529}:
                     raise RefinementError(f"Model API rejected request (HTTP {status})") from None
                 feedback = f"Previous model request failed with HTTP {status}. Try again."
             except httpx.RequestError:

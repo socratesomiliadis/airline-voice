@@ -11,7 +11,7 @@ Tools run sequentially, and mutation caller IDs are injected from
 `system__conversation_id`. The agent requires customer confirmation before writes.
 
 The current temporary API URL is
-`https://occupations-wireless-utilization-pentium.trycloudflare.com`. The database, backend,
+`https://completely-described-exclusively-works.trycloudflare.com`. The database, backend,
 and tunnel were started locally. The URL works only while the backend, tunnel, and
 Mac remain available; a new quick tunnel normally has a different URL.
 
@@ -65,8 +65,10 @@ a direct provider import file; the script translates its schema dialect.
 
 Real provider Chat Mode calls verified search, booking, retrieval from another
 conversation, special items, rescheduling, and cancellation against PostgreSQL.
-The cancelled synthetic booking remains as audit history. Browser microphone and
-audio quality still need a manual voice check in Preview.
+The cancelled synthetic booking remains as audit history. The full eight-scenario
+autonomous suite passed, and synthetic spoken input was recognized and answered
+with generated audio. Physical microphone and speaker quality still need a
+hands-on voice check in Preview.
 
 ## Backend endpoints
 
