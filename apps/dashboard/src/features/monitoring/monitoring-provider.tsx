@@ -11,6 +11,8 @@ export function MonitoringProvider({ children }: { children: ReactNode }) {
   const [connection, setConnection] = useState<ConnectionStatus>("connecting");
   const [receivedAt, setReceivedAt] = useState<number | null>(null);
   const [selectedRun, selectRun] = useState("");
+  const [iterationKey, selectIteration] = useState("");
+  const [scenarioId, selectScenario] = useState("");
 
   useEffect(() => {
     setConnection("connecting");
@@ -60,7 +62,17 @@ export function MonitoringProvider({ children }: { children: ReactNode }) {
 
   return (
     <MonitoringContext.Provider
-      value={{ ...snapshot, connection, receivedAt, selectedRun, selectRun }}
+      value={{
+        ...snapshot,
+        connection,
+        receivedAt,
+        selectedRun,
+        selectRun,
+        iterationKey,
+        selectIteration,
+        scenarioId,
+        selectScenario,
+      }}
     >
       {children}
     </MonitoringContext.Provider>

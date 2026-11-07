@@ -1,9 +1,5 @@
-import type { Metadata } from "next";
-
-import { RefinementDashboard } from "@/features/monitoring/components/refinement-dashboard";
-
-export const metadata: Metadata = { title: "Iteration history" };
+import { redirect } from "next/navigation";
 
 export default function Page() {
-  return <RefinementDashboard view="iterations" />;
+  redirect("/evaluations?tab=history");
 }

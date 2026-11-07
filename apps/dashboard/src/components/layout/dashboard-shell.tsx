@@ -1,18 +1,9 @@
 "use client";
 
-import { Eye, LockKeyhole, Plane, Radio, Workflow } from "lucide-react";
+import { AudioLines, ChevronRight, Headphones, LockKeyhole, Plane, Radio } from "lucide-react";
+import { usePathname } from "next/navigation";
 import type { CSSProperties, ReactNode } from "react";
 import { SidebarNavigation } from "@/components/layout/sidebar-navigation";
-import { Badge } from "@/components/ui/badge";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import {
   Sidebar,
   SidebarContent,
@@ -29,109 +20,92 @@ import { useMonitoring } from "@/features/monitoring/monitoring-provider";
 
 export function DashboardShell({ children }: { children: ReactNode }) {
   const { connection } = useMonitoring();
+  const pathname = usePathname();
+  const page =
+    pathname === "/" ? "Overview" : pathname === "/conversations" ? "Conversations" : "Evaluations";
   return (
-    <SidebarProvider style={{ "--sidebar-width": "218px" } as CSSProperties}>
+    <SidebarProvider style={{ "--sidebar-width": "232px" } as CSSProperties}>
       <a
         href="#main-content"
         className="sr-only rounded bg-background p-3 focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50"
       >
         Skip to content
       </a>
-      <Sidebar collapsible="offcanvas">
-        <SidebarHeader className="gap-5 p-5">
-          <div className="flex items-center gap-2.5 py-2">
-            <div className="flex size-9 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-              <Plane aria-hidden="true" className="size-4.5 -rotate-12" />
+      <Sidebar collapsible="offcanvas" className="border-none">
+        <SidebarHeader className="gap-8 px-5 pt-8 pb-6">
+          <div className="flex items-center gap-3 px-1">
+            <div className="flex size-9 items-center justify-center rounded-lg bg-white/10 text-white">
+              <AudioLines className="size-5" aria-hidden="true" />
             </div>
-            <div>
-              <p className="text-[15px] font-semibold tracking-tight">
-                airline<span className="font-normal text-muted-foreground">voice</span>
-              </p>
-              <p className="mt-0.5 text-[9px] tracking-wider text-muted-foreground">
-                AUTONOMOUS AGENT LAB
-              </p>
+            <span className="text-lg font-medium tracking-tight text-white">
+              airline<span className="text-white/60">voice</span>
+            </span>
+          </div>
+          <div className="flex items-center gap-3 rounded-lg border border-white/10 bg-white/5 p-3">
+            <Plane className="size-4 text-teal-300" aria-hidden="true" />
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-white">Airline assistant</p>
+              <p className="mt-1 text-xs text-white/50">Agent observability</p>
             </div>
           </div>
-          <Badge
-            variant="outline"
-            className="h-auto justify-start gap-2 rounded-lg px-3 py-2.5 text-[11px]"
-          >
-            <Workflow className="size-3" aria-hidden="true" />
-            Airline assistant
-          </Badge>
         </SidebarHeader>
         <SidebarContent>
-          <SidebarGroup>
-            <SidebarGroupLabel>Observe</SidebarGroupLabel>
+          <SidebarGroup className="px-4">
+            <SidebarGroupLabel className="mb-2 px-3 text-xs font-normal text-white/55">
+              Workspace
+            </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarNavigation />
             </SidebarGroupContent>
           </SidebarGroup>
         </SidebarContent>
-        <SidebarFooter className="gap-4 p-4">
-          <Card size="sm" className="bg-accent/60">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-xs text-primary">
-                <Eye className="size-4" aria-hidden="true" />
-                Autonomous by design
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <p className="text-[10px] leading-5 text-muted-foreground">
-                The agent simulates, evaluates and improves itself. You have a front-row seat.
+        <SidebarFooter className="gap-5 px-6 pb-6">
+          <div className="flex items-start gap-2.5 border-t border-white/10 pt-5 text-white/50">
+            <LockKeyhole className="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
+            <div>
+              <p className="text-xs text-white/70">Observation only</p>
+              <p className="mt-1.5 text-xs leading-5">
+                The agent runs autonomously.
+                <br />
+                This workspace follows along.
               </p>
-              <Badge variant="outline" className="gap-1.5 text-[9px]">
-                <LockKeyhole className="size-3" aria-hidden="true" />
-                Read-only workspace
-              </Badge>
-            </CardContent>
-          </Card>
-          <Separator />
-          <p className="text-center text-[10px] text-muted-foreground">ElevenLabs · Chat Mode</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 text-xs text-white/55">
+            <Headphones className="size-3.5" aria-hidden="true" />
+            ElevenLabs · Chat mode
+          </div>
         </SidebarFooter>
       </Sidebar>
-      <SidebarInset className="min-w-0 bg-[#f8faf9]">
-        <header className="flex min-h-[68px] flex-wrap items-center justify-between gap-3 border-b bg-background/80 px-5 py-3 sm:px-8">
-          <div className="flex items-center gap-3">
+      <SidebarInset className="min-w-0 bg-background">
+        <header className="flex h-16 shrink-0 items-center justify-between gap-3 border-b bg-card px-5 sm:px-8 lg:px-10">
+          <div className="flex min-w-0 items-center gap-3">
             <SidebarTrigger className="md:hidden" />
-            <Breadcrumb>
-              <BreadcrumbList className="text-[11px]">
-                <BreadcrumbItem>Workspace</BreadcrumbItem>
-                <BreadcrumbSeparator />
-                <BreadcrumbItem>
-                  <BreadcrumbPage>Agent observatory</BreadcrumbPage>
-                </BreadcrumbItem>
-              </BreadcrumbList>
-            </Breadcrumb>
+            <div className="flex items-center gap-2 text-xs sm:text-[13px]">
+              <span className="text-muted-foreground">Observability</span>
+              <ChevronRight className="size-3 text-muted-foreground/60" aria-hidden="true" />
+              <span className="font-medium">{page}</span>
+            </div>
           </div>
-          <div className="flex items-center gap-4">
-            <span className="hidden text-[10px] text-muted-foreground sm:inline">
-              Autonomous refinement loop
-            </span>
-            <Badge
-              role="status"
-              variant={
-                connection === "connected"
-                  ? "default"
-                  : connection === "reconnecting"
-                    ? "secondary"
-                    : "outline"
-              }
-              className="h-7 gap-1.5 px-2.5 text-[10px]"
-            >
-              <Radio
-                className={connection === "connecting" ? "motion-safe:animate-pulse" : ""}
-                aria-hidden="true"
-              />
-              {connection === "connected"
-                ? "Live updates"
-                : connection === "reconnecting"
-                  ? "Reconnecting"
-                  : "Connecting"}
-            </Badge>
-          </div>
+          <span
+            role="status"
+            className="flex shrink-0 items-center gap-2 text-xs text-muted-foreground"
+          >
+            <Radio
+              className={`size-3.5 ${connection === "connected" ? "text-primary" : "text-amber-600"}`}
+              aria-hidden="true"
+            />
+            {connection === "connected"
+              ? "Connected"
+              : connection === "reconnecting"
+                ? "Reconnecting"
+                : "Connecting"}
+          </span>
         </header>
-        <div id="main-content" className="mx-auto w-full max-w-[1560px] px-4 py-7 sm:px-8 sm:py-8">
+        <div
+          id="main-content"
+          className="mx-auto w-full max-w-[1600px] min-w-0 px-5 py-8 sm:px-8 lg:px-10 lg:py-10"
+        >
           {children}
         </div>
       </SidebarInset>

@@ -6,7 +6,7 @@ export const criteria: { key: Criterion; label: string; short: string; color: st
     key: "api_correctness",
     label: "Correct API & parameters",
     short: "API correctness",
-    color: "#6366f1",
+    color: "#3b687f",
   },
   {
     key: "outcome_confirmation",
@@ -28,6 +28,7 @@ export const stageLabels: Record<string, string> = {
   completed: "Run complete",
   error: "Run stopped",
   pending: "Queued",
+  stale: "Heartbeat stale",
   passed: "Passed",
   failed: "Below target",
   running: "Running",

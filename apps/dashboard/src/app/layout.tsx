@@ -16,8 +16,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className="font-sans">
-      <body className="min-h-screen bg-[#f8faf9] font-sans text-slate-900 antialiased">
+    <html lang="en" className="font-sans" data-type="software" data-radius="sharp">
+      <body className="min-h-screen bg-background font-sans text-foreground antialiased">
         <TooltipProvider>
           <MonitoringProvider>
             <DashboardShell>{children}</DashboardShell>

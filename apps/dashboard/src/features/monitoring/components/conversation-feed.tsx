@@ -37,6 +37,8 @@ export function ConversationFeed({
   const scrollRoot = useRef<HTMLDivElement>(null);
   const viewport = useRef<HTMLDivElement | null>(null);
   const follow = useRef(true);
+  const isLive = useRef(live);
+  isLive.current = live;
   const [detached, setDetached] = useState(false);
   const messageCount = scenario?.dialogue.length || 0;
   const lastMessage = scenario?.dialogue.at(-1)?.message;
@@ -51,36 +53,37 @@ export function ConversationFeed({
   }, []);
   useEffect(() => {
     if (!messageCount && !lastMessage) return;
-    if (viewport.current && follow.current)
+    if (live && viewport.current && follow.current)
       viewport.current.scrollTop = viewport.current.scrollHeight;
-  }, [messageCount, lastMessage]);
+  }, [messageCount, lastMessage, live]);
   useEffect(() => {
     if (selected) {
       follow.current = true;
       setDetached(false);
-      if (viewport.current) viewport.current.scrollTop = viewport.current.scrollHeight;
+      if (viewport.current)
+        viewport.current.scrollTop = isLive.current ? viewport.current.scrollHeight : 0;
     }
   }, [selected]);
   return (
     <ObservationPanel
-      title="Conversation feed"
+      title="Transcript"
       icon={MessagesSquare}
-      subtitle="Customer simulation & airline assistant"
+      subtitle="Customer simulation and airline assistant"
       action={
         <Badge variant={live ? "default" : "outline"}>
-          {live ? (
-            <Radio className="motion-safe:animate-pulse" aria-hidden="true" />
-          ) : (
-            <CheckCheck aria-hidden="true" />
-          )}
-          {live ? "Live conversation" : scenario?.status === "pending" ? "Queued" : "Transcript"}
+          {live ? <Radio aria-hidden="true" /> : <CheckCheck aria-hidden="true" />}
+          {live
+            ? "Live conversation"
+            : scenario?.dialogue.length
+              ? `${scenario.dialogue.length} messages`
+              : "Awaiting messages"}
         </Badge>
       }
     >
       <div className="relative">
         <ScrollArea
           ref={scrollRoot}
-          className="h-[390px] bg-muted/20"
+          className="h-[480px] bg-background/50"
           onScrollCapture={() => {
             const element = viewport.current;
             if (!element) return;
@@ -118,25 +121,23 @@ export function ConversationFeed({
                         )}
                       </AvatarFallback>
                     </Avatar>
-                    <div className="max-w-[88%] min-w-0">
+                    <div className="max-w-[90%] min-w-0">
                       <div
-                        className={`mb-1.5 flex flex-wrap items-center gap-2 text-[10px] ${message.role === "user" ? "justify-end" : ""}`}
+                        className={`mb-1.5 flex flex-wrap items-center gap-2 text-xs ${message.role === "user" ? "justify-end" : ""}`}
                       >
                         <span className="font-medium text-muted-foreground">
-                          {message.role === "agent"
-                            ? "Avery · Airline assistant"
-                            : "Customer · Simulated"}
+                          {message.role === "agent" ? "Airline assistant" : "Simulated customer"}
                         </span>
-                        <time dateTime={message.occurred_at} className="text-muted-foreground/60">
+                        <time dateTime={message.occurred_at} className="text-muted-foreground">
                           {time(message.occurred_at)}
                         </time>
                       </div>
                       <Card
                         size="sm"
-                        className={`py-3 ${message.role === "agent" ? "rounded-tl-sm" : "rounded-tr-sm bg-primary text-primary-foreground"}`}
+                        className={`py-3 ${message.role === "agent" ? "rounded-tl-sm" : "rounded-tr-sm bg-muted text-foreground ring-transparent"}`}
                       >
                         <CardContent>
-                          <p className="whitespace-pre-wrap break-words text-[13px] leading-[1.75]">
+                          <p className="whitespace-pre-wrap break-words text-sm leading-[1.8]">
                             {message.message}
                           </p>
                         </CardContent>
@@ -148,13 +149,13 @@ export function ConversationFeed({
             )}
             {live && scenario?.dialogue.length ? (
               <Badge variant="outline" className="mt-5">
-                <Radio className="motion-safe:animate-pulse" aria-hidden="true" />
+                <Radio aria-hidden="true" />
                 Conversation in progress
               </Badge>
             ) : null}
           </div>
         </ScrollArea>
-        {detached && (
+        {detached && live && (
           <Button
             variant="outline"
             size="sm"
@@ -175,22 +176,26 @@ export function ConversationFeed({
           <Accordion multiple>
             {scenario.tools.map((tool) => (
               <AccordionItem key={tool.id} value={tool.id}>
-                <AccordionTrigger className="py-2 text-[10px]">
+                <AccordionTrigger className="py-2 text-xs">
                   <span className="flex items-center gap-2">
                     <Wrench className="size-3 text-muted-foreground" aria-hidden="true" />
                     <span className="font-mono">{tool.name}</span>
                     <Badge
                       variant={tool.status === "error" ? "destructive" : "outline"}
-                      className="text-[9px]"
+                      className="text-xs"
                     >
-                      {label(tool.status)}
+                      {tool.status === "completed"
+                        ? "Completed"
+                        : tool.status === "error"
+                          ? "Error"
+                          : label(tool.status)}
                     </Badge>
                   </span>
                 </AccordionTrigger>
                 <AccordionContent>
                   {tool.result ? (
                     <ScrollArea className="h-32">
-                      <pre className="whitespace-pre-wrap break-all text-[10px] leading-5 text-muted-foreground">
+                      <pre className="whitespace-pre-wrap break-all text-xs leading-5 text-muted-foreground">
                         {tool.result}
                       </pre>
                     </ScrollArea>
@@ -202,7 +207,7 @@ export function ConversationFeed({
             ))}
           </Accordion>
         ) : (
-          <p className="flex items-center gap-2 text-[11px] text-muted-foreground">
+          <p className="flex items-center gap-2 text-[13px] text-muted-foreground">
             <Wrench className="size-3" aria-hidden="true" />
             Tool activity will appear here
           </p>

@@ -1,25 +1,14 @@
 "use client";
 
 import { ChartNoAxesCombined, Target } from "lucide-react";
-import { CartesianGrid, Line, LineChart, ReferenceLine, XAxis, YAxis } from "recharts";
+import { useEffect, useRef, useState } from "react";
 import { Badge } from "@/components/ui/badge";
-import {
-  type ChartConfig,
-  ChartContainer,
-  ChartLegend,
-  ChartLegendContent,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart";
 import { Progress } from "@/components/ui/progress";
-import { criteria, minimumScores } from "@/features/monitoring/format";
+import { criteria, minimumScores, scenarioName } from "@/features/monitoring/format";
 import type { IterationObservation, ScenarioObservation } from "@/lib/api/contracts";
 import { ObservationEmpty, ObservationPanel } from "./observation-panel";
 
-const chartConfig = Object.fromEntries(
-  criteria.map(({ key, short, color }) => [key, { label: short, color }]),
-) satisfies ChartConfig;
-
+/** Four small series do not need a chart runtime. Keep coordinates at CSS-pixel size. */
 export function ScoreTrend({
   iterations,
   threshold,
@@ -29,66 +18,143 @@ export function ScoreTrend({
   threshold: number;
   limit: number;
 }) {
+  const container = useRef<HTMLDivElement>(null);
+  const [width, setWidth] = useState(600);
+  useEffect(() => {
+    const element = container.current;
+    if (!element) return;
+    const observer = new ResizeObserver(([entry]) =>
+      setWidth(Math.max(200, Math.floor(entry.contentRect.width))),
+    );
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
   const points = iterations.flatMap((iteration) => {
     const scores = minimumScores(iteration);
     return scores ? [{ number: iteration.number, ...scores }] : [];
   });
+  const last = Math.max(2, limit, ...points.map((point) => point.number));
+  const x = (number: number) => 28 + ((number - 1) / (last - 1)) * (width - 48);
+  const y = (score: number) => 198 - score * 17;
+  const ticks = Array.from(
+    new Set(
+      Array.from({ length: Math.min(last, 6) }, (_, index) =>
+        Math.round(1 + (index * (last - 1)) / (Math.min(last, 6) - 1)),
+      ),
+    ),
+  );
   return (
-    <div className="border-t px-5 pt-4 pb-3">
-      <p className="mb-3 text-[10px] font-medium text-muted-foreground">
-        Lowest score per criterion, by iteration
-      </p>
+    <div className="px-5 py-5" ref={container}>
       {points.length ? (
-        <ChartContainer
-          config={chartConfig}
-          className="h-[210px] w-full"
-          aria-label={`Quality scores across iterations. Target ${threshold} out of 10.`}
-        >
-          <LineChart
-            accessibilityLayer
-            data={points}
-            margin={{ top: 15, right: 15, bottom: 5, left: -25 }}
+        <>
+          <svg
+            viewBox={`0 0 ${width} 232`}
+            width="100%"
+            height="232"
+            role="img"
+            aria-label={`Minimum quality scores by iteration. Target ${threshold} out of 10.`}
+            className="overflow-visible"
           >
-            <CartesianGrid vertical={false} strokeDasharray="3 3" />
-            <XAxis
-              dataKey="number"
-              type="number"
-              domain={[1, Math.max(2, limit)]}
-              allowDecimals={false}
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-            />
-            <YAxis domain={[0, 10]} ticks={[2, 4, 6, 8, 10]} tickLine={false} axisLine={false} />
-            <ReferenceLine
-              y={threshold}
+            <title>Quality over time</title>
+            <desc>
+              {points
+                .map(
+                  (point) =>
+                    `Iteration ${point.number}: ${criteria.map(({ key, short }) => `${short} ${point[key]}`).join(", ")}.`,
+                )
+                .join(" ")}
+            </desc>
+            {[0, 2, 4, 6, 8, 10].map((score) => (
+              <g key={score}>
+                <line
+                  x1="28"
+                  x2={width - 20}
+                  y1={y(score)}
+                  y2={y(score)}
+                  stroke="var(--border)"
+                  strokeDasharray="2 4"
+                />
+                <text
+                  x="18"
+                  y={y(score) + 4}
+                  textAnchor="end"
+                  fill="var(--muted-foreground)"
+                  fontSize="12"
+                >
+                  {score}
+                </text>
+              </g>
+            ))}
+            {ticks.map((number) => (
+              <text
+                key={number}
+                x={x(number)}
+                y="224"
+                textAnchor="middle"
+                fill="var(--muted-foreground)"
+                fontSize="12"
+              >
+                {number}
+              </text>
+            ))}
+            <line
+              x1="28"
+              x2={width - 20}
+              y1={y(threshold)}
+              y2={y(threshold)}
               stroke="var(--primary)"
               strokeDasharray="4 4"
-              label={{
-                value: `Target ${threshold}`,
-                position: "insideTopRight",
-                fontSize: 10,
-                fill: "var(--primary)",
-              }}
             />
-            <ChartTooltip
-              content={<ChartTooltipContent labelFormatter={(value) => `Iteration ${value}`} />}
-            />
-            <ChartLegend content={<ChartLegendContent className="flex-wrap text-[10px]" />} />
-            {criteria.map(({ key }) => (
-              <Line
-                key={key}
-                dataKey={key}
-                type="linear"
-                stroke={`var(--color-${key})`}
-                strokeWidth={2}
-                dot={{ r: 3 }}
-                activeDot={{ r: 4 }}
-                isAnimationActive={false}
-              />
+            <text
+              x={width - 20}
+              y={y(threshold) - 8}
+              textAnchor="end"
+              fill="var(--primary)"
+              fontSize="12"
+            >
+              Target {threshold}
+            </text>
+            {criteria.map(({ key, color, short }) => (
+              <g key={key}>
+                <polyline
+                  points={points.map((point) => `${x(point.number)},${y(point[key])}`).join(" ")}
+                  fill="none"
+                  stroke={color}
+                  strokeWidth="2"
+                  strokeLinejoin="round"
+                />
+                {points.map((point) => (
+                  <circle
+                    key={point.number}
+                    cx={x(point.number)}
+                    cy={y(point[key])}
+                    r="3.5"
+                    fill="var(--card)"
+                    stroke={color}
+                    strokeWidth="2"
+                  >
+                    <title>{`Iteration ${point.number} · ${short}: ${point[key]} / 10`}</title>
+                  </circle>
+                ))}
+              </g>
             ))}
-          </LineChart>
-        </ChartContainer>
+          </svg>
+          <ul
+            aria-label="Score criteria"
+            className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 text-xs text-muted-foreground sm:flex sm:flex-wrap sm:justify-center sm:gap-x-4"
+          >
+            {criteria.map(({ key, short, color }) => (
+              <li key={key} className="flex items-center gap-1.5">
+                <span
+                  aria-hidden="true"
+                  className="size-2 shrink-0 rounded-sm"
+                  style={{ backgroundColor: color }}
+                />
+                {short}
+              </li>
+            ))}
+          </ul>
+        </>
       ) : (
         <ObservationEmpty
           title="Awaiting evaluation results"
@@ -103,19 +169,21 @@ export function ScorePanel({
   iterations,
   threshold,
   limit,
+  showTrend = true,
 }: {
   scenario?: ScenarioObservation;
   iterations: IterationObservation[];
   threshold: number;
   limit: number;
+  showTrend?: boolean;
 }) {
   return (
     <ObservationPanel
-      title="Evaluation scores"
-      subtitle="Each criterion must meet the target"
+      title="Selected scenario scores"
+      subtitle={scenario ? scenarioName(scenario.id) : "Each criterion must meet the target"}
       icon={ChartNoAxesCombined}
       action={
-        <Badge variant="outline" className="text-[10px]">
+        <Badge variant="outline" className="text-xs">
           <Target aria-hidden="true" />
           {threshold}/10 to pass
         </Badge>
@@ -132,7 +200,7 @@ export function ScorePanel({
                   variant={
                     score === undefined ? "outline" : score >= threshold ? "default" : "secondary"
                   }
-                  className="font-mono text-[10px]"
+                  className={`font-mono text-xs ${score !== undefined && score < threshold ? "bg-amber-50 text-amber-800" : ""}`}
                 >
                   {score === undefined ? "Pending" : `${score} / 10`}
                 </Badge>
@@ -163,7 +231,7 @@ export function ScorePanel({
           );
         })}
       </div>
-      <ScoreTrend iterations={iterations} threshold={threshold} limit={limit} />
+      {showTrend && <ScoreTrend iterations={iterations} threshold={threshold} limit={limit} />}
     </ObservationPanel>
   );
 }

@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Chivo:wght@400;500;600&family=Chivo+Mono:wght@400;500&display=swap");
+
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
@@ -5,7 +7,8 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --font-sans: "Inter", "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-sans: "Chivo", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: "Chivo Mono", ui-monospace, monospace;
   --font-heading: var(--font-sans);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -63,70 +66,95 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: #065f46;
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: #ecfdf5;
-  --accent-foreground: #065f46;
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: #10b981;
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: #065f46;
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: #ecfdf5;
-  --sidebar-accent-foreground: #065f46;
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  /* Software workspace. Taste deal: teal-on-paper / Chivo + Chivo Mono / sharp.
+     App layouts use task-focused views rather than marketing heroes or effects. */
+  --p-bg: #f7f9f8;
+  --p-surface: #ebf0ee;
+  --p-ink: #06525c;
+  --p-muted: #2f737d;
+  --p-accent: #06525c;
+  --p-accent-ink: #f7f9f8;
+  --p-action: #06525c;
+  --p-action-ink: #f7f9f8;
+  --p-inv-bg: #06525c;
+  --p-inv-surface: #205d66;
+  --p-inv-ink: #f7f9f8;
+  --p-inv-muted: #c1d0d2;
+  --p-inv-accent: #f7f9f8;
+  --p-inv-accent-ink: #06525c;
+  --p-inv-action: #f7f9f8;
+  --p-inv-action-ink: #06525c;
+  --font-display: "Chivo", system-ui, sans-serif;
+  --font-text: "Chivo", system-ui, sans-serif;
+  --display-weight: 400;
+  --display-tracking: -0.03em;
+  --display-tracking-xl: -0.04em;
+  --ly-scale: 0.96;
+  --background: var(--p-bg);
+  --foreground: #202a2a;
+  --card: #ffffff;
+  --card-foreground: #202a2a;
+  --popover: #ffffff;
+  --popover-foreground: #202a2a;
+  --primary: var(--p-action);
+  --primary-foreground: var(--p-action-ink);
+  --secondary: #edf1ef;
+  --secondary-foreground: #354542;
+  --muted: #eef2f0;
+  --muted-foreground: #4a5955;
+  --accent: #e9f3ef;
+  --accent-foreground: #06525c;
+  --destructive: #b64141;
+  --border: #dfe6e2;
+  --input: #d4ded8;
+  --ring: #32807c;
+  --chart-1: #16816d;
+  --chart-2: #3b687f;
+  --chart-3: #8c7853;
+  --chart-4: #b17442;
+  --chart-5: #65716e;
+  --radius: 0.5rem;
+  --sidebar: #172627;
+  --sidebar-foreground: #e8efec;
+  --sidebar-primary: #c0ebe0;
+  --sidebar-primary-foreground: #172627;
+  --sidebar-accent: #293b3b;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #2a3b3b;
+  --sidebar-ring: #74aaa0;
 }
 
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+@layer base {
+  button,
+  a,
+  [role="tab"] {
+    -webkit-tap-highlight-color: transparent;
+  }
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]) {
+    cursor: pointer;
+  }
+  button,
+  a {
+    @apply transition-colors duration-150;
+  }
+  button:focus-visible,
+  a:focus-visible {
+    @apply outline-2 outline-offset-4 outline-ring;
+  }
+  button:active:not(:disabled) {
+    transform: translateY(1px);
+  }
+}
+
+/* Keep accessibility overrides outside layers so component utilities cannot override them. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms;
+    animation-iteration-count: 1;
+    transition-duration: 0.01ms;
+    scroll-behavior: auto;
+  }
 }

@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  ChartNoAxesCombined,
-  FileCode2,
-  LayoutDashboard,
-  MessagesSquare,
-  Repeat2,
-} from "lucide-react";
+import { ArrowUpRight, ChartNoAxesCombined, LayoutDashboard, MessagesSquare } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -17,11 +11,9 @@ import {
 } from "@/components/ui/sidebar";
 
 const navigation = [
-  { href: "/", label: "Live overview", icon: LayoutDashboard },
+  { href: "/", label: "Overview", icon: LayoutDashboard },
   { href: "/conversations", label: "Conversations", icon: MessagesSquare },
-  { href: "/evaluations", label: "Evaluation scores", icon: ChartNoAxesCombined },
-  { href: "/changes", label: "Prompt & code diffs", icon: FileCode2 },
-  { href: "/iterations", label: "Iteration history", icon: Repeat2 },
+  { href: "/evaluations", label: "Evaluations", icon: ChartNoAxesCombined },
 ] as const;
 
 export function SidebarNavigation() {
@@ -29,7 +21,7 @@ export function SidebarNavigation() {
   const { setOpenMobile } = useSidebar();
   return (
     <nav aria-label="Main navigation">
-      <SidebarMenu>
+      <SidebarMenu className="gap-1.5">
         {navigation.map(({ href, label, icon: Icon }) => (
           <SidebarMenuItem key={href}>
             <SidebarMenuButton
@@ -37,10 +29,13 @@ export function SidebarNavigation() {
               render={<Link href={href} />}
               aria-current={pathname === href ? "page" : undefined}
               onClick={() => setOpenMobile(false)}
-              className="h-10 text-xs"
+              className="h-11 gap-3 rounded-md px-3 text-[13px] text-white/60 hover:bg-white/5 hover:text-white data-active:bg-white/10 data-active:text-white"
             >
-              <Icon aria-hidden="true" />
+              <Icon aria-hidden="true" className={pathname === href ? "text-teal-300" : ""} />
               <span>{label}</span>
+              {pathname === href && (
+                <ArrowUpRight className="ml-auto size-3.5 text-white/40" aria-hidden="true" />
+              )}
             </SidebarMenuButton>
           </SidebarMenuItem>
         ))}

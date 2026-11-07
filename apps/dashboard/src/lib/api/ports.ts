@@ -6,4 +6,8 @@ export interface MonitoringState extends MonitoringSnapshot {
   receivedAt: number | null;
   selectedRun: string;
   selectRun: (runId: string) => void;
+  iterationKey: string;
+  selectIteration: (key: string) => void;
+  scenarioId: string;
+  selectScenario: (id: string) => void;
 }

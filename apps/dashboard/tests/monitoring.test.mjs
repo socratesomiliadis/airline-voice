@@ -124,3 +124,34 @@ test("backend failures become a reconnectable error without leaking upstream con
     globalThis.fetch = original;
   }
 });
+
+const { resolveObservation, needsAttention } = await load(
+  "../src/features/monitoring/selection.ts",
+);
+
+test("observation follows the active scenario and ignores an iteration pinned in a different run", () => {
+  const earlier = { number: 1, scenarios: [{ id: "earlier", status: "passed" }] };
+  const latest = {
+    number: 2,
+    scenarios: [
+      { id: "active", status: "simulating" },
+      { id: "queued", status: "pending" },
+    ],
+  };
+  const run = { run_id: "new-run", active_scenario: "active", iterations: [earlier, latest] };
+  assert.equal(resolveObservation(run, "old-run:1", "missing").iteration, latest);
+  assert.equal(resolveObservation(run, "", "").scenario.id, "active");
+  assert.equal(resolveObservation(run, "new-run:1", "active").scenario.id, "earlier");
+  assert.equal(resolveObservation(run, "", "queued").scenario.id, "queued");
+  assert.equal(resolveObservation(null, "new-run:1", "active").scenario, undefined);
+});
+
+test("attention includes tool errors and any below-target criterion, while pending scores stay neutral", () => {
+  assert.equal(needsAttention({ status: "error", evaluation: null }, 8), true);
+  assert.equal(
+    needsAttention({ status: "evaluating", evaluation: { scores: scores(7) } }, 8),
+    true,
+  );
+  assert.equal(needsAttention({ status: "passed", evaluation: { scores: scores(8) } }, 8), false);
+  assert.equal(needsAttention({ status: "pending", evaluation: null }, 8), false);
+});

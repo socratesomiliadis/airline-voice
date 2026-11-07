@@ -21,7 +21,7 @@ export function IterationHistory({
       subtitle="Every evaluation and refinement cycle"
       icon={History}
       action={
-        <Badge variant="outline" className="font-mono text-[10px]">
+        <Badge variant="outline" className="font-mono text-xs">
           {run ? `${run.iteration} / ${run.max_iterations}` : "Awaiting run"}
         </Badge>
       }
@@ -37,7 +37,9 @@ export function IterationHistory({
             {[...run.iterations].reverse().map((iteration) => {
               const scores = minimumScores(iteration);
               const passing = passedCount(iteration, run.pass_score);
-              const completed = iteration.scenarios.every((scenario) => scenario.evaluation);
+              const completed =
+                iteration.scenarios.length > 0 &&
+                iteration.scenarios.every((scenario) => scenario.evaluation);
               const passed = completed && passing === iteration.scenarios.length;
               const active = iteration.number === run.iteration && run.status === "running";
               const Icon = passed ? Check : active ? LoaderCircle : Circle;
@@ -50,20 +52,20 @@ export function IterationHistory({
                   className={`h-auto w-full items-start justify-start gap-3 whitespace-normal px-3 py-4 text-left ${selected === iteration.number ? "border-primary/30 bg-accent/60" : ""}`}
                 >
                   <Icon
-                    className={`mt-0.5 size-4 ${passed ? "text-primary" : active ? "text-primary motion-safe:animate-spin" : "text-muted-foreground"}`}
+                    className={`mt-0.5 size-4 ${passed ? "text-primary" : active ? "text-primary " : "text-muted-foreground"}`}
                     aria-hidden="true"
                   />
                   <span className="min-w-0 flex-1">
                     <span className="flex items-center justify-between gap-2">
                       <span className="text-xs font-semibold">Iteration {iteration.number}</span>
                       <time
-                        className="font-mono text-[9px] text-muted-foreground"
+                        className="font-mono text-xs text-muted-foreground"
                         dateTime={iteration.started_at}
                       >
                         {time(iteration.started_at)}
                       </time>
                     </span>
-                    <span className="mt-1.5 block text-[11px] text-muted-foreground">
+                    <span className="mt-1.5 block text-[13px] text-muted-foreground">
                       {active
                         ? label(iteration.stage)
                         : passed
@@ -79,14 +81,14 @@ export function IterationHistory({
                             ? "default"
                             : "outline"
                         }
-                        className="text-[9px]"
+                        className="text-xs"
                       >
                         {scores
                           ? `Lowest ${Math.min(...Object.values(scores))}/10`
                           : "Scores pending"}
                       </Badge>
                       {iteration.change_status !== "none" && (
-                        <Badge variant="outline" className="text-[9px]">
+                        <Badge variant="outline" className="text-xs">
                           {label(iteration.change_status)}
                         </Badge>
                       )}

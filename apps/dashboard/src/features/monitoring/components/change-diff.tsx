@@ -33,24 +33,24 @@ function DiffContents({
     );
   return (
     <>
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b bg-muted/50 px-5 py-2.5 text-[10px]">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b bg-muted/50 px-5 py-2.5 text-xs">
         <span className="flex items-center gap-2 font-mono text-muted-foreground">
           <FileText className="size-3" aria-hidden="true" />
           {kind === "prompt" ? "prompts/agent/system.md" : "Diagnosed backend functions"}
         </span>
         <span className="flex items-center gap-2">
-          <Badge variant="outline" className="font-mono text-[10px] text-emerald-700">
+          <Badge variant="outline" className="font-mono text-xs text-emerald-700">
             <Plus aria-label="Added lines" />
             {lines.filter((line) => line.kind === "added").length}
           </Badge>
-          <Badge variant="outline" className="font-mono text-[10px] text-rose-600">
+          <Badge variant="outline" className="font-mono text-xs text-rose-600">
             <Minus aria-label="Removed lines" />
             {lines.filter((line) => line.kind === "removed").length}
           </Badge>
         </span>
       </div>
       <ScrollArea className="h-[350px]" aria-label={`${kind} diff`}>
-        <pre className="min-w-full w-max py-2 text-[11px] leading-6">
+        <pre className="min-w-full w-max py-2 text-[13px] leading-6">
           <code>
             {lines.map((line) => (
               <span
@@ -59,13 +59,13 @@ function DiffContents({
               >
                 <span
                   aria-hidden="true"
-                  className="inline-block w-9 shrink-0 select-none border-r pr-2 text-right text-[10px] text-muted-foreground/50"
+                  className="inline-block w-9 shrink-0 select-none border-r pr-2 text-right text-xs text-muted-foreground"
                 >
                   {line.before}
                 </span>
                 <span
                   aria-hidden="true"
-                  className="inline-block w-9 shrink-0 select-none border-r pr-2 text-right text-[10px] text-muted-foreground/50"
+                  className="inline-block w-9 shrink-0 select-none border-r pr-2 text-right text-xs text-muted-foreground"
                 >
                   {line.after}
                 </span>
@@ -120,7 +120,7 @@ export function ChangeDiff({ iteration }: { iteration?: IterationObservation }) 
               >
                 {label(iteration.change_status)}
               </Badge>
-              <span className="text-[10px] text-muted-foreground">
+              <span className="text-xs text-muted-foreground">
                 After iteration {iteration.number}
               </span>
             </div>
