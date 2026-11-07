@@ -1,1 +1,1 @@
-"""Refinement application. No simulation or code mutation is implemented."""
+"""Autonomous airline assistant evaluation and prompt/code refinement."""

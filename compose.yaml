@@ -69,7 +69,7 @@ services:
     depends_on:
       api:
         condition: service_healthy
-    # CLI help only. `docker compose run --rm refiner run` deliberately exits 2.
+    # Package/CLI inspection only. Run the worker on the host for source edits and service reloads.
     command: ["--help"]
 
 volumes:

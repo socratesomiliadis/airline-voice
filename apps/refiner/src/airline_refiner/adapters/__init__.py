@@ -1,1 +1,1 @@
-"""Future API, model provider, sandbox, and artifact-store adapters."""
+"""HTTP, Chat Mode, structured model, patch, and artifact adapters."""

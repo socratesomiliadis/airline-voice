@@ -1,1 +1,1 @@
-"""Pipeline contracts. Stage order, retries, convergence, and scheduling are deferred."""
+"""Autonomous simulation, evaluation, repair, deployment, and convergence."""

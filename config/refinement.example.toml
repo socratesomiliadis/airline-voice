@@ -1,10 +1,24 @@
-# Shape and policy decisions are intentionally deferred.
-# These empty sections are documentation placeholders, not an executable configuration.
-[simulation]
-[evaluation]
-[quality_thresholds]
-[diagnosis]
-[fix_generation]
-[patch_application]
-[verification]
-[iteration]
+# Run from the repository root against a development agent and database.
+pass_score = 8
+max_iterations = 5
+customer_model = "gpt-4.1-mini"
+evaluator_model = "gpt-4.1"
+repair_model = "gpt-4.1"
+max_customer_turns = 18
+workspace_root = "."
+scenarios_path = "scenarios/airline.json"
+prompt_path = "prompts/agent/system.md"
+knowledge_dir = "knowledge"
+editable_roots = ["apps/api/src/airline_api"]
+max_patch_files = 6
+# Tests run before reload. Supply TEST_DATABASE_URL to include PostgreSQL regressions.
+verification_command = ["uv", "run", "--all-packages", "pytest", "-q"]
+# Restart the existing local Uvicorn API, or rebuild its existing Compose container.
+# The helper checks listeners before launching; it refuses unrelated processes.
+reload_command = ["uv", "run", "--package", "airline-refiner", "python", "-m", "airline_refiner.reload_service"]
+command_timeout_seconds = 300
+readiness_timeout_seconds = 90
+turn_timeout_seconds = 90
+transcript_timeout_seconds = 60
+# Optional: pin a specific branch; otherwise use the agent's main branch.
+# agent_branch_id = "agtbrch_..."

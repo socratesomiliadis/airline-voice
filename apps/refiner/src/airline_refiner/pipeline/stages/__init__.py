@@ -1,1 +1,1 @@
-"""Independent extension points for each future refinement stage."""
+"""Conversation simulation, independent evaluation/diagnosis, and targeted repair."""

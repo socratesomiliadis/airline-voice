@@ -8,8 +8,10 @@ a Next.js monitoring dashboard.
 searches flights, books travel, retrieves bookings, cancels or reschedules, and
 adds baggage or special-item requests. Operations use PostgreSQL transactions,
 shared cabin inventory, versioned JSON policies, and durable retry receipts.
-Payments are simulated ledger entries. The refinement loop, live dashboard data,
-and other reserved platform features remain unimplemented.
+Payments are simulated ledger entries. The autonomous refinement worker simulates
+text conversations, scores them, repairs prompts and backend code, reloads the
+service and repeats. Live dashboard data and other reserved platform features
+remain unimplemented.
 
 ## Repository layout
 
@@ -32,8 +34,8 @@ apps/
     migrations/            Flight inventory and booking schema migrations
   refiner/
     src/airline_refiner/
-      pipeline/            Context, runner, and stage protocols
-      adapters/            Reserved API, model, and workspace adapters
+      pipeline/            Autonomous runner, simulation, evaluation, repair
+      adapters/            REST, Chat Mode, model, patch and artifact adapters
   dashboard/
     src/
       app/                 Next.js App Router pages
@@ -41,10 +43,10 @@ apps/
       features/monitoring/ Monitoring view shells
       lib/api/             Future API and event-stream contracts
 packages/contracts/        Shared Python payload and event contracts
-config/                    Webhook contracts and refinement configuration placeholders
+config/                    Webhook contracts and runtime refinement configuration
 data/flights/              Fictional flight week and database setup instructions
-prompts/                   Future versioned prompt assets
-scenarios/                 Future simulated customer scenarios
+prompts/                   Agent system prompt
+scenarios/                 Executable fictional customer suite
 knowledge/                 One JSON file per fictional policy and source staging
 artifacts/                 Ignored local refinement output
 tests/                     Policy, API, concurrency, persistence, and infrastructure checks
@@ -89,8 +91,9 @@ The refinement container is optional and only displays CLI help:
 docker compose --profile refinement run --rm refiner --help
 ```
 
-Passing `run` deliberately exits with status 2 and performs no work. The worker
-has no source-code mount, Docker socket mount, or active patching capability.
+Run autonomous refinement on the host so the worker can edit source, execute
+regression tests and reload the existing API. The container is for CLI inspection
+and has read-only source asset mounts. See [the refinement guide](docs/refinement.md).
 
 ## Run locally
 
@@ -118,11 +121,16 @@ development server. Do not start a local app on a port occupied by Compose.
 The dashboard makes no API requests yet. Both application shells can start without
 PostgreSQL or ElevenLabs credentials; liveness does not imply dependency readiness.
 
-Inspect the worker CLI:
+Run the autonomous refinement worker after configuring its model credentials:
 
 ```sh
-uv run --package airline-refiner airline-refiner --help
+uv run --package airline-refiner airline-refiner run
 ```
+
+It stops when every scenario criterion scores at least 8/10, or after 5 iterations.
+Override these defaults with `--pass-score` and `--max-iterations`, or edit
+`config/refinement.example.toml`. Transcripts, evaluations, patches and logs are
+saved under `artifacts/<run-id>/`. See [setup and recovery](docs/refinement.md).
 
 ## Configuration
 
@@ -142,8 +150,11 @@ key. These endpoints do not make outbound provider calls or process real payment
 `2026-11-05T12:00:00Z`. Without it, flight eligibility uses the current UTC time.
 Audit events keep real timestamps and include the effective business time.
 
-`config/refinement.example.toml` contains empty sections, with no active thresholds,
-retry limits, model selection, or mutation policy. The worker does not load it yet.
+`config/refinement.example.toml` defines quality thresholds, iteration and timeout
+limits, separate customer/evaluator/repair models, editable source roots, and
+verification/reload commands. Set `REFINER_MODEL_API_KEY` (or `OPENAI_API_KEY`) for
+structured model calls. The worker uses the existing `ELEVENLABS_API_KEY`,
+`ELEVENLABS_AGENT_ID`, and `AGENT_API_KEY`.
 
 ## Database migrations
 
@@ -190,5 +201,6 @@ database. CI supplies PostgreSQL and also builds all three application images.
 See [architecture](docs/architecture.md), [development guidance](docs/development.md),
 the [booking API reference](docs/api.md), [ElevenLabs setup](docs/elevenlabs.md),
 and the [fictional JSON knowledge base](knowledge/README.md).
-Outbound provider integration, real-time monitoring, evaluation criteria, and the
-refinement loop remain for subsequent implementation.
+The [refinement worker](docs/refinement.md) implements outbound text conversations,
+evaluation, diagnosis, prompt/code repair and deployment. Real-time monitoring
+and API/dashboard run controls remain for subsequent implementation.

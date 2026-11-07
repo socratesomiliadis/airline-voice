@@ -8,10 +8,10 @@ request-scoped booking service. The service coordinates SQLAlchemy transactions;
 policy calculations live in a separate catalog loaded from the JSON knowledge
 base. Other feature routers continue to return `501`.
 
-The refiner is a separate Python process. It depends on shared contracts and will
-communicate with the API through an adapter. It does not import API internals or
-write directly to the API's database. A future isolated workspace adapter owns
-candidate changes and verification, separate from customer-facing operations.
+The refiner is a separate Python process using REST and Chat Mode adapters.
+It does not import API internals or write directly to the API's database. Its
+workspace adapter applies bounded backend edits, verifies them, reloads the
+service and restores failed changes. See [autonomous refinement](refinement.md).
 
 The dashboard contains presentation components and monitoring view definitions.
 A future server-side API adapter will load data; a dedicated event-stream adapter
@@ -95,23 +95,20 @@ requests requiring provider acceptance remain `pending_confirmation` and are not
 charged. The optional `SIMULATION_NOW` business clock keeps the fixed fixture week
 usable; event audit timestamps use real UTC time.
 
-## Refinement extension points
+## Autonomous refinement
 
-The proposed pipeline has separate protocols for:
+The concrete runner evaluates every scenario in each iteration. Separate stages
+simulate an LLM customer over ElevenLabs Chat Mode, judge the transcript and tool
+results with per-failure prompt/code diagnosis, and propose both kinds of repair.
+Pydantic contracts validate scenarios, scores, evidence quotes and patch payloads.
+Workspace adapters apply exact replacements, compile/test changes, reload the
+existing service and roll back failed repairs. Changed prompts publish through
+ElevenLabs REST. Every criterion must reach the configurable threshold (8/10 by
+default); the loop allows 5 evaluated iterations by default. Artifacts contain
+full evidence and repair histories. No final untested repair is deployed.
 
-1. Simulating customer conversations.
-2. Evaluating transcripts and tool outcomes.
-3. Diagnosing prompt or code failures.
-4. Proposing prompt or code changes.
-5. Applying candidate changes in an isolated workspace.
-6. Verifying candidates with regression checks and fresh evaluations.
-7. Deciding whether quality thresholds require another iteration.
-
-The runner is a protocol, not an implementation. Stage order, inputs and outputs,
-artifact formats, scheduling, quality thresholds, iteration limits, retries,
-rollback, prompt deployment, and mutation policy remain undefined. Current stage
-protocols share a minimal frozen context; replace it with typed stage results
-when implementing the pipeline.
+See [configuration, lifecycle and failure recovery](refinement.md). Refiner HTTP
+run-control routes still return `501`; the executable entry point is the host CLI.
 
 ## Events and monitoring
 
@@ -126,9 +123,9 @@ when its durability and scaling requirements are known.
 - API startup creates a lazy engine but performs no database queries or schema writes.
 - The liveness endpoint reports process availability only.
 - Flight and booking operations persist to PostgreSQL; unrelated platform routes return `501`.
-- The worker CLI cannot run simulations or modify prompts or code.
+- The worker CLI autonomously simulates, evaluates, patches and redeploys within configured limits.
 - Dashboard views contain no fabricated operational data or automated network calls.
-- Provider adapters contain no SDK calls; credentials are confined to backend settings.
+- Provider credentials stay in server-side settings; artifacts redact known secret values.
 
 The implementation follows the documented [FastAPI router composition](https://fastapi.tiangolo.com/tutorial/bigger-applications/),
 [uv workspace](https://docs.astral.sh/uv/concepts/projects/workspaces/),

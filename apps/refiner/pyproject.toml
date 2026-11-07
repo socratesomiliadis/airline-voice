@@ -1,12 +1,13 @@
 [project]
 name = "airline-refiner"
 version = "0.1.0"
-description = "Interfaces and CLI scaffold for the autonomous refinement process."
+description = "Autonomous ElevenLabs conversation evaluation and prompt/code refinement."
 requires-python = ">=3.12"
 dependencies = [
     "airline-contracts",
     "httpx>=0.28,<1",
     "pydantic-settings>=2.8,<3",
+    "websockets>=15,<18",
 ]
 
 [project.scripts]

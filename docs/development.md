@@ -28,12 +28,14 @@ Flight and booking routes have implemented schemas, agent-key authentication,
 durable idempotency, explicit transactions, and database integration tests. See
 `docs/api.md`. Other route names still reserve an unimplemented API surface.
 
-## Adding a refinement stage
+## Refinement development
 
-Implement the relevant protocol under `pipeline/stages/`, with typed inputs and
-results. Keep external models, HTTP requests, filesystem changes, and subprocesses
-behind adapters. Add orchestration to the runner only when the policies and stage
-contracts exist. Keep artifacts and scenario fixtures separate from source code.
+The host CLI runs the concrete pipeline under `apps/refiner`. Keep external LLM,
+HTTP, WebSocket, filesystem and subprocess operations in adapters, and extend
+validated contracts in `models.py` when adding evidence or repair behavior.
+Regression tests in `tests/test_refinement.py` exercise mixed repairs, termination,
+provider contracts, evidence checks and rollback without external credentials.
+See [the refinement guide](refinement.md) before changing runtime policies.
 
 ## Connecting dashboard data
 
