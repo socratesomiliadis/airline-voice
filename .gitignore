@@ -35,3 +35,6 @@ knowledge/sources/*
 .DS_Store
 .idea/
 .vscode/
+
+# Local agent skills
+/.agents/skills/design-taste-frontend/
