@@ -8,6 +8,7 @@
 **/*.egg-info
 **/.pytest_cache
 **/.ruff_cache
+**/.mypy_cache
 **/*.tsbuildinfo
 .venv
 .tools

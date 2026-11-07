@@ -58,9 +58,10 @@ class RefinementRunner:
         code_faults: list[CodeFault],
     ) -> str:
         transaction = self.workspace.plan(repair.edits, sources, code_faults)
-        self.artifacts.write_text(prefix + "/code.patch", transaction.diff(self.workspace.root))
+        code_diff = transaction.diff(self.workspace.root)
+        self.artifacts.write_text(prefix + "/code.patch", code_diff)
         if self.observer:
-            self.observer.patch(transaction.diff(self.workspace.root))
+            self.observer.patch(code_diff)
         prompt_path = self.workspace.root / self.config.prompt_path
         local_prompt = prompt_path.read_text() if prompt_path.exists() else None
         code_applied, prompt_attempted = False, False

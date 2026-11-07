@@ -16,9 +16,6 @@ class Settings(BaseSettings):
         "postgresql+asyncpg://airline:airline_local@localhost:5432/airline"
     )
     cors_origins: list[str] = ["http://localhost:3000"]
-    elevenlabs_api_key: SecretStr | None = None
-    elevenlabs_agent_id: str | None = None
-    elevenlabs_webhook_secret: SecretStr | None = None
     agent_api_key: SecretStr | None = None
     knowledge_dir: Path = Path("knowledge")
     refiner_artifacts_dir: Path = Path("artifacts")

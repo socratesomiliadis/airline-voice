@@ -2,7 +2,8 @@
 
 ## First-time setup on your own account
 
-Install the workspace (`make setup`), start PostgreSQL, run `make migrate` and
+Install the workspace (`make setup`, including the development dependencies used
+by the provisioning script), start PostgreSQL, run `make migrate` and
 `make seed-flights`, then start the API with `make dev-api`. Set these in `.env`:
 
 ```dotenv

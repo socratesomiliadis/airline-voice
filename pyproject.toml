@@ -13,6 +13,7 @@ members = ["apps/api", "apps/refiner", "packages/contracts"]
 
 [dependency-groups]
 dev = [
+    "elevenlabs>=2,<3",
     "httpx2>=2.16.0",
     "mypy>=1.15,<2",
     "pytest>=8,<10",

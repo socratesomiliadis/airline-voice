@@ -100,15 +100,7 @@ export function RefinementDashboard({
     if (window.matchMedia("(max-width: 1023px)").matches)
       document.getElementById("conversation-inspector")?.scrollIntoView({ block: "start" });
   };
-  const scores = (
-    <ScorePanel
-      scenario={scenario}
-      iterations={run?.iterations || []}
-      threshold={threshold}
-      limit={run?.max_iterations || 5}
-      showTrend={false}
-    />
-  );
+  const scores = <ScorePanel scenario={scenario} threshold={threshold} />;
   return (
     <>
       <div className="mb-8 flex flex-wrap items-start justify-between gap-5">

@@ -137,9 +137,11 @@ class FakeSession:
         self.turns += 1
         self.result.conversation_id = "conv-test"
         self.result.dialogue.append({"role": "agent", "message": "Wrong response"})
+        self.result.notify()
 
     async def send(self, message):
         self.result.dialogue.append({"role": "user", "message": message})
+        self.result.notify()
 
     async def close(self):
         self.closed = True
@@ -193,6 +195,37 @@ class FakeAPI:
 
     async def cleanup(self, fixture, conversation_id, caller):
         self.cleanups.append(caller)
+
+
+@pytest.mark.parametrize("capture_fails", [False, True])
+def test_simulator_publishes_messages_once_and_preserves_final_evidence(capture_fails):
+    class API(FakeAPI):
+        async def capture(self, fixture, conversation_id):
+            if capture_fails:
+                raise RefinementError("Booking evidence unavailable")
+            return await super().capture(fixture, conversation_id)
+
+    scenario = Scenario(
+        id="booking",
+        goal="Book travel",
+        customer_facts="One passenger",
+        expected_outcome="Confirmed booking",
+        required_tools=["book_flight"],
+    )
+    api = API()
+    simulator = Simulator(RefinementConfig(), ScriptedModel(), FakeProvider(), api)
+    snapshots = []
+    simulator.on_update = lambda result: snapshots.append(result.model_dump())
+
+    result = asyncio.run(simulator.run(scenario, "caller"))
+
+    assert [len(snapshot["dialogue"]) for snapshot in snapshots] == [1, 2, 3, 3]
+    assert [snapshot["completed"] for snapshot in snapshots] == [False, False, False, True]
+    assert snapshots[-1] == result.model_dump()
+    assert snapshots[-1]["transcript"]
+    assert result.errors == (["Booking evidence unavailable"] if capture_fails else [])
+    assert bool(result.booking_state) is not capture_fails
+    assert api.cleanups == ["caller"]
 
 
 @pytest.fixture

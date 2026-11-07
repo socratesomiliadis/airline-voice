@@ -29,9 +29,6 @@ services:
       SIMULATION_NOW: ${SIMULATION_NOW:-}
       DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-airline}:${POSTGRES_PASSWORD:-airline_local}@database:5432/${POSTGRES_DB:-airline}
       CORS_ORIGINS: ${CORS_ORIGINS:-["http://localhost:3000"]}
-      ELEVENLABS_API_KEY: ${ELEVENLABS_API_KEY:-}
-      ELEVENLABS_AGENT_ID: ${ELEVENLABS_AGENT_ID:-}
-      ELEVENLABS_WEBHOOK_SECRET: ${ELEVENLABS_WEBHOOK_SECRET:-}
       REFINER_ARTIFACTS_DIR: /app/artifacts
     volumes:
       - ./artifacts:/app/artifacts:ro

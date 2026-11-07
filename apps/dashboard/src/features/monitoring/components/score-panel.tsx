@@ -166,16 +166,10 @@ export function ScoreTrend({
 }
 export function ScorePanel({
   scenario,
-  iterations,
   threshold,
-  limit,
-  showTrend = true,
 }: {
   scenario?: ScenarioObservation;
-  iterations: IterationObservation[];
   threshold: number;
-  limit: number;
-  showTrend?: boolean;
 }) {
   return (
     <ObservationPanel
@@ -231,7 +225,6 @@ export function ScorePanel({
           );
         })}
       </div>
-      {showTrend && <ScoreTrend iterations={iterations} threshold={threshold} limit={limit} />}
     </ObservationPanel>
   );
 }

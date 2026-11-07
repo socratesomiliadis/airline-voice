@@ -46,7 +46,6 @@ class Simulator:
             result.fixture = await self.api.prepare(scenario, caller)
             session = await self.provider.connect(result)
             await session.receive_turn(self.config.turn_timeout_seconds)
-            result.notify()
             for _ in range(self.config.max_customer_turns):
                 if session.closed:
                     break
@@ -65,7 +64,6 @@ class Simulator:
                     raise RefinementError("Customer model returned an empty message")
                 await session.send(turn.message)
                 await session.receive_turn(self.config.turn_timeout_seconds)
-                result.notify()
                 if turn.done:
                     result.completed = True
                     break

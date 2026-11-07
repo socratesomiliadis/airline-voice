@@ -4,5 +4,7 @@
 `scripts/configure_elevenlabs.py` publishes this prompt, the greeting, six policy
 documents, and booking webhook tools to the configured private ElevenLabs agent.
 
-Simulation, evaluation, and refinement prompts remain future work. The setup CLI
-does not run the autonomous refinement loop.
+The worker's simulation, evaluation, and repair instructions live alongside their
+implementations in `apps/refiner/src/airline_refiner/pipeline/stages/` as the
+`CUSTOMER`, `JUDGE`, and `REPAIR` constants. Run the autonomous loop with
+`make refine`; the provisioning script only configures the agent.

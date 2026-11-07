@@ -19,11 +19,13 @@ server-sent events. A client provider handles reconnects, transport heartbeats a
 selection across views. Conversations, scores, changes and history update without
 manual commands. See [observation architecture](monitoring.md).
 
-`packages/contracts` is a leaf dependency shared by Python apps. It contains a
-generic JSON payload type, a proposed event envelope, and event transport ports.
-It has no dependency on application or provider packages. TypeScript currently
-mirrors the small event envelope manually. Generate client types from OpenAPI
-when concrete domain schemas are introduced.
+`packages/contracts` is a leaf dependency shared by Python apps. Its concrete
+observation contracts in `monitoring.py` describe run summaries, iterations,
+conversations, and snapshots. The dashboard mirrors these contracts manually in
+`src/lib/api/contracts.ts`; keep the two definitions aligned when payloads change.
+The package also retains a generic JSON payload type, a proposed event envelope,
+and event transport ports for future features. It has no dependency on application
+or provider packages.
 
 ## Feature ownership
 
