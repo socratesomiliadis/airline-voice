@@ -21,10 +21,12 @@ from airline_refiner.config import (
 )
 from airline_refiner.errors import RefinementError
 from airline_refiner.models import (
+    CodeFault,
     CustomerTurn,
     Evaluation,
     Failure,
     FileEdit,
+    Iteration,
     Repair,
     Scenario,
     Scores,
@@ -32,7 +34,18 @@ from airline_refiner.models import (
 )
 from airline_refiner.pipeline.runner import RefinementRunner, load_scenarios
 from airline_refiner.pipeline.stages.evaluate import Evaluator
+from airline_refiner.pipeline.stages.propose import FixProposer
 from airline_refiner.pipeline.stages.simulate import Simulator
+
+
+def service_source(value=1):
+    return f"def quote():\n    return {value}\n\n\ndef untouched():\n    return 99\n"
+
+
+def code_fault(path="backend/service.py", function="quote"):
+    return CodeFault(
+        path=path, function=function, behavior="Returns the wrong fare; return the requested fare"
+    )
 
 
 class ScriptedModel:
@@ -43,6 +56,7 @@ class ScriptedModel:
         self.calls: list[tuple[str, str]] = []
         self.judged = 0
         self.repairs = 0
+        self.repair_inputs = []
 
     async def generate(self, model, instruction, data, schema, validate=None):
         self.calls.append((model, schema.__name__))
@@ -59,7 +73,7 @@ class ScriptedModel:
                         root_cause="prompt",
                         quote="Wrong response",
                         explanation="Agent misunderstood the destination",
-                        files=[],
+                        code_faults=[],
                     )
                 )
             if bad and self.cause in {"code", "mixed"}:
@@ -69,7 +83,13 @@ class ScriptedModel:
                         root_cause="code",
                         quote="Wrong response",
                         explanation="A correct request returned incorrect data",
-                        files=["backend/service.py"],
+                        code_faults=[
+                            CodeFault(
+                                path="backend/service.py",
+                                function="quote",
+                                behavior="Returns the wrong fare; return the requested fare",
+                            )
+                        ],
                     )
                 )
             scores = Scores(
@@ -84,6 +104,7 @@ class ScriptedModel:
                 failures=failures,
             )
         elif schema is Repair:
+            self.repair_inputs.append(data)
             self.repairs += 1
             result = Repair(
                 explanation="Correct destination understanding and the backend result",
@@ -91,8 +112,9 @@ class ScriptedModel:
                 edits=[
                     FileEdit(
                         path="backend/service.py",
-                        old_text=data["source"]["backend/service.py"],
-                        new_text=f"value = {self.repairs + 1}\n",
+                        function="quote",
+                        old_text=f"return {self.repairs}",
+                        new_text=f"return {self.repairs + 1}",
                     )
                 ]
                 if self.cause != "prompt"
@@ -176,7 +198,8 @@ class FakeAPI:
 @pytest.fixture
 def rig(tmp_path):
     (tmp_path / "backend").mkdir()
-    (tmp_path / "backend/service.py").write_text("value = 1\n")
+    (tmp_path / "backend/service.py").write_text(service_source(1))
+    (tmp_path / "backend/unrelated.py").write_text("UNCHANGED = True\n")
     (tmp_path / "knowledge").mkdir()
     (tmp_path / "knowledge/policy.json").write_text('{"policy": "fictional"}')
     (tmp_path / "prompt.md").write_text("Original local prompt\n")
@@ -215,13 +238,17 @@ def test_mixed_repairs_are_applied_reloaded_published_and_retested(rig):
     assert len(result.iterations) == 2
     assert result.iterations[0].repair_applied
     assert model.repairs == 1
-    assert (root / "backend/service.py").read_text() == "value = 2\n"
+    repair_input = model.repair_inputs[0]
+    assert set(repair_input["source"]) == {"backend/service.py"}
+    assert repair_input["code_faults"] == [code_fault().model_dump()]
+    assert (root / "backend/unrelated.py").read_text() == "UNCHANGED = True\n"
+    assert (root / "backend/service.py").read_text() == service_source(2)
     assert (root / "reloaded").read_text() == "reload\n"
     assert provider.updates == ["Improved prompt 1"]
     assert (root / "prompt.md").read_text() == "Improved prompt 1\n"
     assert len(api.cleanups) == 2 and len(set(api.cleanups)) == 2
     assert all(session.closed for session in provider.sessions)
-    assert "value = 2" in (root / "artifacts/iteration-01/code.patch").read_text()
+    assert "return 2" in (root / "artifacts/iteration-01/code.patch").read_text()
     report = json.loads((root / "artifacts/run.json").read_text())
     assert report["status"] == "passed"
     assert report["iterations"][0]["evaluations"][0]["failures"][1]["root_cause"] == "code"
@@ -241,7 +268,7 @@ def test_single_cause_only_changes_its_target(rig, cause):
     assert asyncio.run(runner.run()).status == "passed"
     assert bool(provider.updates) == (cause == "prompt")
     assert (root / "reloaded").exists() == (cause == "code")
-    assert ((root / "backend/service.py").read_text() != "value = 1\n") == (cause == "code")
+    assert ((root / "backend/service.py").read_text() != service_source(1)) == (cause == "code")
 
 
 def test_iteration_limit_includes_baseline_and_never_deploys_untested_final_fix(rig):
@@ -252,7 +279,7 @@ def test_iteration_limit_includes_baseline_and_never_deploys_untested_final_fix(
     assert result.status == "iteration_limit"
     assert len(result.iterations) == 3 and model.repairs == 2
     assert not result.iterations[-1].repair_applied
-    assert (root / "backend/service.py").read_text() == "value = 3\n"
+    assert (root / "backend/service.py").read_text() == service_source(3)
 
 
 def test_all_scenarios_rerun_and_one_low_criterion_prevents_pass(rig):
@@ -282,7 +309,7 @@ def test_verification_failure_restores_code_and_next_iteration_recovers(rig):
     assert result.status == "passed"
     assert "exited 1" in result.iterations[0].repair_error
     assert not result.iterations[0].repair_applied
-    assert (root / "backend/service.py").read_text() == "value = 1\n"
+    assert (root / "backend/service.py").read_text() == service_source(1)
     assert provider.updates == []
     assert (root / "reloaded").read_text() == "reload\n"  # Restored service reload.
 
@@ -301,7 +328,7 @@ def test_failed_reload_rolls_back_and_restores_old_service(rig):
     result = asyncio.run(runner.run())
     assert result.status == "passed"
     assert result.iterations[0].repair_error
-    assert (root / "backend/service.py").read_text() == "value = 1\n"
+    assert (root / "backend/service.py").read_text() == service_source(1)
 
 
 def test_unrecoverable_reload_stops_instead_of_testing_unknown_state(rig):
@@ -311,7 +338,7 @@ def test_unrecoverable_reload_stops_instead_of_testing_unknown_state(rig):
     assert result.status == "error" and len(result.iterations) == 1
     assert "rollback" in result.error
     assert model.judged == 1
-    assert (root / "backend/service.py").read_text() == "value = 1\n"
+    assert (root / "backend/service.py").read_text() == service_source(1)
 
 
 def test_prompt_publish_failure_rolls_back_both_prompt_and_code(rig):
@@ -328,7 +355,7 @@ def test_prompt_publish_failure_rolls_back_both_prompt_and_code(rig):
     assert result.status == "passed"
     assert attempts == ["Improved prompt 1", "Original prompt"]
     assert (root / "prompt.md").read_text() == "Original local prompt\n"
-    assert (root / "backend/service.py").read_text() == "value = 1\n"
+    assert (root / "backend/service.py").read_text() == service_source(1)
     assert (root / "reloaded").read_text().count("reload") == 2
 
 
@@ -336,46 +363,128 @@ def test_patch_rejects_traversal_symlinks_ambiguity_syntax_and_stale_source(rig)
     runner, _, _, _, _, root = rig
     workspace = runner.workspace
     sources = workspace.source()
+    faults = [code_fault()]
     for path in ("../escape.py", "backend/../../escape.py", "tests/test.py", "/tmp/escape.py"):
         with pytest.raises(RefinementError):
             workspace.plan(
-                [FileEdit(path=path, old_text="value = 1", new_text="value = 2")], sources
+                [FileEdit(path=path, function="quote", old_text="return 1", new_text="return 2")],
+                sources,
+                faults,
             )
     (root / "backend/link.py").symlink_to(root / "backend/service.py")
     with pytest.raises(RefinementError, match="symlinks"):
         workspace.plan(
-            [FileEdit(path="backend/link.py", old_text="value = 1", new_text="value = 2")], sources
+            [
+                FileEdit(
+                    path="backend/link.py",
+                    function="quote",
+                    old_text="return 1",
+                    new_text="return 2",
+                )
+            ],
+            sources,
+            faults,
         )
     (root / "backend/link.py").unlink()
-    for old, new in (("missing", "value = 2"), ("value = 1", "not python!"), ("", "value = 2")):
+    for old, new in (("missing", "return 2"), ("return 1", "not python!")):
         with pytest.raises(RefinementError):
             workspace.plan(
-                [FileEdit(path="backend/service.py", old_text=old, new_text=new)], sources
+                [FileEdit(path="backend/service.py", function="quote", old_text=old, new_text=new)],
+                sources,
+                faults,
             )
-    (root / "backend/service.py").write_text("value = 99\n")
+    (root / "backend/service.py").write_text(service_source(99))
     with pytest.raises(RefinementError, match="stale"):
         workspace.plan(
-            [FileEdit(path="backend/service.py", old_text="value = 1", new_text="value = 2")],
+            [
+                FileEdit(
+                    path="backend/service.py",
+                    function="quote",
+                    old_text="return 1",
+                    new_text="return 2",
+                )
+            ],
             sources,
+            faults,
         )
-    assert (root / "backend/service.py").read_text() == "value = 99\n"
+    assert (root / "backend/service.py").read_text() == service_source(99)
 
 
-def test_new_module_patch_rolls_back_and_file_limit_is_enforced(rig):
+def test_patch_rejects_new_files_and_enforces_file_limit(rig):
     runner, config, _, _, _, root = rig
     workspace = runner.workspace
-    edit = FileEdit(path="backend/helper.py", old_text="", new_text="value = 2\n")
-    transaction = workspace.plan([edit], workspace.source())
-    transaction.apply()
-    assert (root / "backend/helper.py").exists()
-    transaction.rollback()
+    edit = FileEdit(
+        path="backend/helper.py", function="quote", old_text="return 1", new_text="return 2"
+    )
+    with pytest.raises(RefinementError, match="existing"):
+        workspace.plan([edit], workspace.source(), [code_fault("backend/helper.py")])
     assert not (root / "backend/helper.py").exists()
     config.max_patch_files = 1
     with pytest.raises(RefinementError, match="max_patch_files"):
         workspace.plan(
-            [edit, FileEdit(path="backend/other.py", old_text="", new_text="x=1")],
+            [
+                edit,
+                FileEdit(
+                    path="backend/other.py",
+                    function="quote",
+                    old_text="return 1",
+                    new_text="return 2",
+                ),
+            ],
             workspace.source(),
+            [code_fault("backend/helper.py"), code_fault("backend/other.py")],
         )
+
+
+def test_patch_rejects_undiagnosed_functions_and_module_level_injection(rig):
+    runner, _, _, _, _, root = rig
+    sources = runner.workspace.source()
+    for function, old, new in (
+        ("untouched", "return 99", "return 2"),
+        ("quote", "return 99", "return 2"),
+        ("quote", "return 1", "return 2\n\nINJECTED = True"),
+    ):
+        with pytest.raises(RefinementError):
+            runner.workspace.plan(
+                [
+                    FileEdit(
+                        path="backend/service.py", function=function, old_text=old, new_text=new
+                    )
+                ],
+                sources,
+                [code_fault()],
+            )
+    assert (root / "backend/service.py").read_text() == service_source(1)
+
+
+def test_targeted_method_patch_preserves_decorators_other_methods_and_can_rollback(rig):
+    runner, _, _, _, _, root = rig
+    path = root / "backend/service.py"
+    original = (
+        "class Fares:\n"
+        "    @staticmethod\n"
+        "    async def quote():\n"
+        "        return 1\n\n"
+        "    def untouched(self):\n"
+        "        return 1\n"
+    )
+    path.write_text(original)
+    transaction = runner.workspace.plan(
+        [
+            FileEdit(
+                path="backend/service.py",
+                function="Fares.quote",
+                old_text="return 1",
+                new_text="return 2",
+            )
+        ],
+        runner.workspace.source(),
+        [code_fault(function="Fares.quote")],
+    )
+    transaction.apply()
+    assert path.read_text() == original.replace("return 1", "return 2", 1)
+    transaction.rollback()
+    assert path.read_text() == original
 
 
 def test_workspace_lock_rejects_concurrent_runs(rig):
@@ -419,7 +528,7 @@ def test_judge_rejects_unsupported_or_false_passing_evaluations(mode):
                 root_cause="prompt",
                 quote="Never happened",
                 explanation="Wrong",
-                files=[],
+                code_faults=[],
             )
         ]
     elif mode == "missing_cause":
@@ -836,3 +945,116 @@ def test_malformed_backend_evidence_and_cleanup_are_recorded_without_losing_tran
     assert result.errors == ["Booking evidence collection failed (KeyError)"]
     assert result.cleanup_errors == ["Fixture cleanup failed (KeyError)"]
     assert provider.sessions[0].closed
+
+
+@pytest.mark.parametrize(
+    "path,function",
+    [
+        ("backend/missing.py", "quote"),
+        ("backend/service.py", "missing"),
+    ],
+)
+def test_evaluator_rejects_code_diagnosis_without_existing_file_and_function(path, function):
+    scenario = Scenario(
+        id="case",
+        goal="Book",
+        customer_facts="One passenger",
+        expected_outcome="Booking",
+        required_tools=[],
+    )
+    simulation = Simulation(
+        scenario_id="case",
+        completed=True,
+        transcript=[{"role": "agent", "message": "Wrong fare"}],
+    )
+    evaluation = Evaluation(
+        scenario_id="case",
+        scores=Scores(
+            understanding=9,
+            api_correctness=4,
+            outcome_confirmation=9,
+            naturalness=9,
+        ),
+        rationale="Fare calculation is incorrect",
+        failures=[
+            Failure(
+                criterion="api_correctness",
+                root_cause="code",
+                quote="Wrong fare",
+                explanation="The fare calculation returned an incorrect price",
+                code_faults=[code_fault(path, function)],
+            )
+        ],
+    )
+
+    class Model:
+        async def generate(self, model, instruction, data, schema, validate):
+            validate(evaluation)
+            return evaluation
+
+    with pytest.raises(ValueError):
+        asyncio.run(
+            Evaluator(RefinementConfig(), Model()).run(
+                scenario,
+                simulation,
+                "Prompt",
+                {"backend/service.py": service_source()},
+                {},
+            )
+        )
+
+
+def test_fixer_rejects_patch_to_a_function_not_identified_by_evaluator():
+    iteration = Iteration(
+        number=1,
+        evaluations=[
+            Evaluation(
+                scenario_id="case",
+                scores=Scores(
+                    understanding=9,
+                    api_correctness=4,
+                    outcome_confirmation=9,
+                    naturalness=9,
+                ),
+                rationale="Wrong fare",
+                failures=[
+                    Failure(
+                        criterion="api_correctness",
+                        root_cause="code",
+                        quote="Wrong fare",
+                        explanation="Fare should be calculated correctly",
+                        code_faults=[code_fault()],
+                    )
+                ],
+            )
+        ],
+    )
+
+    class Model:
+        async def generate(self, model, instruction, data, schema, validate):
+            assert data["code_faults"] == [code_fault().model_dump()]
+            validate(
+                Repair(
+                    explanation="Unrelated edit",
+                    system_prompt=None,
+                    edits=[
+                        FileEdit(
+                            path="backend/service.py",
+                            function="untouched",
+                            old_text="return 99",
+                            new_text="return 2",
+                        )
+                    ],
+                )
+            )
+
+    with pytest.raises(ValueError, match="diagnosed"):
+        asyncio.run(
+            FixProposer(RefinementConfig(), Model()).run(
+                iteration,
+                "Prompt",
+                {"backend/service.py": service_source()},
+                {},
+                [],
+            )
+        )

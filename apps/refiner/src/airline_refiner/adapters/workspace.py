@@ -12,7 +12,8 @@ from typing import Any
 
 from airline_refiner.config import RefinementConfig
 from airline_refiner.errors import RefinementError
-from airline_refiner.models import FileEdit
+from airline_refiner.models import CodeFault, FileEdit
+from airline_refiner.patching import function_bounds, validate_function_changes
 
 
 def atomic_write(path: Path, content: str) -> None:
@@ -93,42 +94,63 @@ class Workspace:
             raise RefinementError("Code patch is outside editable_roots")
         return path
 
-    def plan(self, edits: list[FileEdit], sources: dict[str, str]) -> "PatchTransaction":
+    def plan(
+        self, edits: list[FileEdit], sources: dict[str, str], code_faults: list[CodeFault]
+    ) -> "PatchTransaction":
         if len({edit.path for edit in edits}) > self.config.max_patch_files:
             raise RefinementError("Code patch exceeds max_patch_files")
-        originals: dict[Path, str | None] = {}
+        originals: dict[Path, str] = {}
         candidates: dict[Path, str] = {}
+        targets = {(fault.path, fault.function) for fault in code_faults}
+        changed_functions: dict[Path, set[str]] = {}
         for edit in edits:
             path = self.validate_path(edit.path)
+            if (edit.path, edit.function) not in targets:
+                raise RefinementError("Patch must target a diagnosed file and function")
             if path not in originals:
-                original = path.read_text() if path.exists() else None
+                if not path.is_file() or edit.path not in sources:
+                    raise RefinementError("Code patches must modify existing source files")
+                original = path.read_text()
                 if original != sources.get(edit.path):
                     raise RefinementError(
                         "Source changed during repair generation; refusing stale patch"
                     )
                 originals[path] = original
-                candidates[path] = original or ""
+                candidates[path] = original
             current = candidates[path]
-            if not edit.old_text:
-                if originals[path] is not None or current:
-                    raise RefinementError("Empty old_text is only valid when creating a new module")
-                candidates[path] = edit.new_text
-            else:
-                if current.count(edit.old_text) != 1:
-                    raise RefinementError("Patch old_text must match exactly once")
-                candidates[path] = current.replace(edit.old_text, edit.new_text, 1)
+            try:
+                start, end = function_bounds(current, edit.function)
+                function_source = current[start:end]
+                if function_source.count(edit.old_text) != 1:
+                    raise ValueError(
+                        "Patch old_text must match exactly once inside the diagnosed function"
+                    )
+                candidates[path] = (
+                    current[:start]
+                    + function_source.replace(edit.old_text, edit.new_text, 1)
+                    + current[end:]
+                )
+                compile(candidates[path], str(path), "exec")
+            except (SyntaxError, ValueError) as error:
+                message = (
+                    str(error) if type(error) is ValueError else "Patch contains invalid Python"
+                )
+                raise RefinementError(message) from None
+            changed_functions.setdefault(path, set()).add(edit.function)
         if edits and all(candidates[path] == originals[path] for path in candidates):
             raise RefinementError("Generated code patch makes no change")
         size = sum(len(content) for content in sources.values()) + sum(
-            len(content) - len(originals[path] or "") for path, content in candidates.items()
+            len(content) - len(originals[path]) for path, content in candidates.items()
         )
         if size > self.config.max_source_chars:
             raise RefinementError("Generated code patch exceeds max_source_chars")
         for path, content in candidates.items():
             try:
-                compile(content, str(path), "exec")
+                validate_function_changes(originals[path], content, changed_functions[path])
             except (SyntaxError, ValueError):
-                raise RefinementError("Generated patch contains invalid Python") from None
+                raise RefinementError(
+                    "Patch must preserve code outside the diagnosed functions"
+                ) from None
         return PatchTransaction(originals, candidates)
 
     async def command(self, command: list[str], log: Path, artifacts: Artifacts) -> None:
@@ -165,7 +187,7 @@ class Workspace:
 
 
 class PatchTransaction:
-    def __init__(self, originals: dict[Path, str | None], candidates: dict[Path, str]) -> None:
+    def __init__(self, originals: dict[Path, str], candidates: dict[Path, str]) -> None:
         self.originals = originals
         self.candidates = candidates
 
@@ -173,7 +195,7 @@ class PatchTransaction:
         return "".join(
             "".join(
                 difflib.unified_diff(
-                    (self.originals[path] or "").splitlines(keepends=True),
+                    self.originals[path].splitlines(keepends=True),
                     content.splitlines(keepends=True),
                     fromfile="a/" + str(path.relative_to(root)),
                     tofile="b/" + str(path.relative_to(root)),
@@ -192,7 +214,4 @@ class PatchTransaction:
 
     def rollback(self) -> None:
         for path, original in self.originals.items():
-            if original is None:
-                path.unlink(missing_ok=True)
-            else:
-                atomic_write(path, original)
+            atomic_write(path, original)

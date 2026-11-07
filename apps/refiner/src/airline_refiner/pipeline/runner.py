@@ -14,7 +14,7 @@ from airline_refiner.adapters.model import Model
 from airline_refiner.adapters.workspace import Artifacts, Workspace, atomic_write
 from airline_refiner.config import RefinementConfig
 from airline_refiner.errors import RecoveryError, RefinementError
-from airline_refiner.models import Iteration, Repair, RunResult, Scenario
+from airline_refiner.models import CodeFault, Iteration, Repair, RunResult, Scenario
 from airline_refiner.pipeline.stages.evaluate import Evaluator
 from airline_refiner.pipeline.stages.propose import FixProposer
 from airline_refiner.pipeline.stages.simulate import Simulator
@@ -46,9 +46,14 @@ class RefinementRunner:
         self.proposer = FixProposer(config, model)
 
     async def apply_repair(
-        self, repair: Repair, prompt: str, sources: dict[str, str], prefix: str
+        self,
+        repair: Repair,
+        prompt: str,
+        sources: dict[str, str],
+        prefix: str,
+        code_faults: list[CodeFault],
     ) -> str:
-        transaction = self.workspace.plan(repair.edits, sources)
+        transaction = self.workspace.plan(repair.edits, sources, code_faults)
         self.artifacts.write_text(prefix + "/code.patch", transaction.diff(self.workspace.root))
         prompt_path = self.workspace.root / self.config.prompt_path
         local_prompt = prompt_path.read_text() if prompt_path.exists() else None
@@ -164,7 +169,15 @@ class RefinementRunner:
                         self.artifacts.write(
                             prefix + "/repair.json", repair.model_dump(mode="json")
                         )
-                        prompt = await self.apply_repair(repair, prompt, sources, prefix)
+                        code_faults = [
+                            fault
+                            for evaluation in iteration.evaluations
+                            for failure in evaluation.failures
+                            for fault in failure.code_faults
+                        ]
+                        prompt = await self.apply_repair(
+                            repair, prompt, sources, prefix, code_faults
+                        )
                         iteration.repair_applied = True
                         sources = self.workspace.source()
                     except RecoveryError:

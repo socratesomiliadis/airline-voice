@@ -53,12 +53,28 @@ class Scores(Contract):
     naturalness: int = Field(ge=1, le=10, strict=True)
 
 
+class CodeFault(Contract):
+    path: str = Field(min_length=1)
+    function: str = Field(min_length=1, description="Qualified name, e.g. BookingService.cancel")
+    behavior: str = Field(
+        min_length=1, description="Observed faulty behavior and expected behavior"
+    )
+
+
 class Failure(Contract):
     criterion: Criterion
     root_cause: Literal["prompt", "code"]
     quote: str = Field(min_length=1)
     explanation: str = Field(min_length=1)
-    files: list[str]
+    code_faults: list[CodeFault]
+
+    @model_validator(mode="after")
+    def diagnosis_matches_cause(self) -> Self:
+        if (self.root_cause == "code") != bool(self.code_faults):
+            raise ValueError(
+                "Code failures require code_faults; prompt failures require an empty list"
+            )
+        return self
 
 
 class Evaluation(Contract):
@@ -73,7 +89,8 @@ class Evaluation(Contract):
 
 class FileEdit(Contract):
     path: str
-    old_text: str
+    function: str = Field(min_length=1)
+    old_text: str = Field(min_length=1)
     new_text: str
 
 

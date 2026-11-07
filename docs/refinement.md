@@ -11,9 +11,12 @@ The Python worker runs the complete cycle without interactive approvals:
 3. A separate, stateless evaluator LLM call scores understanding, API correctness,
    outcome confirmation and naturalness from 1–10. Each failed criterion must
    have an actual evidence quote, explanation and `prompt` or `code` root cause.
-   Backend errors are distinguished from valid rejection of bad agent arguments.
+   Each code failure identifies its existing file, qualified function, and the
+   faulty behavior versus expected behavior. Backend errors are distinguished
+   from valid rejection of bad agent arguments.
 4. A repair LLM rewrites the complete system prompt for prompt failures and
-   proposes exact-text Python edits for code failures. Both can occur together.
+   proposes exact-text Python edits to the diagnosed functions for code failures.
+   It receives those files and behavior diagnoses. Both fix types can occur together.
 5. Automatically apply bounded code edits, compile the changed modules, run the
    configured regression command, reload the API, and wait for database-backed
    readiness. Publish a changed prompt using ElevenLabs' REST `PATCH` endpoint,
@@ -84,8 +87,13 @@ redacted from artifacts; signed WebSocket URLs are never logged.
 
 ## Repairs and service reload
 
-`editable_roots` defaults to `apps/api/src/airline_api`. Existing Python modules
-and new helper modules inside those roots can change. The worker rejects absolute
+`editable_roots` defaults to `apps/api/src/airline_api`. Patches change specific
+existing functions inside the evaluator's diagnosed files. Each code diagnosis
+contains `path`, `function` (for example `BookingService.cancel`) and `behavior`.
+The fixer must name that same path/function in each edit; exact replacements
+are scoped to that function, preserving the rest of the file. An AST check rejects
+changes to unrelated functions or module-level code. New files, function renames
+and arbitrary refactors are outside this contract. The worker also rejects absolute
 paths, traversal, symlinks, stale source, ambiguous replacements, invalid Python,
 and patches exceeding `max_patch_files`. Tests, scenarios, policies and the
 refiner itself are outside the default editable paths. Model-generated shell
@@ -139,7 +147,7 @@ scenario snapshots, original prompt, and iteration directories containing:
 - `<scenario>.simulation.json`: conversation ID, dialogue, full transcript, tool
   events, fixture, persisted booking state, and execution/cleanup errors.
 - `<scenario>.evaluation.json`: four scores, rationale, failure quotes, root
-  causes and relevant source paths.
+  causes and precise file/function/behavior diagnoses for code failures.
 - `prompt.md` and `source.json`: the prompt and source used in that iteration.
 - `repair.json`, `code.patch`, verification/reload logs when a repair is attempted.
 
