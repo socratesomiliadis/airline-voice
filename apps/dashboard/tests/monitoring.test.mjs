@@ -155,3 +155,18 @@ test("attention includes tool errors and any below-target criterion, while pendi
   assert.equal(needsAttention({ status: "passed", evaluation: { scores: scores(8) } }, 8), false);
   assert.equal(needsAttention({ status: "pending", evaluation: null }, 8), false);
 });
+
+test("failed deterministic checks block passing counts even when every score is high", () => {
+  const scenario = {
+    status: "failed",
+    evaluation: {
+      scores: scores(10),
+      checks: [{ name: "selection_oracle", passed: false }],
+    },
+  };
+  assert.equal(passedCount({ scenarios: [scenario] }, 8), 0);
+  assert.equal(needsAttention(scenario, 8), true);
+  scenario.evaluation.checks[0].passed = true;
+  assert.equal(passedCount({ scenarios: [scenario] }, 8), 1);
+  assert.equal(needsAttention(scenario, 8), false);
+});

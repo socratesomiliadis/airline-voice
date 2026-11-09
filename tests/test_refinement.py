@@ -1398,3 +1398,362 @@ def test_fixer_rejects_patch_to_a_function_not_identified_by_evaluator():
                 [],
             )
         )
+
+
+@pytest.mark.parametrize("stage", ["prepare", "capture", "cleanup"])
+def test_reproducible_application_failure_reaches_diagnosis_repair_and_retest(rig, stage):
+    from airline_refiner.adapters.api import request
+
+    runner, _, _, _, _, root = rig
+    if stage == "cleanup":
+        suite_path = root / "scenarios.json"
+        suite = json.loads(suite_path.read_text())
+        suite.append({**suite[0], "id": "second-booking"})
+        suite_path.write_text(json.dumps(suite))
+
+    class DiagnosticModel(ScriptedModel):
+        async def generate(self, model, instruction, data, schema, validate=None):
+            if schema is not Evaluation:
+                return await super().generate(model, instruction, data, schema, validate)
+            self.judged += 1
+            failures = data["simulation"]["application_failures"]
+            result = Evaluation(
+                scenario_id=data["scenario"]["id"],
+                scores=Scores(
+                    understanding=9,
+                    api_correctness=4 if failures else 9,
+                    outcome_confirmation=4 if failures else 9,
+                    naturalness=9,
+                ),
+                rationale="Diagnose reproducible endpoint error, not provider availability",
+                failures=[
+                    Failure(
+                        criterion=criterion,
+                        root_cause="code",
+                        quote=failures[0]["evidence"],
+                        explanation="Endpoint fails with healthy dependencies",
+                        code_faults=[code_fault()],
+                    )
+                    for criterion in ("api_correctness", "outcome_confirmation")
+                ]
+                if failures
+                else [],
+            )
+            validate(result)
+            return result
+
+    requests = []
+
+    def transport(req):
+        requests.append((req.method, req.url.path))
+        if req.url.path in {"/health", "/ready"}:
+            return httpx.Response(200, json={"status": "ok"})
+        broken = (root / "backend/service.py").read_text() == service_source(1)
+        return httpx.Response(500 if broken else 200, json={"status": "ok"})
+
+    async def run():
+        async with httpx.AsyncClient(
+            base_url="http://test/", transport=httpx.MockTransport(transport)
+        ) as client:
+
+            class API(FakeAPI):
+                async def probe(self):
+                    await request(
+                        client,
+                        "POST",
+                        "api/v1/bookings/ABC123/cancel",
+                        diagnose_application=True,
+                        json={"idempotency_key": "stable-fixture-cleanup"},
+                    )
+
+                async def prepare(self, scenario, caller):
+                    if stage == "prepare":
+                        await self.probe()
+                    return await super().prepare(scenario, caller)
+
+                async def capture(self, fixture, conversation_id):
+                    if stage == "capture":
+                        await self.probe()
+                    return await super().capture(fixture, conversation_id)
+
+                async def cleanup(self, fixture, conversation_id, caller):
+                    if stage == "cleanup":
+                        await self.probe()
+                    await super().cleanup(fixture, conversation_id, caller)
+
+            runner.api = runner.simulator.api = API()
+            model = DiagnosticModel(cause="code")
+            runner.simulator.model = runner.evaluator.model = runner.proposer.model = model
+            result = await runner.run("application-defect")
+            assert result.status == "passed", result.error
+            assert len(result.iterations) == 2
+            assert model.judged == (3 if stage == "cleanup" else 2)
+            assert model.repairs == 1
+            first = result.iterations[0]
+            assert first.repair_applied and not first.evaluations[0].passes(8)
+            assert first.simulations[0].application_failures[0].stage == stage
+            assert bool(first.simulations[0].transcript) is (stage != "prepare")
+            assert first.simulations[0].cleanup_pending is (stage == "cleanup")
+            if stage == "cleanup":
+                assert len(first.simulations) == 1
+                assert not result.baseline_complete and result.final_complete
+                assert result.performance_summary["second-booking"].initial is None
+                assert result.performance_summary["second-booking"].change is None
+                assert first.cleanup_recoveries == ["booking"]
+                assert (root / "artifacts/iteration-01/booking.cleanup-recovery.json").exists()
+            assert ("GET", "/ready") in requests
+
+    asyncio.run(run())
+
+
+@pytest.mark.parametrize("dependency_status", [200, 503])
+def test_repeatable_500_is_application_evidence_only_with_healthy_dependencies(dependency_status):
+    from airline_refiner.adapters.api import request
+    from airline_refiner.errors import ApplicationError
+
+    async def run():
+        attempts = []
+
+        def transport(req):
+            attempts.append(req.url.path)
+            if req.url.path in {"/ready", "/health"}:
+                return httpx.Response(dependency_status, json={"status": "ok"})
+            return httpx.Response(500, json={"error": "injected defect"})
+
+        async with httpx.AsyncClient(
+            base_url="http://test/", transport=httpx.MockTransport(transport)
+        ) as client:
+            with pytest.raises(RefinementError) as caught:
+                await request(client, "GET", "api/v1/flights", diagnose_application=True)
+            assert isinstance(caught.value, ApplicationError) is (dependency_status == 200)
+            assert attempts.count("/api/v1/flights") == 2
+
+    asyncio.run(run())
+
+
+def test_unsafe_mutations_are_not_replayed_and_transient_errors_can_recover():
+    from airline_refiner.adapters.api import request
+
+    async def run():
+        attempts = []
+
+        def transport(req):
+            attempts.append(req)
+            return httpx.Response(500 if len(attempts) == 1 else 200, json={"status": "ok"})
+
+        async with httpx.AsyncClient(
+            base_url="http://test/", transport=httpx.MockTransport(transport)
+        ) as client:
+            with pytest.raises(RefinementError):
+                await request(client, "POST", "api/v1/bookings", json={})
+            assert len(attempts) == 1
+            attempts.clear()
+            assert await request(
+                client,
+                "POST",
+                "api/v1/bookings",
+                diagnose_application=True,
+                json={"idempotency_key": "safe"},
+            ) == {"status": "ok"}
+            assert len(attempts) == 2
+            assert attempts[0].content == attempts[1].content
+
+    asyncio.run(run())
+
+
+@pytest.mark.parametrize(
+    "error_type", [httpx.RemoteProtocolError, httpx.ReadError, httpx.WriteError]
+)
+def test_repeatable_500_survives_uvicorn_closing_the_pooled_connection(error_type):
+    from airline_refiner.adapters.api import request
+    from airline_refiner.errors import ApplicationError
+
+    async def run():
+        attempts = 0
+
+        def transport(req):
+            nonlocal attempts
+            if req.url.path in {"/health", "/ready"}:
+                return httpx.Response(200, json={"status": "ok"})
+            attempts += 1
+            if attempts == 2:
+                raise error_type("Server disconnected", request=req)
+            return httpx.Response(500)
+
+        async with httpx.AsyncClient(
+            base_url="http://test/", transport=httpx.MockTransport(transport)
+        ) as client:
+            with pytest.raises(ApplicationError):
+                await request(
+                    client,
+                    "POST",
+                    "api/v1/bookings/ABC123/cancel",
+                    diagnose_application=True,
+                    json={"idempotency_key": "stable-cleanup"},
+                )
+            assert attempts == 3
+
+    asyncio.run(run())
+
+
+def test_run_ids_with_a_common_prefix_do_not_reuse_fixture_idempotency_keys(rig):
+    runner, _, model, _, api, _ = rig
+    model.fail_rounds = 0
+    assert asyncio.run(runner.run("shared-prefix-one")).status == "passed"
+    assert asyncio.run(runner.run("shared-prefix-two")).status == "passed"
+    assert len(api.cleanups) == len(set(api.cleanups)) == 2
+
+
+def test_judged_webhook_infrastructure_failure_keeps_diagnosis_without_repair(rig):
+    runner, _, model, provider, _, root = rig
+
+    class OutageJudge:
+        async def generate(self, model, instruction, data, schema, validate):
+            result = Evaluation(
+                scenario_id="booking",
+                scores=Scores(
+                    understanding=9, api_correctness=2, outcome_confirmation=2, naturalness=9
+                ),
+                rationale="Public webhook unavailable; no grounded application fault",
+                failures=[
+                    Failure(
+                        criterion=c,
+                        root_cause="infrastructure",
+                        quote="Wrong response",
+                        explanation="External webhook transport failed",
+                        code_faults=[],
+                    )
+                    for c in ("api_correctness", "outcome_confirmation")
+                ],
+            )
+            validate(result)
+            return result
+
+    runner.evaluator.model = OutageJudge()
+    result = asyncio.run(runner.run("webhook-outage"))
+    assert result.status == "error" and "infrastructure" in result.error
+    assert len(result.iterations[0].evaluations) == 1
+    assert model.repairs == 0 and provider.updates == []
+    assert (root / "backend/service.py").read_text() == service_source(1)
+
+
+def test_provider_http_500_does_not_run_airline_application_probes():
+    from airline_refiner.adapters.api import request
+
+    async def run():
+        paths = []
+
+        def transport(req):
+            paths.append(req.url.path)
+            return httpx.Response(500)
+
+        async with httpx.AsyncClient(
+            base_url="https://provider.test/", transport=httpx.MockTransport(transport)
+        ) as client:
+            with pytest.raises(RefinementError, match="HTTP 500"):
+                await request(client, "GET", "convai/agents/example")
+            assert paths == ["/convai/agents/example"]
+
+    asyncio.run(run())
+
+
+def test_public_readiness_fails_before_any_model_or_conversation_call(tmp_path, monkeypatch):
+    from airline_refiner import cli
+
+    settings = Settings(
+        _env_file=None, PUBLIC_API_BASE_URL="https://public.test", artifacts_dir=tmp_path
+    )
+    calls = []
+
+    async def unavailable(self, timeout_seconds):
+        calls.append(self.client.base_url.host)
+        raise RefinementError("Tunnel unavailable")
+
+    monkeypatch.setattr(cli, "preflight", lambda *args: None)
+    monkeypatch.setattr(AirlineAPI, "ready", unavailable)
+    with pytest.raises(RefinementError, match="Public webhook readiness"):
+        asyncio.run(cli.execute(settings, RefinementConfig()))
+    assert calls == ["public.test"]
+
+
+def test_tls_error_is_an_infrastructure_error_without_private_transport_details():
+    import ssl
+
+    from airline_refiner.adapters.api import request
+
+    async def run():
+        def transport(req):
+            raise ssl.SSLError("private certificate details")
+
+        async with httpx.AsyncClient(
+            base_url="https://test/", transport=httpx.MockTransport(transport)
+        ) as client:
+            with pytest.raises(RefinementError, match="transport: SSLError") as caught:
+                await request(client, "GET", "ready")
+            assert "private certificate details" not in str(caught.value)
+
+    asyncio.run(run())
+
+
+def test_repair_payload_keeps_failed_authoritative_evidence_without_debug_duplicates():
+    from airline_refiner.models import OutcomeCheck
+
+    failure = Failure(
+        criterion="understanding",
+        root_cause="prompt",
+        quote="Wrong response",
+        explanation="Wrong policy reasoning",
+        code_faults=[],
+    )
+
+    def evaluation(name, bad):
+        return Evaluation(
+            scenario_id=name,
+            scores=Scores(
+                understanding=4 if bad else 9,
+                api_correctness=9,
+                outcome_confirmation=9,
+                naturalness=9,
+            ),
+            rationale="Recorded evidence",
+            failures=[failure] if bad else [],
+            checks=[OutcomeCheck(name="passing", passed=True, explanation="OK")],
+        )
+
+    iteration = Iteration(
+        number=1,
+        evaluations=[evaluation("bad", True), evaluation("good", False)],
+        simulations=[
+            Simulation(
+                scenario_id=name,
+                completed=True,
+                transcript=[{"role": "agent", "message": "Wrong response"}],
+                dialogue=[{"role": "agent", "message": "duplicate dialogue"}],
+                events=[{"private_debug": "large duplicate event"}],
+                fixture={"business_time": "2026-11-06T12:00:00Z"},
+            )
+            for name in ("bad", "good")
+        ],
+    )
+
+    class Capture:
+        async def generate(self, model, instruction, data, schema, validate):
+            self.data = data
+            result = Repair(
+                explanation="Correct policy reasoning", system_prompt="Corrected prompt", edits=[]
+            )
+            validate(result)
+            return result
+
+    model = Capture()
+    asyncio.run(
+        FixProposer(RefinementConfig(), model).run(iteration, "Original prompt", {}, {}, [])
+    )
+    assert [s["scenario_id"] for s in model.data["simulations"]] == ["bad"]
+    evidence = model.data["simulations"][0]
+    assert evidence["transcript"] == iteration.simulations[0].transcript
+    assert evidence["fixture"] == iteration.simulations[0].fixture
+    assert "events" not in evidence and "dialogue" not in evidence
+    assert len(model.data["evaluations"]) == 2
+    assert not model.data["evaluations"][1]["checks"]
+    assert iteration.simulations[0].events and iteration.evaluations[0].checks

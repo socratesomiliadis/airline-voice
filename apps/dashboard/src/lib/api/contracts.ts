@@ -19,7 +19,7 @@ export type Criterion =
 export type Scores = Record<Criterion, number>;
 export interface Failure {
   criterion: Criterion;
-  root_cause: "prompt" | "code";
+  root_cause: "prompt" | "code" | "infrastructure";
   quote: string;
   explanation: string;
   code_faults: { path: string; function: string; behavior: string }[];
@@ -29,6 +29,13 @@ export interface Evaluation {
   scores: Scores;
   rationale: string;
   failures: Failure[];
+  checks?: {
+    name: string;
+    passed: boolean;
+    explanation: string;
+    evidence: string;
+    criteria?: Criterion[];
+  }[];
 }
 export interface ScenarioObservation {
   id: string;

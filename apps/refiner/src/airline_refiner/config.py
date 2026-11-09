@@ -17,6 +17,9 @@ class Settings(BaseSettings):
     )
 
     api_base_url: HttpUrl = HttpUrl("http://localhost:8000")
+    public_api_base_url: HttpUrl | None = Field(
+        default=None, validation_alias="PUBLIC_API_BASE_URL"
+    )
     artifacts_dir: Path = Path("artifacts")
     config_path: Path = Path("config/refinement.example.toml")
     elevenlabs_api_key: SecretStr = Field(
@@ -54,6 +57,7 @@ class RefinementConfig(BaseModel):
     scenarios_path: Path = Path("scenarios/airline.json")
     prompt_path: Path = Path("prompts/agent/system.md")
     knowledge_dir: Path = Path("knowledge")
+    reference_dataset_path: Path = Path("data/flights/week_2026_11_09.json")
     agent_branch_id: str | None = None
     editable_roots: list[str] = ["apps/api/src/airline_api"]
     max_patch_files: int = Field(default=6, ge=1, le=20)

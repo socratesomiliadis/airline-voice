@@ -1,0 +1,10 @@
+--- a/apps/api/src/airline_api/modules/bookings/service.py
++++ b/apps/api/src/airline_api/modules/bookings/service.py
+@@ -429,7 +429,6 @@
+         )
+ 
+     async def _cancel(self, reference: str, request: CancelBooking) -> BookingView:
+-        raise RuntimeError("Seeded assessment defect: cancellation fails before settlement")
+         booking = await self._find(reference, lock=True)
+         if booking.status == "cancelled":
+             return await self._view(booking)

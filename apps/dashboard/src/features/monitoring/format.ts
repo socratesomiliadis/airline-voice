@@ -84,6 +84,7 @@ export function passedCount(iteration: IterationObservation | undefined, thresho
     iteration?.scenarios.filter(
       (scenario) =>
         scenario.evaluation &&
+        scenario.evaluation.checks?.every((check) => check.passed) !== false &&
         Object.values(scenario.evaluation.scores).every((score) => score >= threshold),
     ).length || 0
   );

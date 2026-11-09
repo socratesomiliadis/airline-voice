@@ -18,19 +18,26 @@ def read_json(path: Path) -> Any:
     return json.loads(path.read_text())
 
 
-def export_run(source: Path, destination: Path) -> dict[str, Any]:
+def export_run(
+    source: Path, destination: Path, *, allow_incomplete: bool = False
+) -> dict[str, Any]:
     run_path = source if source.is_file() else source / "run.json"
     source = run_path.parent
     run = read_json(run_path)
     config_path, monitor_path = source / "configuration.json", source / "monitor.json"
     config = run.get("configuration") or (read_json(config_path) if config_path.exists() else {})
     monitor = read_json(monitor_path) if monitor_path.exists() else {}
-    if run["status"] not in {"passed", "iteration_limit"}:
+    if run["status"] not in {"passed", "iteration_limit"} and not (
+        allow_incomplete and run["status"] == "error"
+    ):
         raise ValueError("Only completed runs can be exported as recorded examples")
-    if not run["iterations"] or any(
-        not iteration["evaluations"]
-        or len(iteration["evaluations"]) != len(iteration["simulations"])
-        for iteration in run["iterations"]
+    if not run["iterations"] or (
+        not allow_incomplete
+        and any(
+            not iteration["evaluations"]
+            or len(iteration["evaluations"]) != len(iteration["simulations"])
+            for iteration in run["iterations"]
+        )
     ):
         raise ValueError("Recorded examples require complete simulation and evaluation evidence")
     # Project evidence into an allowlist. Never export provider headers, URLs, debug events,
@@ -55,14 +62,25 @@ def export_run(source: Path, destination: Path) -> dict[str, Any]:
                         "tool_calls": [
                             {
                                 k: call.get(k)
-                                for k in ("tool_name", "params_as_json", "tool_has_been_called")
+                                for k in (
+                                    "request_id",
+                                    "tool_name",
+                                    "params_as_json",
+                                    "tool_has_been_called",
+                                )
                             }
                             for call in turn.get("tool_calls") or []
                         ],
                         "tool_results": [
                             {
                                 k: result.get(k)
-                                for k in ("tool_name", "result_value", "is_error", "is_blocked")
+                                for k in (
+                                    "request_id",
+                                    "tool_name",
+                                    "result_value",
+                                    "is_error",
+                                    "is_blocked",
+                                )
                             }
                             for result in turn.get("tool_results") or []
                         ],
@@ -75,6 +93,13 @@ def export_run(source: Path, destination: Path) -> dict[str, Any]:
                     "completed": simulation["completed"],
                     "errors": simulation["errors"],
                     "cleanup_errors": simulation["cleanup_errors"],
+                    "application_failures": simulation.get("application_failures", []),
+                    "cleanup_pending": simulation.get("cleanup_pending", False),
+                    "fixture": {
+                        key: simulation.get("fixture", {})[key]
+                        for key in ("passenger", "booking", "business_time", "selection_reference")
+                        if key in simulation.get("fixture", {})
+                    },
                     "transcript": transcript,
                     "booking_state": simulation["booking_state"],
                 }
@@ -82,6 +107,8 @@ def export_run(source: Path, destination: Path) -> dict[str, Any]:
         iterations.append(
             {
                 "number": iteration["number"],
+                "status": iteration.get("status"),
+                "error": iteration.get("error"),
                 "evaluations": iteration["evaluations"],
                 "conversations": conversations,
                 "repair_applied": iteration["repair_applied"],
@@ -93,12 +120,21 @@ def export_run(source: Path, destination: Path) -> dict[str, Any]:
                 "verification": iteration.get("verification"),
                 "prompt_diff": iteration.get("prompt_diff", ""),
                 "code_diff": iteration.get("code_diff", ""),
+                "cleanup_recoveries": iteration.get("cleanup_recoveries")
+                or [
+                    s["scenario_id"]
+                    for s in iteration["simulations"]
+                    if (prefix / f"{s['scenario_id']}.cleanup-recovery.json").exists()
+                    and read_json(prefix / f"{s['scenario_id']}.cleanup-recovery.json").get(
+                        "recovered"
+                    )
+                ],
             }
         )
     first, final = iterations[0], iterations[-1]
     initial_scores = {e["scenario_id"]: e["scores"] for e in first["evaluations"]}
     final_scores = {e["scenario_id"]: e["scores"] for e in final["evaluations"]}
-    if initial_scores.keys() != final_scores.keys():
+    if initial_scores.keys() != final_scores.keys() and not run.get("performance_summary"):
         raise ValueError("First and final iterations must evaluate the same scenarios")
     report = {
         "format": "airline-recorded-run-v1",
@@ -109,6 +145,7 @@ def export_run(source: Path, destination: Path) -> dict[str, Any]:
             name: config.get(name) for name in ("customer_model", "evaluator_model", "repair_model")
         },
         "status": run["status"],
+        "error": run.get("error"),
         "pass_score": run["pass_score"],
         "max_iterations": run["max_iterations"],
         "scenario_definitions": run.get("scenario_definitions")
@@ -116,6 +153,8 @@ def export_run(source: Path, destination: Path) -> dict[str, Any]:
         "baseline_complete": run.get("baseline_complete"),
         "final_complete": run.get("final_complete"),
         "deployment_consistent": run.get("deployment_consistent", True),
+        "initial_source_sha256": run.get("initial_source_sha256"),
+        "final_source_sha256": run.get("final_source_sha256"),
         "iterations": iterations,
         "performance_summary": run.get("performance_summary")
         or {
@@ -168,8 +207,13 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("source", type=Path)
     parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument(
+        "--include-incomplete",
+        action="store_true",
+        help="Preserve an error run, including partial iterations and missing evaluations",
+    )
     args = parser.parse_args()
-    report = export_run(args.source, args.output)
+    report = export_run(args.source, args.output, allow_incomplete=args.include_incomplete)
     print(
         f"Exported {report['status']} run with {len(report['iterations'])} iterations "
         f"to {args.output}"

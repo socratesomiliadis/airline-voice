@@ -1,0 +1,7 @@
+{
+  "seeded": true,
+  "seed_function": "BookingService._cancel",
+  "seed": "        raise RuntimeError(\"Seeded assessment defect: cancellation fails before settlement\")\n",
+  "suite_count": 17,
+  "original_service_sha256": "6acb57b18d5dce1557239ee4410b4888bed9552d76ab8d1f870ee4e71c6efd33"
+}

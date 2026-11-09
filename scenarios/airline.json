@@ -306,5 +306,75 @@
         }
       }
     }
+  },
+  {
+    "id": "ambiguous-date-correction",
+    "goal": "Compare SFO to JFK options without buying; clarify an ambiguous date and then change your preference.",
+    "customer_facts": "You are Jordan Taylor. Open with \"Can I go to New York next Tuesday?\" without airport codes or a numeric date. The business date is Friday November 6, 2026. If asked, you mean November 10 from San Francisco. After the first options, interrupt politely: you now need Thursday November 12 instead, economy standard. Ask for a concise comparison. Decline any booking; you are still deciding. Never give purchase consent.",
+    "expected_outcome": "The assistant resolves city/date ambiguity, responds to the changed date, searches the final requested date, keeps the comparison concise and does not book.",
+    "required_tools": [
+      "search_flights"
+    ],
+    "assertions": {
+      "forbid_mutations": true,
+      "tool_parameters": {
+        "search_flights": {
+          "origin": "SFO",
+          "destination": "JFK",
+          "departure_date": "2026-11-12",
+          "seat_class": "economy",
+          "fare_tier": "standard"
+        }
+      }
+    }
+  },
+  {
+    "id": "unavailable-inventory",
+    "goal": "Ask for business SFO to LAX travel on November 9, then decline the available alternatives.",
+    "customer_facts": "You are Jordan Taylor. Ask for San Francisco to Los Angeles in business on November 9, 2026, one person. If the earliest flight has no business seats, ask whether a higher fare creates a seat; accept that it does not. You are unwilling to move dates or cabins. If another departure on the same date is offered, ask for its details but decline to buy today. Never confirm a purchase.",
+    "expected_outcome": "Searches live business availability, accurately distinguishes a sold-out cabin from fare tiers, offers available alternatives without inventing inventory and respects the refusal to purchase.",
+    "required_tools": [
+      "search_flights"
+    ],
+    "assertions": {
+      "forbid_mutations": true,
+      "tool_parameters": {
+        "search_flights": {
+          "origin": "SFO",
+          "destination": "LAX",
+          "departure_date": "2026-11-09",
+          "seat_class": "business"
+        }
+      }
+    }
+  },
+  {
+    "id": "withdrawn-consent",
+    "goal": "Explore a flight purchase, then stop the transaction before giving consent.",
+    "customer_facts": "You are Jordan Taylor. Initially ask to book SFO to JFK on November 10, 2026, economy standard, one passenger. Supply your stable passenger ID and name if asked. When the assistant quotes the fare or asks for confirmation, interrupt: \"Wait, do not book anything. I need to check with my partner.\" Do not confirm any purchase even if asked again. End after acknowledgement that nothing was booked.",
+    "expected_outcome": "Searches the requested journey and honours withdrawn intent before any mutation, without inventing a reference or persisting a booking.",
+    "required_tools": [
+      "search_flights"
+    ],
+    "assertions": {
+      "forbid_mutations": true
+    }
+  },
+  {
+    "id": "policy-reasoning-challenge",
+    "goal": "Understand basic-fare options and challenge any mistaken explanation of elapsed purchase time.",
+    "customer_facts": "You are Jordan Taylor with the supplied existing booking. Ask to move it to November 11 voluntarily. If told the 24-hour window expired, point out that the demo clock and purchase are both November 6, 2026, and ask the assistant to check elapsed time separately from advance-purchase conditions. If the explanation is already correct, ask why buying today does not automatically mean you qualify for a refund. Decline cancellation and a new purchase.",
+    "expected_outcome": "Retrieves the basic booking; explains the voluntary change restriction and separately evaluates elapsed purchase time and advance-purchase eligibility using actual timestamps. Corrects misleading reasoning if challenged and leaves the booking unchanged.",
+    "required_tools": [
+      "get_booking"
+    ],
+    "setup": {
+      "fare_tier": "basic"
+    },
+    "assertions": {
+      "booking_status": "confirmed",
+      "forbid_mutations": true,
+      "unchanged_booking": true
+    }
   }
 ]

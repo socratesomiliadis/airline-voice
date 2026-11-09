@@ -3,10 +3,14 @@
 import json
 from collections import Counter
 from dataclasses import dataclass
+from datetime import datetime
 from decimal import Decimal, InvalidOperation
+from pathlib import Path
 from typing import Any
 
+from airline_refiner.errors import RefinementError
 from airline_refiner.models import OutcomeCheck, Scenario, Simulation
+from airline_refiner.reference import DEFAULT_DATASET, selection_reference
 
 MUTATIONS = {"book_flight", "cancel_booking", "reschedule_booking", "add_booking_items"}
 WEBHOOKS = MUTATIONS | {"search_flights", "get_booking", "get_flight_information"}
@@ -82,7 +86,9 @@ def invocations(simulation: Simulation) -> list[Invocation]:
     return output
 
 
-def check_outcomes(scenario: Scenario, simulation: Simulation) -> list[OutcomeCheck]:
+def check_outcomes(
+    scenario: Scenario, simulation: Simulation, dataset_path: Path = DEFAULT_DATASET
+) -> list[OutcomeCheck]:
     checks: list[OutcomeCheck] = []
 
     def add(name: str, passed: bool, explanation: str, evidence: Any = None) -> None:
@@ -107,10 +113,19 @@ def check_outcomes(scenario: Scenario, simulation: Simulation) -> list[OutcomeCh
         simulation.completed
         and bool(simulation.transcript)
         and not simulation.errors
-        and not simulation.cleanup_errors,
+        and not simulation.cleanup_errors
+        and not simulation.application_failures
+        and not simulation.cleanup_pending,
         "Conversation, transcript, and fixture cleanup must complete without errors.",
         simulation.transcript,
     )
+    for failure in simulation.application_failures:
+        add(
+            f"application_failure:{failure.stage}:{failure.method}:{failure.path}",
+            False,
+            "A reproducible application failure requires diagnosis before this scenario can pass.",
+            failure.model_dump(mode="json"),
+        )
     if any(c.name in MUTATIONS for c in calls) or MUTATIONS.intersection(scenario.required_tools):
         add(
             "booking_evidence",
@@ -492,25 +507,38 @@ def check_outcomes(scenario: Scenario, simulation: Simulation) -> list[OutcomeCh
             booking,
         )
     if expected.selection:
-        offer = simulation.fixture.get("expected_offer") or {}
+        oracle = None
+        try:
+            oracle = selection_reference(
+                scenario, dataset_path, simulation.fixture.get("business_time", "")
+            )
+        except (OSError, ValueError, KeyError, RefinementError):
+            pass
         add(
             "selection_oracle",
-            bool(offer),
-            "Selection needs an independently captured REST offer.",
+            bool(oracle) and simulation.fixture.get("selection_reference") == oracle,
+            "Selection requires a reproducible trusted fixture calculation and business clock.",
             simulation.fixture,
         )
-        if offer:
-            correct = (
-                flight.get("id") == offer.get("flight_id")
-                if expected.selection == "earliest"
-                else booking.get("unit_price_cents") == offer.get("unit_price_cents")
+        try:
+            selected_departure = datetime.fromisoformat(str(flight.get("departure_local")))
+        except ValueError:
+            selected_departure = None
+        correct = oracle is not None and any(
+            flight.get("id") == offer["flight_id"]
+            and selected_departure == datetime.fromisoformat(offer["departure_at"])
+            and all(
+                booking.get(key) == offer[key]
+                for key in ("unit_price_cents", "seat_class", "fare_tier")
             )
-            add(
-                "selected_offer",
-                correct,
-                f"Booking must select the {expected.selection} eligible offer.",
-                booking,
-            )
+            for offer in oracle["optimal_offers"]
+        )
+        add(
+            "selected_offer",
+            correct,
+            f"Booking must select the {expected.selection} eligible trusted fixture offer.",
+            booking,
+        )
         search = expected.tool_parameters.get("search_flights", {})
         local_date = str(flight.get("departure_local", ""))[:10]
         for key in ("departure_date_from", "departure_date_to"):

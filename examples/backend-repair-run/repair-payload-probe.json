@@ -1,0 +1,12 @@
+{
+  "payload_characters": 348934,
+  "scenario_ids": [
+    "ambiguous-date-correction",
+    "unavailable-inventory",
+    "policy-reasoning-challenge"
+  ],
+  "model": "claude-sonnet-5-5",
+  "proposal_validated": true,
+  "activated": false,
+  "original_rejection": "prompt is too long: 1223607 tokens > 1000000 maximum"
+}

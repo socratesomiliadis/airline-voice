@@ -72,11 +72,26 @@ async def execute(settings: Settings, config: RefinementConfig) -> int:
                 timeout=config.request_timeout_seconds,
             )
         )
+        if settings.public_api_base_url:
+            public_client = await stack.enter_async_context(
+                httpx.AsyncClient(
+                    base_url=str(settings.public_api_base_url).rstrip("/") + "/",
+                    headers={"X-Agent-Api-Key": settings.agent_api_key.get_secret_value()},
+                    timeout=config.request_timeout_seconds,
+                )
+            )
+            try:
+                await AirlineAPI(public_client).ready(config.readiness_timeout_seconds)
+            except RefinementError:
+                raise RefinementError(
+                    "Public webhook readiness failed; "
+                    "restore the tunnel/deployment before refinement"
+                ) from None
         runner = RefinementRunner(
             config,
             JsonModel(model_client, config.model_attempts, config.model_max_tokens),
             ElevenLabs(provider_client, settings.elevenlabs_agent_id, config.agent_branch_id),
-            AirlineAPI(api_client),
+            AirlineAPI(api_client, config.workspace_root / config.reference_dataset_path),
             Workspace(config, test_database_url=settings.test_database_url.get_secret_value()),
             artifacts,
         )

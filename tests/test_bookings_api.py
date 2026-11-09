@@ -705,3 +705,16 @@ def test_airline_cancellation_rebooking_waives_basic_restriction_and_price_diffe
     assert result.json()["ticket_total_cents"] == original["unit_price_cents"]
     assert result.json()["events"][-1]["charged_cents"] == 0
     assert result.json()["events"][-1]["details"]["airline_disruption"] is True
+
+
+def test_readiness_is_authenticated_and_independent_of_broken_search(client, monkeypatch):
+    from airline_api.modules.bookings.service import BookingService
+
+    async def broken_search(*args):
+        raise RuntimeError("Injected application defect")
+
+    monkeypatch.setattr(BookingService, "search", broken_search)
+    response = client.get("/ready")
+    assert response.status_code == 200
+    assert response.json() == {"status": "ok", "business_time": "2026-11-05T12:00:00+00:00"}
+    assert client.get("/ready", headers={"X-Agent-Api-Key": "wrong"}).status_code == 401

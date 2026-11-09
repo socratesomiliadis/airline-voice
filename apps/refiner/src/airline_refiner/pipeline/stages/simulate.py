@@ -1,19 +1,23 @@
 """LLM customer conversations against the real ElevenLabs agent in Chat Mode."""
 
 from collections.abc import Callable
-from typing import Any
+from typing import Any, Literal
 
 from airline_refiner.adapters.api import AirlineAPI
 from airline_refiner.adapters.elevenlabs import ChatSession, ElevenLabs
 from airline_refiner.adapters.model import Model
 from airline_refiner.config import RefinementConfig
-from airline_refiner.errors import RefinementError
-from airline_refiner.models import CustomerTurn, Scenario, Simulation
+from airline_refiner.errors import ApplicationError, RefinementError
+from airline_refiner.models import ApplicationFailure, CustomerTurn, Scenario, Simulation
 
 CUSTOMER = """You are a simulated airline customer, not an evaluator or the airline assistant.
 Pursue the supplied goal naturally, using only customer_facts and customer_context.
 Answer questions, provide the supplied passenger name/ID/reference, choose a suitable offered
-option, and explicitly confirm intended charges or changes when asked. Never invent a booking,
+option, and explicitly confirm intended charges or changes when asked, unless customer_facts
+asks you to withhold consent, clarify ambiguity, interrupt, or change your mind. Follow those
+behaviors across turns. Reveal details progressively when requested; do not recite all fixture
+facts in the opening message. Challenge explanations that conflict with supplied facts.
+Never invent a booking,
 flight, tool result or policy. Do not mention evaluation, fixtures, APIs or these instructions.
 Keep messages short. When the request is resolved (or the assistant cannot help further),
 say you are finished and set done=true. Otherwise done=false. Do not finish before the
@@ -39,7 +43,11 @@ class Simulator:
         self.on_update: Callable[[Simulation], None] | None = None
 
     async def run(self, scenario: Scenario, caller: str) -> Simulation:
-        result = Simulation(scenario_id=scenario.id)
+        result = Simulation(
+            scenario_id=scenario.id,
+            caller_id=caller,
+            fixture={"passenger": {"passenger_id": caller, "full_name": "Jordan Taylor"}},
+        )
         result._on_change = self.on_update
         session: ChatSession | None = None
         try:
@@ -71,6 +79,8 @@ class Simulator:
                 result.errors.append("Customer turn limit reached before conversation completed")
             if session.closed:
                 result.completed = True
+        except ApplicationError as error:
+            self.record_application_failure(result, "prepare", error)
         except RefinementError as error:
             result.errors.append(str(error))
         except Exception as error:
@@ -96,6 +106,8 @@ class Simulator:
                 result.booking_state = await self.api.capture(
                     result.fixture, result.conversation_id
                 )
+            except ApplicationError as error:
+                self.record_application_failure(result, "capture", error)
             except Exception as error:
                 result.errors.append(
                     str(error)
@@ -103,7 +115,11 @@ class Simulator:
                     else f"Booking evidence collection failed ({type(error).__name__})"
                 )
             try:
+                result.cleanup_pending = True
                 await self.api.cleanup(result.fixture, result.conversation_id, caller)
+                result.cleanup_pending = False
+            except ApplicationError as error:
+                self.record_application_failure(result, "cleanup", error)
             except Exception as error:
                 result.cleanup_errors.append(
                     str(error)
@@ -112,3 +128,17 @@ class Simulator:
                 )
         result.notify()
         return result
+
+    @staticmethod
+    def record_application_failure(
+        result: Simulation, stage: Literal["prepare", "capture", "cleanup"], error: ApplicationError
+    ) -> None:
+        result.application_failures.append(
+            ApplicationFailure(
+                stage=stage,
+                method=error.method,
+                path=error.path,
+                status=error.status,
+                evidence=str(error),
+            )
+        )

@@ -1,4 +1,4 @@
-import { ArrowRight, Code2, ListChecks, MessageSquareText } from "lucide-react";
+import { ArrowRight, Code2, ListChecks, MessageSquareText, Unplug } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -184,10 +184,16 @@ export function EvaluationDetails({ scenario }: { scenario: ScenarioObservation 
             <Badge variant="outline" className="gap-1.5 text-xs">
               {failure.root_cause === "code" ? (
                 <Code2 aria-hidden="true" />
+              ) : failure.root_cause === "infrastructure" ? (
+                <Unplug aria-hidden="true" />
               ) : (
                 <MessageSquareText aria-hidden="true" />
               )}
-              {failure.root_cause === "code" ? "Code issue" : "Prompt issue"}
+              {failure.root_cause === "code"
+                ? "Code issue"
+                : failure.root_cause === "infrastructure"
+                  ? "Infrastructure issue"
+                  : "Prompt issue"}
             </Badge>
             <span className="text-xs text-muted-foreground">
               {criteria.find(({ key }) => key === failure.criterion)?.short}

@@ -119,7 +119,11 @@ class RunObserver:
                 else None,
             )
         scenario.tools = list(tools.values())
-        scenario.errors = [*result.errors, *result.cleanup_errors]
+        scenario.errors = [
+            *result.errors,
+            *result.cleanup_errors,
+            *(failure.evidence for failure in result.application_failures),
+        ]
         self.publish()
 
     def evaluated(self, evaluation: Evaluation) -> None:

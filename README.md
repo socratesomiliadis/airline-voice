@@ -220,13 +220,22 @@ remain for subsequent implementation.
 
 ## Assessment scenarios and recorded evidence
 
-Thirteen scenarios cover all ten requested call types, including next departure,
+Seventeen scenarios cover all ten requested call types and interaction regressions,
+including ambiguous dates, withdrawn consent, unavailable inventory, next departure,
 cheapest across a week, seat preferences, baggage policy and gate/status lookup.
 Seat preferences are saved requests, not guaranteed assignments. Flight status
 and gates are fictional database records. See [coverage](scenarios/README.md).
 
 The [recorded example](examples/recorded-run/README.md) includes a real provider
 run, starting/final prompts, scores, diagnoses, changes and an improvement summary.
+The [new backend-repair evidence](examples/backend-repair-run/README.md) adds a
+real model code fix, actual PostgreSQL gate and service reload, and a successful
+next cancellation. It also preserves later interaction failures and a provider
+disconnect; that report is explicitly an error run.
+A separate [interaction-repair run](examples/interaction-repair-run/README.md)
+passed the four harder scenarios after an automatic prompt repair.
+The [policy calibration set](evaluations/README.md) contains five human-labelled cases.
+
 Raw local artifacts stay ignored; export completed runs with:
 
 ```sh

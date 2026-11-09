@@ -11,6 +11,8 @@ workspace_root = "."
 scenarios_path = "scenarios/airline.json"
 prompt_path = "prompts/agent/system.md"
 knowledge_dir = "knowledge"
+# Independent fixture oracle; requires a dedicated database seeded from this file.
+reference_dataset_path = "data/flights/week_2026_11_09.json"
 editable_roots = ["apps/api/src/airline_api"]
 max_patch_files = 6
 # Backend repairs require TEST_DATABASE_URL and passing receipts for these PostgreSQL groups.

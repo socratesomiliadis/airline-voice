@@ -44,6 +44,13 @@ def test_export_preserves_repair_and_scores_without_provider_headers(tmp_path, m
                         "errors": [],
                         "cleanup_errors": [],
                         "booking_state": [],
+                        "fixture": {
+                            "business_time": "2026-11-06T12:00:00Z",
+                            "selection_reference": {"source": "trusted_fixture"},
+                            "provider_headers": {"key": "private-value"},
+                        },
+                        "application_failures": [{"stage": "cleanup", "status": 500}],
+                        "cleanup_pending": number == 1,
                         "transcript": [
                             {
                                 "role": "agent",
@@ -51,6 +58,7 @@ def test_export_preserves_repair_and_scores_without_provider_headers(tmp_path, m
                                 "tool_calls": [
                                     {
                                         "tool_name": "book_flight",
+                                        "request_id": "request-1",
                                         "params_as_json": "{}",
                                         "tool_has_been_called": True,
                                         "tool_details": {
@@ -77,6 +85,12 @@ def test_export_preserves_repair_and_scores_without_provider_headers(tmp_path, m
     assert report["performance_summary"]["booking"]["change"]["outcome_confirmation"] == 5
     assert report["iterations"][0]["change_explanation"] == "Include missing reference"
     assert (output / "final-prompt.md").read_text() == "Final"
+    conversation = report["iterations"][0]["conversations"][0]
+    assert conversation["fixture"]["selection_reference"]["source"] == "trusted_fixture"
+    assert conversation["fixture"]["business_time"] == "2026-11-06T12:00:00Z"
+    assert "provider_headers" not in conversation["fixture"]
+    assert conversation["application_failures"] == [{"stage": "cleanup", "status": 500}]
+    assert conversation["transcript"][0]["tool_calls"][0]["request_id"] == "request-1"
     exported = "".join(path.read_text() for path in output.iterdir())
     assert "private-value" not in exported and "private-url" not in exported
     assert "tool_details" not in exported and "headers" not in exported
@@ -100,7 +114,36 @@ def test_export_preserves_repair_and_scores_without_provider_headers(tmp_path, m
     standalone = export_run(source / "run.json", tmp_path / "standalone")
     assert standalone["performance_summary"] == report["performance_summary"]
     assert standalone["iterations"][0]["change_explanation"] == "Include missing reference"
+    # A cleanup fault can end a diagnostic baseline early. Preserve the explicit
+    # missing baseline, rather than refusing the evidence or inventing improvement.
+    extra_simulation = {**iterations[-1]["simulations"][0], "scenario_id": "second"}
+    iterations[-1]["simulations"].append(extra_simulation)
+    iterations[-1]["evaluations"].append(
+        {"scenario_id": "second", "scores": {"outcome_confirmation": 9}}
+    )
+    run["baseline_complete"] = False
+    run["final_complete"] = True
+    run["performance_summary"] = {
+        "second": {"initial": None, "final": {"outcome_confirmation": 9}, "change": None}
+    }
+    (source / "run.json").write_text(json.dumps(run))
+    partial = export_run(source, tmp_path / "partial-baseline")
+    assert not partial["baseline_complete"] and partial["final_complete"]
+    assert partial["performance_summary"]["second"]["initial"] is None
+    assert partial["performance_summary"]["second"]["change"] is None
     run["status"] = "error"
     (source / "run.json").write_text(json.dumps(run))
     with pytest.raises(ValueError, match="completed runs"):
         export_run(source, tmp_path / "incomplete")
+    run["error"] = "Provider disconnected"
+    iterations[-1]["status"] = "error"
+    iterations[-1]["error"] = "Incomplete provider conversation"
+    iterations[-1]["evaluations"] = []
+    run["final_complete"] = False
+    (source / "run.json").write_text(json.dumps(run))
+    failed = export_run(source, tmp_path / "failed-evidence", allow_incomplete=True)
+    assert failed["status"] == "error" and failed["error"] == "Provider disconnected"
+    assert not failed["final_complete"]
+    assert not failed["iterations"][-1]["evaluations"]
+    assert failed["iterations"][-1]["error"] == "Incomplete provider conversation"
+    assert len(failed["iterations"][-1]["conversations"]) == 2

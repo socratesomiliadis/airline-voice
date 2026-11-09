@@ -2,6 +2,7 @@
 
 import asyncio
 import json
+import ssl
 from collections.abc import Callable
 from typing import Any, Protocol
 
@@ -109,9 +110,19 @@ class JsonModel:
             except httpx.HTTPStatusError as error:
                 status = error.response.status_code
                 if status not in {429, 500, 502, 503, 504, 529}:
-                    raise RefinementError(f"Model API rejected request (HTTP {status})") from None
+                    hint = ""
+                    if status == 400:
+                        try:
+                            message = str(error.response.json().get("error", {}).get("message", ""))
+                            if "prompt is too long" in message.casefold():
+                                hint = ": input exceeds the model context limit"
+                        except (ValueError, AttributeError):
+                            pass
+                    raise RefinementError(
+                        f"Model API rejected request (HTTP {status}){hint}"
+                    ) from None
                 feedback = f"Previous model request failed with HTTP {status}. Try again."
-            except httpx.RequestError:
+            except (httpx.RequestError, ssl.SSLError):
                 feedback = "Previous model request failed due to a transport error. Try again."
             except (ValidationError, ValueError, KeyError, TypeError) as error:
                 feedback = (

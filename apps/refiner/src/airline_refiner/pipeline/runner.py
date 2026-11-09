@@ -214,7 +214,8 @@ class RefinementRunner:
                                 self.config.max_iterations,
                                 scenario.id,
                             )
-                            caller = f"ref-{result.run_id[:12]}-{number}-{scenario.id}"[:100]
+                            namespace = hashlib.sha256(result.run_id.encode()).hexdigest()[:12]
+                            caller = f"ref-{namespace}-{number}-{scenario.id}"[:100]
                             self.observer.phase("simulating", scenario.id)
                             simulation = await self.simulator.run(scenario, caller)
                             iteration.simulations.append(simulation)
@@ -225,8 +226,10 @@ class RefinementRunner:
                             if (
                                 simulation.errors
                                 or simulation.cleanup_errors
-                                or not simulation.completed
-                                or not simulation.transcript
+                                or (
+                                    (not simulation.completed or not simulation.transcript)
+                                    and not simulation.application_failures
+                                )
                             ):
                                 details = "; ".join(simulation.errors + simulation.cleanup_errors)
                                 raise RefinementError(
@@ -247,7 +250,20 @@ class RefinementRunner:
                                 "Scores %s: %s", scenario.id, evaluation.scores.model_dump()
                             )
                             self.artifacts.write("run.json", result.model_dump(mode="json"))
-                        if all(e.passes(self.config.pass_score) for e in iteration.evaluations):
+                            if not simulation.application_failures and any(
+                                f.root_cause == "infrastructure" for f in evaluation.failures
+                            ):
+                                raise RefinementError(
+                                    f"Scenario {scenario.id}: external infrastructure failure; "
+                                    "diagnosis retained, repair stopped"
+                                )
+                            # A leaked fixture can alter the next scenario's inventory. Diagnose
+                            # and repair this failure before creating any more test bookings.
+                            if simulation.cleanup_pending:
+                                break
+                        if len(iteration.evaluations) == len(scenarios) and all(
+                            e.passes(self.config.pass_score) for e in iteration.evaluations
+                        ):
                             result.status = "passed"
                             break
                         if number == self.config.max_iterations:
@@ -311,6 +327,20 @@ class RefinementRunner:
                                     logs.append(path.read_text()[-12_000:])
                             previous_errors.append(message + "\n" + "\n".join(logs))
                             logger.warning("Repair rejected and rolled back: %s", message)
+                        for simulation in iteration.simulations:
+                            if simulation.cleanup_pending:
+                                await self.api.cleanup(
+                                    simulation.fixture,
+                                    simulation.conversation_id,
+                                    simulation.caller_id or "",
+                                )
+                                iteration.cleanup_recoveries.append(simulation.scenario_id)
+                                # Keep original failures/evaluation immutable; record recovery
+                                # separately rather than changing the evidence that was judged.
+                                self.artifacts.write(
+                                    prefix + f"/{simulation.scenario_id}.cleanup-recovery.json",
+                                    {"recovered": True, "caller_id": simulation.caller_id},
+                                )
                     except BaseException as error:
                         iteration.status = "error"
                         iteration.error = (

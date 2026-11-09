@@ -4,6 +4,7 @@ from typing import Any
 
 from airline_refiner.adapters.model import Model
 from airline_refiner.config import RefinementConfig
+from airline_refiner.errors import RefinementError
 from airline_refiner.models import Iteration, Repair
 
 REPAIR = """Repair the airline assistant using the supplied grounded evaluation failures.
@@ -40,6 +41,14 @@ class FixProposer:
             failure.root_cause
             for evaluation in iteration.evaluations
             for failure in evaluation.failures
+            if failure.root_cause != "infrastructure"
+        }
+        if not causes:
+            raise RefinementError("No application or prompt diagnosis to repair")
+        failed_scenarios = {
+            evaluation.scenario_id
+            for evaluation in iteration.evaluations
+            if any(f.root_cause != "infrastructure" for f in evaluation.failures)
         }
         faults = [
             fault
@@ -68,10 +77,18 @@ class FixProposer:
             REPAIR,
             {
                 "evaluations": [
-                    evaluation.model_dump(mode="json") for evaluation in iteration.evaluations
+                    {
+                        **evaluation.model_dump(mode="json", exclude={"checks"}),
+                        "checks": [
+                            c.model_dump(mode="json") for c in evaluation.checks if not c.passed
+                        ],
+                    }
+                    for evaluation in iteration.evaluations
                 ],
                 "simulations": [
-                    simulation.model_dump(mode="json") for simulation in iteration.simulations
+                    simulation.model_dump(mode="json", exclude={"events", "dialogue"})
+                    for simulation in iteration.simulations
+                    if simulation.scenario_id in failed_scenarios
                 ],
                 "system_prompt": prompt,
                 "code_faults": [fault.model_dump(mode="json") for fault in faults],

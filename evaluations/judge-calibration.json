@@ -1,0 +1,332 @@
+[
+  {
+    "id": "recorded-false-expiry",
+    "label_source": "Requester review of examples/recorded-run/report.json",
+    "human_review_required": false,
+    "expected_pass": {
+      "understanding": false
+    },
+    "scenario": {
+      "id": "policy-calibration",
+      "goal": "Explain why this basic fare cannot be changed voluntarily and what cancellation rules apply.",
+      "customer_facts": "The business time and purchase time are both November 6. Departure is November 9. No cancellation or purchase is authorized.",
+      "expected_outcome": "Accurate basic-fare restriction and separate elapsed-time and advance-purchase explanations.",
+      "required_tools": [],
+      "setup": null,
+      "assertions": {
+        "booking_status": null,
+        "origin": null,
+        "destination": null,
+        "departure_date": null,
+        "seat_class": null,
+        "fare_tier": null,
+        "seat_preference": null,
+        "items": [],
+        "item_charge_cents": null,
+        "full_refund": false,
+        "forbid_mutations": true,
+        "unchanged_booking": false,
+        "tool_order": [],
+        "tool_parameters": {},
+        "selection": null
+      }
+    },
+    "simulation": {
+      "scenario_id": "policy-calibration",
+      "caller_id": null,
+      "conversation_id": null,
+      "dialogue": [],
+      "transcript": [
+        {
+          "role": "user",
+          "message": "Can I move my basic ticket to November 11? Please explain the cancellation options without changing anything."
+        },
+        {
+          "role": "agent",
+          "message": "Thanks for your patience, Jordan. Here's the situation for your booking.\n\nYour ticket is a basic economy fare on a domestic route, and basic fares do not allow voluntary flight changes. So you can't simply move this ticket to November 11 \u2014 a change isn't permitted on this fare.\n\nYour options under the policy are:\n\nFirst, you could cancel and buy a new ticket. Since this is a basic fare, a voluntary cancellation is nonrefundable and earns no travel credit, except that any refundable unused taxes may be returned to your original payment method. You'd then purchase a new ticket for November 11 separately.\n\nSecond, if you'd prefer flexibility in the future, a standard fare would allow changes before departure for a USD 30 domestic change fee plus any positive fare difference, and a flexible fare would allow changes with no change fee, though any fare difference would still apply.\n\nOne thing worth checking: if you booked directly with us and it's been within 24 hours of purchase, there's a fictional 24-hour cancellation benefit that gives a full refund to the original payment method on any fare, provided the first flight was scheduled at least 168 hours after purchase. Your booking was created November 6, so that window has likely passed, but I can confirm if you'd like.\n\nWould you like me to look at available flights from San Francisco to New York JFK on November 11 so you can see what a new ticket would cost?"
+        }
+      ],
+      "events": [],
+      "fixture": {
+        "business_time": "2026-11-06T12:00:00Z",
+        "booking": {
+          "created_at": "2026-11-06T10:00:00Z",
+          "fare_tier": "basic",
+          "flight": {
+            "departure_at": "2026-11-09T14:00:00Z"
+          }
+        }
+      },
+      "booking_state": [],
+      "completed": true,
+      "errors": [],
+      "cleanup_errors": [],
+      "application_failures": [],
+      "cleanup_pending": false
+    }
+  },
+  {
+    "id": "correct-independent-conditions",
+    "label_source": "Requester confirmed the four policy judgments in this session, 2026-11-08",
+    "human_review_required": false,
+    "expected_pass": {
+      "understanding": true
+    },
+    "scenario": {
+      "id": "policy-calibration",
+      "goal": "Explain why this basic fare cannot be changed voluntarily and what cancellation rules apply.",
+      "customer_facts": "The business time and purchase time are both November 6. Departure is November 9. No cancellation or purchase is authorized.",
+      "expected_outcome": "Accurate basic-fare restriction and separate elapsed-time and advance-purchase explanations.",
+      "required_tools": [],
+      "setup": null,
+      "assertions": {
+        "booking_status": null,
+        "origin": null,
+        "destination": null,
+        "departure_date": null,
+        "seat_class": null,
+        "fare_tier": null,
+        "seat_preference": null,
+        "items": [],
+        "item_charge_cents": null,
+        "full_refund": false,
+        "forbid_mutations": true,
+        "unchanged_booking": false,
+        "tool_order": [],
+        "tool_parameters": {},
+        "selection": null
+      }
+    },
+    "simulation": {
+      "scenario_id": "policy-calibration",
+      "caller_id": null,
+      "conversation_id": null,
+      "dialogue": [],
+      "transcript": [
+        {
+          "role": "user",
+          "message": "Can I move my basic ticket to November 11? Please explain the cancellation options without changing anything."
+        },
+        {
+          "role": "agent",
+          "message": "Basic fares do not allow voluntary changes. Your ticket was purchased two hours ago, so the 24-hour elapsed-time condition is met. The separate 168-hour advance-purchase condition is not met: departure is November 9. A voluntary basic cancellation does not qualify for that full-refund benefit. We can leave your booking unchanged."
+        }
+      ],
+      "events": [],
+      "fixture": {
+        "business_time": "2026-11-06T12:00:00Z",
+        "booking": {
+          "created_at": "2026-11-06T10:00:00Z",
+          "fare_tier": "basic",
+          "flight": {
+            "departure_at": "2026-11-09T14:00:00Z"
+          }
+        }
+      },
+      "booking_state": [],
+      "completed": true,
+      "errors": [],
+      "cleanup_errors": [],
+      "application_failures": [],
+      "cleanup_pending": false
+    }
+  },
+  {
+    "id": "wrong-expiry-short",
+    "label_source": "Requester confirmed the four policy judgments in this session, 2026-11-08",
+    "human_review_required": false,
+    "expected_pass": {
+      "understanding": false
+    },
+    "scenario": {
+      "id": "policy-calibration",
+      "goal": "Explain why this basic fare cannot be changed voluntarily and what cancellation rules apply.",
+      "customer_facts": "The business time and purchase time are both November 6. Departure is November 9. No cancellation or purchase is authorized.",
+      "expected_outcome": "Accurate basic-fare restriction and separate elapsed-time and advance-purchase explanations.",
+      "required_tools": [],
+      "setup": null,
+      "assertions": {
+        "booking_status": null,
+        "origin": null,
+        "destination": null,
+        "departure_date": null,
+        "seat_class": null,
+        "fare_tier": null,
+        "seat_preference": null,
+        "items": [],
+        "item_charge_cents": null,
+        "full_refund": false,
+        "forbid_mutations": true,
+        "unchanged_booking": false,
+        "tool_order": [],
+        "tool_parameters": {},
+        "selection": null
+      }
+    },
+    "simulation": {
+      "scenario_id": "policy-calibration",
+      "caller_id": null,
+      "conversation_id": null,
+      "dialogue": [],
+      "transcript": [
+        {
+          "role": "user",
+          "message": "Can I move my basic ticket to November 11? Please explain the cancellation options without changing anything."
+        },
+        {
+          "role": "agent",
+          "message": "Your 24-hour cancellation window has expired because you purchased earlier today. Basic fares cannot be changed voluntarily."
+        }
+      ],
+      "events": [],
+      "fixture": {
+        "business_time": "2026-11-06T12:00:00Z",
+        "booking": {
+          "created_at": "2026-11-06T10:00:00Z",
+          "fare_tier": "basic",
+          "flight": {
+            "departure_at": "2026-11-09T14:00:00Z"
+          }
+        }
+      },
+      "booking_state": [],
+      "completed": true,
+      "errors": [],
+      "cleanup_errors": [],
+      "application_failures": [],
+      "cleanup_pending": false
+    }
+  },
+  {
+    "id": "missing-advance-condition",
+    "label_source": "Requester confirmed the four policy judgments in this session, 2026-11-08",
+    "human_review_required": false,
+    "expected_pass": {
+      "understanding": false
+    },
+    "scenario": {
+      "id": "policy-calibration",
+      "goal": "Explain why this basic fare cannot be changed voluntarily and what cancellation rules apply.",
+      "customer_facts": "The business time and purchase time are both November 6. Departure is November 9. No cancellation or purchase is authorized.",
+      "expected_outcome": "Accurate basic-fare restriction and separate elapsed-time and advance-purchase explanations.",
+      "required_tools": [],
+      "setup": null,
+      "assertions": {
+        "booking_status": null,
+        "origin": null,
+        "destination": null,
+        "departure_date": null,
+        "seat_class": null,
+        "fare_tier": null,
+        "seat_preference": null,
+        "items": [],
+        "item_charge_cents": null,
+        "full_refund": false,
+        "forbid_mutations": true,
+        "unchanged_booking": false,
+        "tool_order": [],
+        "tool_parameters": {},
+        "selection": null
+      }
+    },
+    "simulation": {
+      "scenario_id": "policy-calibration",
+      "caller_id": null,
+      "conversation_id": null,
+      "dialogue": [],
+      "transcript": [
+        {
+          "role": "user",
+          "message": "Can I move my basic ticket to November 11? Please explain the cancellation options without changing anything."
+        },
+        {
+          "role": "agent",
+          "message": "You bought the basic fare two hours ago, so you automatically qualify for the full 24-hour cancellation refund even though departure is in three days. Voluntary changes are not allowed."
+        }
+      ],
+      "events": [],
+      "fixture": {
+        "business_time": "2026-11-06T12:00:00Z",
+        "booking": {
+          "created_at": "2026-11-06T10:00:00Z",
+          "fare_tier": "basic",
+          "flight": {
+            "departure_at": "2026-11-09T14:00:00Z"
+          }
+        }
+      },
+      "booking_state": [],
+      "completed": true,
+      "errors": [],
+      "cleanup_errors": [],
+      "application_failures": [],
+      "cleanup_pending": false
+    }
+  },
+  {
+    "id": "correct-expired-window",
+    "label_source": "Requester confirmed the four policy judgments in this session, 2026-11-08",
+    "human_review_required": false,
+    "expected_pass": {
+      "understanding": true
+    },
+    "scenario": {
+      "id": "policy-calibration",
+      "goal": "Explain why this basic fare cannot be changed voluntarily and what cancellation rules apply.",
+      "customer_facts": "The business time and purchase time are both November 6. Departure is November 9. No cancellation or purchase is authorized.",
+      "expected_outcome": "Accurate basic-fare restriction and separate elapsed-time and advance-purchase explanations.",
+      "required_tools": [],
+      "setup": null,
+      "assertions": {
+        "booking_status": null,
+        "origin": null,
+        "destination": null,
+        "departure_date": null,
+        "seat_class": null,
+        "fare_tier": null,
+        "seat_preference": null,
+        "items": [],
+        "item_charge_cents": null,
+        "full_refund": false,
+        "forbid_mutations": true,
+        "unchanged_booking": false,
+        "tool_order": [],
+        "tool_parameters": {},
+        "selection": null
+      }
+    },
+    "simulation": {
+      "scenario_id": "policy-calibration",
+      "caller_id": null,
+      "conversation_id": null,
+      "dialogue": [],
+      "transcript": [
+        {
+          "role": "user",
+          "message": "Can I move my basic ticket to November 11? Please explain the cancellation options without changing anything."
+        },
+        {
+          "role": "agent",
+          "message": "Basic fares do not permit voluntary changes. Your 24-hour cancellation window has expired: you purchased more than 26 hours ago. Departure was also less than 168 hours after purchase, so the separate advance-purchase condition is not met either. We can leave the booking unchanged."
+        }
+      ],
+      "events": [],
+      "fixture": {
+        "business_time": "2026-11-07T12:01:00Z",
+        "booking": {
+          "created_at": "2026-11-06T10:00:00Z",
+          "fare_tier": "basic",
+          "flight": {
+            "departure_at": "2026-11-09T14:00:00Z"
+          }
+        }
+      },
+      "booking_state": [],
+      "completed": true,
+      "errors": [],
+      "cleanup_errors": [],
+      "application_failures": [],
+      "cleanup_pending": false
+    }
+  }
+]

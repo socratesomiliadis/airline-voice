@@ -52,3 +52,29 @@ Export a completed run with:
 ```sh
 uv run --all-packages python scripts/export_refinement_run.py artifacts/RUN_ID --output examples/recorded-run
 ```
+
+
+## Limits of this recording
+
+This historical report predates independent fixture selection references and the
+current deterministic checks. It is preserved unchanged; newer fields have not
+been backfilled as if they had been captured at the time. It demonstrates prompt
+repair, not live backend fault diagnosis, database-gated code repair or reload.
+
+The final basic-fare conversation incorrectly suggests that a booking created on
+November 6 has probably passed its 24-hour window even though the demonstration
+business time is November 6. Its understanding score of 10 is overgenerous. The
+advance-purchase condition is a separate issue. The current factual regression
+checks this exact recorded explanation and prevents a passing understanding score
+with same-day purchase timestamps. Historical scores are not recalculated or
+silently corrected in this report.
+
+See [judge regression cases](../../evaluations/judge-calibration.json) for the
+requester-labelled counterexample and four additional human-reviewed cases,
+and [current assessment boundaries](../../docs/refinement.md#assessment-boundaries-and-production-work).
+
+
+A [new live backend-repair recording](../backend-repair-run/README.md) demonstrates
+actual model diagnosis, database-gated code repair, reload and a successful next
+conversation. That newer recording also preserves its later failures and terminal
+provider error; it is not labelled as a passing suite.

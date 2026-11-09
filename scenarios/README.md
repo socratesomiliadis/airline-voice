@@ -36,6 +36,26 @@ need no reference. Seat preferences remain unassigned requests.
 Each scenario's `assertions` object is an executable acceptance contract. It can
 specify saved status/route/date/fare, seat request, item counts/status/charges,
 read-only behavior, unchanged bookings, tool ordering and exact parameters.
-Next/cheapest selection also checks a REST reference offer captured before the
-conversation. These checks are enforced independently of the LLM's scores.
+Next/cheapest selection uses an independent calculation over trusted fixture data,
+with a captured business clock and dataset hash; it never uses the search service
+as its reference. Use a dedicated seeded database with no external inventory writers. These checks are enforced independently of the LLM's scores.
 Policy wording and conversational confirmation remain the LLM judge's job.
+
+
+Four additional interaction regressions expand the suite to seventeen scenarios:
+
+- `ambiguous-date-correction`: an ambiguous city/date, then a changed travel date;
+  the final search must use the corrected date and no purchase is authorized.
+- `unavailable-inventory`: a sold-out business cabin, a question about fare tiers,
+  and refusal to buy any offered alternatives.
+- `withdrawn-consent`: initial purchase intent followed by an interruption before
+  consent; no mutation, including a rejected mutation attempt, is allowed.
+- `policy-reasoning-challenge`: a challenge to elapsed-time reasoning; the booking
+  must remain unchanged, and policy reasoning remains subject to factual/judge checks.
+
+The customer model reveals details progressively and follows scenario-specific
+refusals and interruptions. These are stochastic interaction tests, not an assurance
+that all difficult conversations are covered. Multi-passenger interactions,
+contradictory identity claims and longer recovery sequences still need dedicated
+scenarios and human review. Policy assertions and no-mutation checks alone do not
+prove that each desired conversational behavior occurred.

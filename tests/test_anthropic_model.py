@@ -225,3 +225,54 @@ def test_cli_uses_native_anthropic_auth_endpoint_and_configured_token_limit(monk
     assert body["max_tokens"] == 8192
     assert body["system"] == "customer"
     assert "response_format" not in body
+
+
+@pytest.mark.parametrize("permanent", [False, True])
+def test_tls_failures_use_bounded_transport_retries_without_leaking_details(permanent, monkeypatch):
+    import ssl
+
+    attempts = []
+
+    async def no_sleep(_):
+        pass
+
+    monkeypatch.setattr("airline_refiner.adapters.model.asyncio.sleep", no_sleep)
+
+    def transport(request):
+        attempts.append(request)
+        if permanent or len(attempts) == 1:
+            raise ssl.SSLError("private TLS detail")
+        return httpx.Response(200, json=message_response())
+
+    async def run():
+        async with httpx.AsyncClient(
+            base_url="https://model.test/", transport=httpx.MockTransport(transport)
+        ) as client:
+            if permanent:
+                with pytest.raises(RefinementError, match="exhausted 2 attempts") as caught:
+                    await JsonModel(client, attempts=2).generate("test", "role", {}, CustomerTurn)
+                assert "private TLS detail" not in str(caught.value)
+            else:
+                assert (
+                    await JsonModel(client, attempts=2).generate("test", "role", {}, CustomerTurn)
+                ).done
+
+    asyncio.run(run())
+    assert len(attempts) == 2
+
+
+def test_context_rejection_has_an_actionable_hint_without_private_error_text():
+    def transport(request):
+        return httpx.Response(
+            400, json={"error": {"message": "prompt is too long: private request details"}}
+        )
+
+    async def run():
+        async with httpx.AsyncClient(
+            base_url="https://model.test/", transport=httpx.MockTransport(transport)
+        ) as client:
+            with pytest.raises(RefinementError, match="context limit") as caught:
+                await JsonModel(client).generate("test", "role", {}, CustomerTurn)
+            assert "private request details" not in str(caught.value)
+
+    asyncio.run(run())

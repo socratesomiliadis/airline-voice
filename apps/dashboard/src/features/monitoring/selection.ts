@@ -23,6 +23,7 @@ export function resolveObservation(
 export function needsAttention(scenario: ScenarioObservation, threshold: number) {
   return (
     scenario.status === "error" ||
+    scenario.evaluation?.checks?.some((check) => !check.passed) ||
     (!!scenario.evaluation &&
       Object.values(scenario.evaluation.scores).some((score) => score < threshold))
   );

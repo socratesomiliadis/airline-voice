@@ -60,6 +60,14 @@ class CustomerTurn(Contract):
     done: bool
 
 
+class ApplicationFailure(Contract):
+    stage: Literal["prepare", "capture", "cleanup"]
+    method: str
+    path: str
+    status: int
+    evidence: str
+
+
 class Simulation(Contract):
     _on_change: Callable[["Simulation"], None] | None = PrivateAttr(default=None)
 
@@ -68,6 +76,7 @@ class Simulation(Contract):
             self._on_change(self)
 
     scenario_id: str
+    caller_id: str | None = None
     conversation_id: str | None = None
     dialogue: list[dict[str, Any]] = Field(default_factory=list)
     transcript: list[dict[str, Any]] = Field(default_factory=list)
@@ -77,6 +86,8 @@ class Simulation(Contract):
     completed: bool = False
     errors: list[str] = Field(default_factory=list)
     cleanup_errors: list[str] = Field(default_factory=list)
+    application_failures: list[ApplicationFailure] = Field(default_factory=list)
+    cleanup_pending: bool = False
 
 
 class Scores(Contract):
@@ -99,11 +110,12 @@ class OutcomeCheck(Contract):
     passed: bool
     explanation: str
     evidence: str = ""
+    criteria: list[Criterion] = Field(default=["api_correctness", "outcome_confirmation"])
 
 
 class Failure(Contract):
     criterion: Criterion
-    root_cause: Literal["prompt", "code"]
+    root_cause: Literal["prompt", "code", "infrastructure"]
     quote: str = Field(min_length=1)
     explanation: str = Field(min_length=1)
     code_faults: list[CodeFault]
@@ -168,6 +180,7 @@ class Iteration(Contract):
     source_sha256: str | None = None
     verification: dict[str, Any] | None = None
     execution_logs: dict[str, str] = Field(default_factory=dict)
+    cleanup_recoveries: list[str] = Field(default_factory=list)
 
 
 class ScenarioPerformance(Contract):
