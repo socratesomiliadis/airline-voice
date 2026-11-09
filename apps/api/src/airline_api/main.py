@@ -35,7 +35,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         version="0.1.0",
         description=(
             "Persistent fictional airline bookings and ElevenLabs webhook tools. "
-            "Unimplemented platform features return 501."
+            "Read-only observation of autonomous refinement runs."
         ),
         lifespan=lifespan,
     )

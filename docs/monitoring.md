@@ -4,8 +4,8 @@ The dashboard is an observation-only interface. It shows conversations as turns
 arrive, tool activity, evaluation scores for each scenario and iteration, prompt
 and code diffs, failure diagnoses, and the complete iteration history of a run.
 The UI uses CLI-installed shadcn/ui components on Base UI (`base-nova`), including
-sidebar navigation, selects, tabs, accordions, scroll areas, progress, cards and
-charts. Feature components compose those installed primitives.
+sidebar navigation, selects, tabs, accordions, scroll areas, progress, and cards.
+Feature components compose those installed primitives and a small SVG score chart.
 
 There are no start, stop, approve, edit, retry or message-entry controls. Run,
 iteration and scenario selection change only what the viewer sees.

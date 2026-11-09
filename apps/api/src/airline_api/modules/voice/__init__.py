@@ -1,1 +1,1 @@
-"""ElevenLabs booking webhook tools; voice session creation is deferred."""
+"""Authenticated ElevenLabs booking webhook tools."""

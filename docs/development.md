@@ -19,16 +19,16 @@ Biome handles dashboard linting, formatting, and import organization. Run
 ## Adding a backend feature
 
 1. Define domain request/result schemas in the owning module.
-2. Replace generic payloads in the relevant ports with those types.
+2. Define typed ports for implemented behavior when adapters share a boundary.
 3. Add use cases that depend on ports rather than infrastructure.
 4. Implement provider/repository adapters and register their dependencies.
 5. Add ORM models and a reviewed Alembic revision when persistence is required.
-6. Replace the corresponding `501` route only when its behavior is implemented.
-7. Replace the scaffold boundary test for that route with behavior-focused tests.
+6. Register routes only after their behavior is implemented.
+7. Add behavior-focused tests for the feature.
 
 Flight and booking routes have implemented schemas, agent-key authentication,
 durable idempotency, explicit transactions, and database integration tests. See
-`docs/api.md`. Other route names still reserve an unimplemented API surface.
+`docs/api.md`. The API exposes only implemented routes.
 
 ## Refinement development
 

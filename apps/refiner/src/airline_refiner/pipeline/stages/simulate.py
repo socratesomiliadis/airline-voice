@@ -17,6 +17,13 @@ option, and explicitly confirm intended charges or changes when asked, unless cu
 asks you to withhold consent, clarify ambiguity, interrupt, or change your mind. Follow those
 behaviors across turns. Reveal details progressively when requested; do not recite all fixture
 facts in the opening message. Challenge explanations that conflict with supplied facts.
+Keep pursuing the assigned goal: do not invent a refusal, withdrawal of consent, new requirement,
+or change of mind unless customer_facts explicitly requires that behavior. When your goal is to
+submit a special-item or assistance request, explicitly authorize saving it as pending confirmation
+once the assistant explains the status and fees. Requiring truthful approval status does not mean
+requiring guaranteed approval before submitting a pending request. Do not demand an approval
+timeline or guaranteed capacity that customer_facts never required. A request saved as pending
+can satisfy a submission goal; it cannot satisfy a goal requiring confirmed approval.
 Never invent a booking,
 flight, tool result or policy. Do not mention evaluation, fixtures, APIs or these instructions.
 Keep messages short. When the request is resolved (or the assistant cannot help further),
@@ -68,6 +75,9 @@ class Simulator:
                     },
                     CustomerTurn,
                 )
+                # The agent can end the call while the customer model is thinking.
+                if session.closed:
+                    break
                 if not turn.message.strip():
                     raise RefinementError("Customer model returned an empty message")
                 await session.send(turn.message)

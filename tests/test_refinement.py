@@ -808,6 +808,102 @@ def test_customer_failure_still_closes_session_collects_evidence_and_cleans_up()
     assert provider.sessions[0].closed and api.cleanups == ["caller"]
 
 
+def test_simulator_does_not_send_after_agent_ends_during_customer_generation():
+    provider, api = FakeProvider(), FakeAPI()
+
+    class ClosingModel:
+        async def generate(self, *args, **kwargs):
+            provider.sessions[-1].closed = True
+            return CustomerTurn(message="A reply after the call ended", done=False)
+
+    scenario = Scenario(
+        id="case",
+        goal="Ask about travel",
+        customer_facts="One passenger",
+        expected_outcome="Answered question",
+        required_tools=[],
+    )
+    result = asyncio.run(
+        Simulator(RefinementConfig(), ClosingModel(), provider, api).run(scenario, "caller")
+    )
+    assert result.completed and not result.errors and result.transcript
+    assert not any(turn["role"] == "user" for turn in result.dialogue)
+    assert api.cleanups == ["caller"]
+
+
+@pytest.mark.parametrize(
+    ("status", "is_error", "is_blocked", "ended"),
+    [
+        ("success", False, False, True),
+        ("error", True, False, False),
+        ("success", False, True, False),
+    ],
+)
+def test_chat_recognizes_only_successful_end_call(status, is_error, is_blocked, ended):
+    async def run():
+        class Socket:
+            async def recv(self):
+                await asyncio.Future()
+
+            async def close(self):
+                pass
+
+        session = ChatSession(Socket(), Simulation(scenario_id="case"))
+        await session.queue.put(
+            {
+                "type": "agent_tool_response",
+                "agent_tool_response": {
+                    "tool_name": "end_call",
+                    "tool_type": "system",
+                    "is_called": True,
+                    "status": status,
+                    "is_error": is_error,
+                    "is_blocked": is_blocked,
+                },
+            }
+        )
+        await session.queue.put({"type": "agent_response_complete"})
+        await session.receive_turn(1)
+        assert session.closed is ended
+        await session.close()
+
+    asyncio.run(run())
+
+
+@pytest.mark.parametrize("code", [1000, 1001, 1011, 3000])
+def test_chat_send_race_preserves_abnormal_connection_errors(code):
+    from websockets.exceptions import ConnectionClosedError, ConnectionClosedOK
+    from websockets.frames import Close
+
+    async def run():
+        class Socket:
+            async def recv(self):
+                await asyncio.Future()
+
+            async def send(self, data):
+                error = ConnectionClosedOK if code in {1000, 1001} else ConnectionClosedError
+                raise error(Close(code, "closed"), Close(code, "closed"), True)
+
+            async def close(self):
+                pass
+
+        result = Simulation(scenario_id="case")
+        session = ChatSession(Socket(), result)
+        try:
+            if code in {1000, 1001}:
+                await session.send("Reply")
+                assert session.closed
+            else:
+                with pytest.raises(RefinementError, match="Unable to send"):
+                    await session.send("Reply")
+                assert not session.closed
+            assert not result.dialogue
+        finally:
+            await session.close()
+
+    asyncio.run(run())
+
+
 def test_provider_uses_correct_override_nesting_and_preserves_voice_security():
     requests = []
 

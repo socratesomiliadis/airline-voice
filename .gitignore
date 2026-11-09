@@ -31,7 +31,6 @@ artifacts/*
 !artifacts/.gitkeep
 .refinement.lock
 knowledge/sources/*
-!knowledge/sources/.gitkeep
 .DS_Store
 .idea/
 .vscode/

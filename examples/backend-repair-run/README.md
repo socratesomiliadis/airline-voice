@@ -3,7 +3,7 @@
 This is a real ElevenLabs/Anthropic run against the fictional PostgreSQL service,
 recorded November 8, 2026 (Pacific time). It is an **error run, not a passing suite**.
 The complete evidence includes one diagnostic baseline, one complete seventeen-scenario
-iteration, and a partial third iteration interrupted by a provider message-send failure.
+iteration, and a partial third iteration interrupted by a session message-send failure.
 The failed conversations and rejected repair have not been removed.
 
 The experiment deliberately inserted an unconditional `RuntimeError` at the start
@@ -39,7 +39,7 @@ These are real observed limitations, not seeded conversational defects.
 The subsequent prompt-repair request exceeded the model context limit because it included
 all simulations, duplicate streaming dialogue, debug events and passing checks. The
 worker rejected that repair and left the prompt unchanged. During the next iteration,
-ElevenLabs failed to send a customer message in the pet scenario; the run stopped with
+the simulator failed to send a customer message in the pet scenario; the run stopped with
 its error and partial evaluations intact. Neither baseline nor final suite is marked
 complete. Only the second iteration is a complete suite; missing first/final scenario
 scores remain null.
@@ -49,7 +49,7 @@ omits duplicate dialogue/debug events and passing checks, and keeps the full ori
 artifacts. A separate read-only probe using this run's complete seventeen-scenario
 iteration produced a validated real model proposal with the reduced payload. That probe
 was **not activated** and is not retroactively counted as a repair in this recording.
-The actual context rejection and later provider failure remain in `report.json`.
+The actual context rejection and later session failure remain in `report.json`.
 
 ## Files
 
@@ -87,3 +87,12 @@ used the reduced repair payload in the normal loop. It automatically repaired it
 prompt and passed all four harder scenarios on reevaluation. That scoped result
 does not replace this run's error status or establish a complete seventeen-scenario
 pass under the new prompt.
+
+## Later session-close diagnosis
+
+A later full-suite attempt reproduced the message-send error after a successful
+`end_call`. The historical pet transcript also records a successful `end_call`
+before its error. The current simulator handles that normal closure and the
+customer-generation race explicitly; abnormal closures still fail. See the
+[session-close regression](../session-close-regression/README.md). This diagnosis
+and manual fix do not change this report, its missing evaluations, or its error status.

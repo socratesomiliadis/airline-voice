@@ -1,4 +1,4 @@
-"""Metadata root for future domain persistence models."""
+"""Shared metadata and naming conventions for persistent airline models."""
 
 from sqlalchemy import MetaData
 from sqlalchemy.orm import DeclarativeBase

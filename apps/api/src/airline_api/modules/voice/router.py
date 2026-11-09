@@ -3,7 +3,6 @@
 from fastapi import APIRouter, Depends
 
 from airline_api.core.auth import require_agent_key
-from airline_api.core.placeholders import not_implemented
 from airline_api.modules.bookings.dependencies import BookingServiceDep
 from airline_api.modules.bookings.schemas import (
     AddBookingItems,
@@ -23,11 +22,6 @@ from airline_api.modules.bookings.schemas import (
 
 router = APIRouter(prefix="/voice", tags=["voice"])
 tools = APIRouter(prefix="/webhooks/elevenlabs", dependencies=[Depends(require_agent_key)])
-
-
-@router.post("/sessions", status_code=501, response_model=None, summary="Create a voice session")
-async def create_session() -> None:
-    not_implemented("voice.create_session")
 
 
 @tools.post("/search_flights", response_model=FlightSearchResult)

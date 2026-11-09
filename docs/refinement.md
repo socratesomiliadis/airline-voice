@@ -170,8 +170,8 @@ error instead of continuing against an unknown version.
 
 Code is applied and checked in the configured development checkout; this is not
 an execution sandbox. The [read-only observation dashboard](monitoring.md) streams live progress, scores,
-changes and history from the local artifacts. Backend refinement-control endpoints
-remain reserved; the UI exposes no commands.
+changes and history from the local artifacts. Start refinement with the host CLI;
+the API and UI provide observation only.
 
 ## Scenarios and artifacts
 
@@ -183,6 +183,14 @@ iterations use new passenger/action IDs, and successful cleanup releases seats
 without deleting audit history. Simulation and cleanup errors prevent passing
 API/outcome scores. The November fixture week needs the fixed business clock
 shown above once those departures would otherwise be in the past.
+
+The customer model must pursue its assigned goal and may refuse or withdraw
+consent only when its scenario requires that behavior. A goal to submit a pending
+special-item request does not require guaranteed approval first. Customer behavior
+is still stochastic. Inspect failed conversations for customer drift before treating
+every missing outcome as an assistant defect. The
+[customer-goal regression](../examples/customer-goal-regression/README.md) preserves
+an actual counterexample and the subsequent instruction correction.
 
 Add scenarios to that JSON file or change `scenarios_path`. IDs must be unique
 and filename-safe. The suite cannot be empty. Required tools must actually have
@@ -352,7 +360,7 @@ needs those controls and separate test/production databases and agents.
 The [live backend-repair recording](../examples/backend-repair-run/README.md)
 contains a real model code fix, actual PostgreSQL receipt, service reload, recovered
 cleanup and a successful next cancellation. It also retains three interaction
-failures, a context-limit rejection and a later provider disconnect. It is explicitly
+failures, a context-limit rejection and a later session-close race. It is explicitly
 an error run, not a passing-suite claim. `--include-incomplete` allows that evidence
 to be exported with errors, incomplete flags and missing evaluations preserved;
 normal export still requires a completed run. The original prompt-only recording
@@ -364,3 +372,10 @@ used the reduced repair payload, automatically repaired its prompt and passed th
 four new scenarios in its second iteration. This is a scoped regression result;
 the complete seventeen-scenario suite was not rerun under that candidate prompt.
 The candidate remains on the isolated experiment branch and in the exported files.
+
+New full-suite attempts are retained in the
+[customer-goal regression](../examples/customer-goal-regression/README.md) and
+[latest submission attempt](../examples/submission-attempt-run/README.md).
+The latter stopped when ElevenLabs credits were exhausted, confirmed through
+its browser Preview. No complete current-suite pass or default-prompt promotion
+is claimed. Restore credits and rerun the complete suite before promotion.

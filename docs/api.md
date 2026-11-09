@@ -231,7 +231,7 @@ existing booking entitlements. Business timestamps use `SIMULATION_NOW` when
 configured. Events retain real audit timestamps plus their `effective_at` business
 timestamp.
 
-## Errors and other platform routes
+## Errors
 
 Business errors use:
 
@@ -250,9 +250,9 @@ state or policy restrictions, and `422` for invalid measurements or input.
 FastAPI validation errors use its standard `detail` array; authentication errors
 also use `detail`. Unknown input fields are rejected.
 
-Unrelated baggage inquiries, general support, conversations, knowledge ingestion,
-refinement control and voice-session creation remain reserved `501`
-routes. Agent tool webhook setup is documented in [elevenlabs.md](elevenlabs.md).
+Agent tool webhook setup is documented in [elevenlabs.md](elevenlabs.md).
+Policy retrieval runs in ElevenLabs. Refinement starts through the host CLI;
+conversations and iteration history are available through the monitoring endpoints.
 
 ## Observation-only monitoring
 

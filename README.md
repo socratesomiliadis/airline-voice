@@ -19,13 +19,13 @@ Earlier project discussions informed these decisions. The current code and linke
 | Flights | Search by route, local date or date range, price, cabin, and fare tier. Retrieve gates and flight status. | The schedule and operational data are fictional. |
 | Bookings | Create, retrieve, cancel, and reschedule bookings. Add baggage and special-item requests. Save passenger seat preferences. | Payments are simulated. Seat preferences are requests, not assigned seats. |
 | Persistence | Share committed bookings and inventory across callers and API restarts. | Caller identity and booking ownership still need production authorization. |
-| Policies | Load six JSON policies in the API and attach them to ElevenLabs for retrieval. | Local document ingestion and knowledge-search routes remain unimplemented. |
+| Policies | Load six JSON policies in the API and attach them to ElevenLabs for retrieval. | Policy changes require API reload and ElevenLabs synchronization. |
 | Refinement | Simulate, score, diagnose, repair, verify, reload, and repeat automatically. | Generated code executes with the worker's host permissions. |
 | Monitoring | Show live conversations, tool activity, scores, diagnoses, changes, and history. | The dashboard can observe runs but cannot control them. |
 
 Seven ElevenLabs tools and seventeen executable scenarios cover all ten assessment call types.
-Reserved support, conversation-storage, voice-session, knowledge, and refinement-control routes return `501 Not Implemented`.
-Their presence does not mean those platform features work. See the [API reference](docs/api.md) and [scenario coverage](scenarios/README.md).
+The API exposes booking, flight, webhook, health, and observation endpoints.
+Run refinement through the host CLI. See the [API reference](docs/api.md) and [scenario coverage](scenarios/README.md).
 
 ## Design decisions and tradeoffs
 
@@ -41,7 +41,7 @@ Shadcn with Base UI and Anthropic model calls follow later explicit project deci
 | Decision | Reason | Cost or limit |
 | --- | --- | --- |
 | Separate API, worker, and dashboard processes in one repository. | Each process has one runtime responsibility. The worker can restart the API while monitoring remains available. | Local execution needs several processes and shared configuration. |
-| Use feature modules, typed ports, and infrastructure adapters. | REST and webhook routes share booking logic. Provider and filesystem operations stay outside pipeline stages. | Some unused interfaces remain as documented extension points. They are scaffolding, not completed features. |
+| Use feature modules, typed ports, and infrastructure adapters. | REST and webhook routes share booking logic. Provider and filesystem operations stay outside pipeline stages. | Feature boundaries add some indirection; only implemented interfaces are retained. |
 | Use PostgreSQL 17, async SQLAlchemy, and asyncpg. | Transactions, constraints, and row locks protect shared inventory and persistent bookings. | Development and meaningful backend verification need PostgreSQL. |
 | Use Alembic for versioned schema changes. | Schema updates are explicit and reviewable. | Operators must apply migrations. Startup does not migrate or seed the database. |
 | Use Python 3.12+, uv workspaces, and Hatchling packaging. | Python applications share dependency resolution and installable package boundaries. | Contributors need uv and must preserve `uv.lock`. |
@@ -218,7 +218,9 @@ uv run --package airline-refiner airline-refiner run \
 ```
 
 Exit codes are `0` for success, `1` for iteration exhaustion, and `2` for configuration or execution errors.
-An unavailable agent can indicate exhausted ElevenLabs credits. A previous incident exposed this cause only in provider Preview.
+An unavailable agent can indicate exhausted ElevenLabs credits. During the latest submission attempt,
+both main and test-branch sessions returned close code `3000`. Dia's ElevenLabs Preview showed
+`[quota_exceeded] You've run out of credits`. Restore provider credits before another live run.
 Do not treat that provider message as proof of a prompt or booking defect.
 
 ### Configuration reference
@@ -303,13 +305,18 @@ Physical microphone, speaker quality, and real conversational interruption still
 | Evidence | What it establishes | What it does not establish |
 | --- | --- | --- |
 | [Original prompt-repair run](examples/recorded-run/README.md) | Thirteen scenarios passed in two iterations after an automatic prompt repair on an isolated branch. | The starting prompt deliberately withheld booking references. No code repair occurred. Current references and factual checks were absent. One policy explanation received an incorrect passing score. |
-| [Backend-repair run](examples/backend-repair-run/README.md) | A real model removed an injected fault in `BookingService._cancel`. Actual PostgreSQL verification, API reload, cleanup recovery, and a fresh cancellation succeeded. | The fault was deliberately inserted. Later interaction failures, a context-limit rejection, and a provider error remain. The run did not pass. |
+| [Backend-repair run](examples/backend-repair-run/README.md) | A real model removed an injected fault in `BookingService._cancel`. Actual PostgreSQL verification, API reload, cleanup recovery, and a fresh cancellation succeeded. | The fault was deliberately inserted. Later interaction failures, a context-limit rejection, and a session-close race remain in the historical report. The race is now fixed; that run did not pass. |
 | [Focused interaction-repair run](examples/interaction-repair-run/README.md) | Four harder scenarios passed after an automatic prompt repair in the second iteration. | The other thirteen scenarios were not rerun under that candidate. The candidate remains isolated from the default prompt and main agent. |
 | [Judge calibration](evaluations/README.md) | The raw judge agreed with all five human-labelled policy cases in the recorded invocation. | Five policy cases do not establish calibration for naturalness, consent, or general conversational quality. |
+| [Session-close regression](examples/session-close-regression/README.md) | A real transcript exposed a send attempt after successful `end_call`. The adapter and simulator now handle normal closure; regression tests preserve abnormal-close errors. | The run stopped during its fifth scenario. The orchestration fix was manual. |
+| [Customer-goal regression](examples/customer-goal-regression/README.md) | A complete seventeen-scenario baseline passed nine scenarios and triggered an automatic prompt repair. A later simulated refusal exposed customer-goal drift. | The run was manually interrupted in its second iteration. Customer instructions were corrected manually before a new run. |
+| [Latest submission attempt](examples/submission-attempt-run/README.md) | Three of four evaluated scenarios passed under the corrected test driver. Rescheduling exposed an inaccurate fee quote and consent failure. | ElevenLabs credits ran out before the baseline completed. No repair was applied in this attempt and no prompt was promoted. |
 
 **The committed evidence does not establish a complete seventeen-scenario pass under the latest isolated candidate prompt.**
 Different experiments must not be combined into that claim. Scripted orchestration tests also do not establish live model debugging ability.
 Exact conversations, scores, and iteration counts can differ between provider runs.
+The latest live attempt is blocked by confirmed ElevenLabs credit exhaustion. Restore credits,
+repair the remaining prompt failures, and complete the full suite before claiming a current passing result.
 
 Each new `artifacts/<run-id>/run.json` contains prompts, scenarios, tool evidence, booking state, scores, and failure diagnoses.
 It also contains repair reasons, diffs, source hashes, activation results, and initial-to-final score changes.
@@ -348,17 +355,18 @@ See [assessment boundaries and production work](docs/refinement.md#assessment-bo
 | `apps/api/` | FastAPI routes, booking service, JSON policy calculations, PostgreSQL models, and Alembic migrations. |
 | `apps/refiner/` | Host CLI, simulation/evaluation/repair stages, provider adapters, verification, reload, and artifact output. |
 | `apps/dashboard/` | Three observation views, shared UI components, and server-side monitoring proxy. |
-| `packages/contracts/` | Shared Python contracts, including concrete monitoring payloads and reserved event interfaces. |
+| `packages/contracts/` | Shared Python observation contracts for runs, conversations, scores, and changes. |
 | `config/` | Portable webhook schemas and worker configuration. |
 | `data/flights/` | Trusted fictional seed dataset and database instructions. |
-| `knowledge/` | Six policy JSON files and an ignored source-staging directory. |
+| `knowledge/` | Six version-controlled policy JSON files. |
 | `prompts/` and `scenarios/` | Default assistant prompt and executable customer expectations. |
 | `examples/` and `evaluations/` | Sanitized provider-run evidence and human-labelled judge cases. |
 | `tests/` and `.github/workflows/` | Local verification and CI. |
 | `artifacts/` and `.local/` | Ignored runtime output and account-specific configuration. |
 
 Python monitoring contracts and their TypeScript equivalents are maintained separately. Update both when payloads change.
-Retain documented extension interfaces, historical migrations, compatibility redirects, and shared shadcn theme variables.
+Retain historical migrations, compatibility redirects, and shared shadcn theme variables.
+Add routes and interfaces when their behavior is implemented.
 The local design skill is ignored and untracked. That change did not remove its earlier Git history.
 
 Install new shadcn components from `apps/dashboard` with the CLI:

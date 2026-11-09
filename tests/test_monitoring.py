@@ -204,7 +204,7 @@ def test_monitoring_is_authenticated_get_only_and_has_no_run_controls(tmp_path):
             client.get("/api/v1/monitoring/events?run_id=missing", headers=headers).status_code
             == 404
         )
-        assert client.post("/api/v1/refinement/runs", headers=headers).status_code == 501
+        assert client.post("/api/v1/refinement/runs", headers=headers).status_code == 404
 
 
 def test_empty_monitoring_is_an_honest_empty_state_without_database(tmp_path):

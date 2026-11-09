@@ -69,9 +69,9 @@ for file in knowledge/*.json; do
 done
 ```
 
-`sources/` remains an ignored local drop location for future source documents.
-The policy JSON files are outside that ignored directory so they can be version controlled.
 The booking service loads these JSON rule details at API startup and stores a
 policy snapshot with each booking. Baggage pricing, changes, and cancellation
-outcomes use that snapshot. Semantic indexing, retrieval, and provider upload
-remain unimplemented.
+outcomes use that snapshot. `scripts/configure_elevenlabs.py` uploads all six
+documents and attaches them to the agent for ElevenLabs-managed retrieval during
+conversations. Rerun provisioning after policy changes. Retrieval runs in
+ElevenLabs; the API uses the structured JSON rules directly.

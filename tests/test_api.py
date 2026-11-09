@@ -60,9 +60,9 @@ def test_exported_webhook_contracts_match_code_and_openapi(client: TestClient) -
         ("POST", "/voice/sessions"),
     ],
 )
-def test_feature_routes_are_explicitly_unimplemented(
+def test_removed_platform_routes_are_not_exposed(
     client: TestClient, method: str, path: str
 ) -> None:
     response = client.request(method, f"/api/v1{path}")
-    assert response.status_code == 501
-    assert response.json()["detail"]["code"] == "not_implemented"
+    assert response.status_code == 404
+    assert f"/api/v1{path}" not in client.get("/openapi.json").json()["paths"]

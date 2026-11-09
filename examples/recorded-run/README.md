@@ -77,4 +77,4 @@ and [current assessment boundaries](../../docs/refinement.md#assessment-boundari
 A [new live backend-repair recording](../backend-repair-run/README.md) demonstrates
 actual model diagnosis, database-gated code repair, reload and a successful next
 conversation. That newer recording also preserves its later failures and terminal
-provider error; it is not labelled as a passing suite.
+session error; it is not labelled as a passing suite.

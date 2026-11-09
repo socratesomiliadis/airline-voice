@@ -6,7 +6,7 @@ The API owns flight search and customer booking operations. REST routes and
 ElevenLabs webhook-tool routes share the typed `BookingOperations` boundary and
 request-scoped booking service. The service coordinates SQLAlchemy transactions;
 policy calculations live in a separate catalog loaded from the JSON knowledge
-base. Other feature routers continue to return `501`.
+base.
 
 The refiner is a separate Python process using REST and Chat Mode adapters.
 It does not import API internals or write directly to the API's database. Its
@@ -23,27 +23,20 @@ manual commands. See [observation architecture](monitoring.md).
 observation contracts in `monitoring.py` describe run summaries, iterations,
 conversations, and snapshots. The dashboard mirrors these contracts manually in
 `src/lib/api/contracts.ts`; keep the two definitions aligned when payloads change.
-The package also retains a generic JSON payload type, a proposed event envelope,
-and event transport ports for future features. It has no dependency on application
-or provider packages.
+It has no dependency on application or provider packages.
 
 ## Feature ownership
 
 | Module | Responsibility |
 | --- | --- |
 | bookings | Flight search, booking, cancellation, rescheduling, and booking items |
-| baggage | Baggage policies and tracking inquiries |
-| support | Other customer requests and escalation |
-| conversations | Conversation metadata, transcripts, and tool activity |
-| voice | Implemented booking webhook tools; future voice sessions and call events |
-| knowledge | Document ingestion, metadata, retrieval, and search |
-| monitoring | Durable monitoring events and a real-time transport |
-| refinement | Run control, iteration history, evaluations, and change records |
+| voice | Authenticated ElevenLabs webhook tools and their portable contracts |
+| monitoring | Durable observation snapshots and a real-time transport |
 
-Each feature starts with `router.py` and `ports.py`. Add domain types, request
-schemas, use cases, and repositories to their owning module as real requirements
-are implemented. Bookings use typed schemas and a typed application protocol;
-other modules still have provisional `JsonObject` boundaries.
+Feature modules contain their implemented routes, schemas, services, and adapters.
+Bookings use typed schemas and a typed application protocol shared by REST and
+webhook routes. The separate refiner application owns simulation, evaluation,
+repair, and iteration history. Policy data lives in `knowledge/`.
 
 ## Persistence and knowledge
 
@@ -78,10 +71,7 @@ inventory, flight status, or fares. This JSON is reproducible seed input; the mu
 PostgreSQL tables are the booking API's flight inventory source. See the
 [flight database guide](../data/flights/README.md) for setup and query examples.
 
-Knowledge ingestion and search are separate ports so storage and retrieval can
-evolve independently. No embedding model, vector index, chunking algorithm,
-document parser, or external knowledge provider has been selected. The ignored
-`knowledge/sources/` directory is only a local staging area.
+ElevenLabs manages policy retrieval for the assistant.
 
 `knowledge/` contains one JSON file per fictional development policy: pets,
 baggage, accessibility, check-in, cancellations and refunds, and flight changes.
@@ -89,8 +79,8 @@ Each file includes metadata, stable rule IDs, plain-language answers, and
 structured details. The API loads policy details at startup and persists a policy
 snapshot on each booking. Baggage fees, fare-change rules, disruption handling,
 and cancellation outcomes use that snapshot. The provisioning script uploads the
-six policies to ElevenLabs for provider-managed retrieval during calls. The local
-knowledge ingestion/search API remains reserved.
+six policies to ElevenLabs for provider-managed retrieval during calls. Rerun
+provisioning after changing policy documents.
 
 All money is integer cents in a simulated ledger; no payment processor is called.
 Refunds use stored paid amounts. Basic/standard unused-tax and credit settlements
@@ -111,8 +101,8 @@ ElevenLabs REST. Every criterion must reach the configurable threshold (8/10 by
 default); the loop allows 5 evaluated iterations by default. Artifacts contain
 full evidence and repair histories. No final untested repair is deployed.
 
-See [configuration, lifecycle and failure recovery](refinement.md). Refiner HTTP
-run-control routes still return `501`; the executable entry point is the host CLI.
+See [configuration, lifecycle and failure recovery](refinement.md). The executable
+entry point is the host CLI. HTTP monitoring routes provide observation only.
 
 ## Events and monitoring
 
@@ -124,15 +114,14 @@ reconnect and replay idempotent across API reloads. The dashboard proxies the
 stream with server-only credentials. Worker and transport heartbeats are separate,
 and the viewer shows stale/disconnected state without inventing activity.
 
-The earlier generic event envelope remains available for future broader platform
-events. Current monitoring uses the concrete observation contracts described in
+Monitoring uses the concrete observation contracts described in
 [the monitoring guide](monitoring.md).
 
 ## Current runtime guarantees
 
 - API startup creates a lazy engine but performs no database queries or schema writes.
 - The liveness endpoint reports process availability only.
-- Flight and booking operations persist to PostgreSQL; unrelated platform routes return `501`.
+- Flight and booking operations persist to PostgreSQL; only implemented routes are registered.
 - The worker CLI autonomously simulates, evaluates, patches and redeploys within configured limits.
 - Dashboard views contain only recorded observations and accept no loop-control commands.
 - Provider credentials stay in server-side settings; artifacts redact known secret values.

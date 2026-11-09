@@ -178,8 +178,8 @@ class ChatSession:
                 else:
                     await self.queue.put(event)
         except ConnectionClosed as error:
-            self.closed = True
             if error.rcvd is not None and error.rcvd.code in {1000, 1001}:
+                self.closed = True
                 await self.queue.put(None)
             else:
                 await self.queue.put(
@@ -197,6 +197,11 @@ class ChatSession:
     async def send(self, text: str) -> None:
         try:
             await self.socket.send(json.dumps({"type": "user_message", "text": text}))
+        except ConnectionClosed as error:
+            if error.rcvd is not None and error.rcvd.code in {1000, 1001}:
+                self.closed = True
+                return
+            raise RefinementError("Unable to send ElevenLabs customer message") from None
         except Exception:
             raise RefinementError("Unable to send ElevenLabs customer message") from None
         self.result.dialogue.append({"role": "user", "message": text})
@@ -236,6 +241,17 @@ class ChatSession:
                     elif kind == "agent_response_complete":
                         self.result.notify()
                         return
+                    elif kind in {"agent_tool_response", "agent_tool_response_full_payload"}:
+                        tool = event[kind]
+                        if (
+                            tool.get("tool_name") == "end_call"
+                            and tool.get("tool_type") == "system"
+                            and tool.get("status") == "success"
+                            and tool.get("is_called") is True
+                            and not tool.get("is_error")
+                            and not tool.get("is_blocked")
+                        ):
+                            self.closed = True
                     elif kind in {"client_tool_call", "client_error", "error"}:
                         raise RefinementError(f"Unexpected ElevenLabs event: {kind}")
                     self.result.notify()

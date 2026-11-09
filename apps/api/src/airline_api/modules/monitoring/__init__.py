@@ -1,1 +1,1 @@
-"""Real-time monitoring transport. Implementation is intentionally deferred."""
+"""Durable observation snapshots and server-sent events."""
